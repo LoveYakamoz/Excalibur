@@ -1,6 +1,4 @@
 # Quantitative_Trading
 2017/4/26: init project
-Test jenkins work when commit.
-Test sublime text3 to commit
-Test commit and build
-yangpei1
+Description:
+1. a webchat robot: It can extract some group infomation with special key words and send these infomations to special groups
