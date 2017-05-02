@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 import codecs
-import urllib.request, urllib.parse, urllib.error
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.parse
+import urllib.error
 import http.cookiejar
 import requests
 import xml.dom.minidom
@@ -18,6 +19,20 @@ import platform
 import logging
 import http.client
 from collections import defaultdict
+import logging.handlers
+
+LOG_FILE = 'wechat.log'
+
+# 实例化handler
+handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes = 1024*1024, backupCount = 5)
+fmt = '%(asctime)s - %(filename)s:%(lineno)s - %(name)s - %(message)s'
+
+formatter = logging.Formatter(fmt)
+handler.setFormatter(formatter)
+
+logger = logging.getLogger('tst')
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG)
 
 
 def catchKeyboardInterrupt(fn):
@@ -129,7 +144,7 @@ class WebWeixin(object):
                 fp.write(content)
                 fp.close
             else:
-                return;
+                return
         finally:
             if fp:
                 fp.close()
@@ -368,9 +383,7 @@ class WebWeixin(object):
         if dic == '':
             return False
 
-        # blabla ...
         ContactList = dic['ContactList']
-        ContactCount = dic['Count']
         self.GroupList = ContactList
 
         for i in range(len(ContactList) - 1, -1, -1):
@@ -627,7 +640,7 @@ class WebWeixin(object):
                     groupName = srcName
                     srcName = 'SYSTEM'
 
-        if (groupName != None) and (len(self.ListenGroupList) > 0):
+        if (groupName is not None) and (len(self.ListenGroupList) > 0):
             if groupName in self.ListenGroupList:
                 if (card == ''):
                     print('%s |%s| %s -> %s: %s' % (
@@ -661,8 +674,7 @@ class WebWeixin(object):
 
             msgType = msg['MsgType']
             name = self.getUserRemarkName(msg['FromUserName'])
-            content = msg['Content'].replace('&lt;', '<').replace('&gt;', '>')
-            msgid = msg['MsgId']
+            content = msg['Content'].replace('&lt;', '<').replace('&gt;', '>')            
 
             if msgType == 1:
                 raw_msg = {'raw_msg': msg}
@@ -696,8 +708,7 @@ class WebWeixin(object):
     def listenMsgMode(self):
         print('[*] Enter listen mode ... Successfully')
         self._run('[*] Enter sync check ... ', self.testsynccheck)
-        playWeChat = 0
-        redEnvelope = 0
+
         while True:
             self.lastCheckTs = time.time()
             [retcode, selector] = self.synccheck()
@@ -747,10 +758,10 @@ class WebWeixin(object):
 
     @catchKeyboardInterrupt
     def start(self):
-        self._echo('[*] Web wechat ... start')
+        self._echo('[*] Web wechat ... start \n')
         while True:
             self._run('[*] Get uuid ... ', self.getUUID)
-            self._echo('[*] Get QR code ... successfully')
+            self._echo('[*] Get QR code ... successfully \n')
             self.genQRCode()
             print('[*] Please scan QR code by phone ... ')
             if not self.waitForLogin():
@@ -842,17 +853,17 @@ class WebWeixin(object):
         try:
             response = urllib.request.urlopen(request)
             data = response.read().decode('utf-8')
-            print(url)
+            logger.debug(url)
             return data
         except urllib.error.HTTPError as e:
-            print('HTTPError = ' + str(e.code))
+            logger.error('HTTPError = ' + str(e.code))
         except urllib.error.URLError as e:
-            print('URLError = ' + str(e.reason))
+            logger.error('URLError = ' + str(e.reason))
         except http.client.HTTPException as e:
-            print('HTTPException')
+            logger.error('HTTPException')
         except Exception:
             import traceback
-            print('generic exception: ' + traceback.format_exc())
+            logger.error('generic exception: ' + traceback.format_exc())
         return ''
 
     def _post(self, url: object, params: object, jsonfmt: object = True) -> object:
@@ -916,11 +927,11 @@ if sys.stdout.encoding == 'cp936':
     sys.stdout = UnicodeStreamFilter(sys.stdout)
 
 if __name__ == '__main__':
-    logger = logging.getLogger(__name__)
+    logger.info("start")
     if not sys.platform.startswith('win'):
         import coloredlogs
 
         coloredlogs.install(level='DEBUG')
-    print("Version: %s" % "2017-4-18 BugFix: read UTF-8 BOM File")
+    logger.info("Version: %s" % "2017-4-18 BugFix: read UTF-8 BOM File")
     webwx = WebWeixin()
     webwx.start()
