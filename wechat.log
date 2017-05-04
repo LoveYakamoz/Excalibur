@@ -12,3 +12,15 @@
 2017-05-02 20:56:38,143 - webchat_robot.py:856 - tst - https://login.weixin.qq.com/cgi-bin/mmwebwx-bin/login?tip=1&uuid=4ZuJaGK_Xg==&_=1493729785
 2017-05-02 20:56:40,052 - webchat_robot.py:856 - tst - https://login.weixin.qq.com/cgi-bin/mmwebwx-bin/login?tip=0&uuid=4ZuJaGK_Xg==&_=1493729798
 2017-05-02 20:56:41,090 - webchat_robot.py:856 - tst - https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket=A0z50HUBloEXwfQtH-r1NCle@qrticket_0&uuid=4ZuJaGK_Xg==&lang=zh_CN&scan=1493729813&fun=new
+2017-05-04 22:55:54,028 - webchat_robot.py:930 - tst - start
+2017-05-04 22:55:54,043 - webchat_robot.py:935 - tst - Version: 2017-4-18 BugFix: read UTF-8 BOM File
+2017-05-04 22:56:02,029 - webchat_robot.py:856 - tst - https://login.weixin.qq.com/cgi-bin/mmwebwx-bin/login?tip=1&uuid=QYfxQGt6ig==&_=1493909755
+2017-05-04 22:56:04,035 - webchat_robot.py:856 - tst - https://login.weixin.qq.com/cgi-bin/mmwebwx-bin/login?tip=0&uuid=QYfxQGt6ig==&_=1493909762
+2017-05-04 22:56:04,795 - webchat_robot.py:856 - tst - https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket=A7BAAlzv1ETo_hq_5NZQYSF6@qrticket_0&uuid=QYfxQGt6ig==&lang=zh_CN&scan=1493909779&fun=new
+2017-05-04 22:57:46,806 - webchat_robot.py:930 - tst - start
+2017-05-04 22:57:46,806 - webchat_robot.py:935 - tst - Version: 2017-4-18 BugFix: read UTF-8 BOM File
+2017-05-04 22:57:53,944 - webchat_robot.py:856 - tst - https://login.weixin.qq.com/cgi-bin/mmwebwx-bin/login?tip=1&uuid=wZs9EQYvvQ==&_=1493909868
+2017-05-04 22:57:56,181 - webchat_robot.py:856 - tst - https://login.weixin.qq.com/cgi-bin/mmwebwx-bin/login?tip=0&uuid=wZs9EQYvvQ==&_=1493909873
+2017-05-04 22:57:56,897 - webchat_robot.py:856 - tst - https://wx2.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage?ticket=A9PkeHoC9UarY1ykIbbbFpQM@qrticket_0&uuid=wZs9EQYvvQ==&lang=zh_CN&scan=1493909890&fun=new
+2017-05-04 23:02:35,725 - webchat_robot.py:930 - Robot - start
+2017-05-04 23:02:35,725 - webchat_robot.py:935 - Robot - Version: 2017-4-18 BugFix: read UTF-8 BOM File

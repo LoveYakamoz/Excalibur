@@ -30,7 +30,7 @@ fmt = '%(asctime)s - %(filename)s:%(lineno)s - %(name)s - %(message)s'
 formatter = logging.Formatter(fmt)
 handler.setFormatter(formatter)
 
-logger = logging.getLogger('tst')
+logger = logging.getLogger('Robot')
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
