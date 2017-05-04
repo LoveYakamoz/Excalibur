@@ -1,0 +1,64 @@
+zw_talib帮助文件
+
+    模块文件名名：zwpd_talib.py
+    默认缩写：zwta,示例：import zwpd_talib as zwta
+
+【简介】
+    zw_talib是个独立开源项目，是基于pandas的talib函数封装 ，属于zwQaunt（简称zwQT，zw量化）项目的衍生项目。
+    zw_talib无需安装zwQaunt，模块和demo，均可独立运行
+
+    第一批以pandas_talib.py的29个函数为蓝本。
+    zw_talib函数库v0.5版，共有33个函数，均已测试通过，
+    运行平台：python3.5，zwPython2016m2    
+     
+    pandas_talib.py参见：
+    https://www.quantopian.com/posts/technical-analysis-indicators-without-talib-code
+    https://github.com/panpanpandas/ultrafinance/blob/master/ultrafinance/pyTaLib/pandasImpl.py
+    默认数据格式，采用zwDat标准，全部小写
+    ohlcv:open,high,low,close,volumns
+
+【开发】zw量化开源团队 2016.03.28
+
+zw量化，py量化第一品牌
+网站：http://www.ziwang.com zw网站
+QQ总群：124134140   千人大群 zwPython量化&大数据 
+     
+     
+
+---------zwtalib 首批函数名称
+
+zw_talib函数库v0.5版，共有33个函数，均已测试通过，运行平台：python3.5，zwPython2016m2    
+（未来，不同版本，有所差异）
+zwtalib 首批函数名称
+  :: ACCDIST(df, n):集散指标(A/D)——Accumulation/Distribution,是由价格和成交量的变化而决定的
+  :: ADX(df, n, n_ADX): 	 #adx，中文全称：平均趋向指数，ADX指数是反映趋向变动的程度，而不是方向的本身;英文全称：Average Directional Index 或者Average Directional Movement Index
+  :: ATR(df, n): ATR,均幅指标（Average True Ranger）,取一定时间周期内的股价波动幅度的移动平均值，主要用于研判买卖时机
+  :: BBANDS(df, n):布林带.Bollinger Bands 
+  :: BBANDS_UpLow(df, n): zw改进版的布林带talib函数
+  :: CCI(df, n): CCI顺势指标(Commodity Channel Index),CCI指标，是由美国股市分析家唐纳德?蓝伯特（Donald Lambert）所创造的，是一种重点研判股价偏离度的股市分析工具。
+  :: COPP(df, n):估波指标（Coppock Curve）,又称“估波曲线”，通过计算月度价格的变化速率的加权平均值来测量市场的动量，属于长线指标。估波指标由Edwin?Sedgwick?Coppock于1962年提出，主要用于判断牛市的到来。该指标用于研判大盘指数较为可靠，一般较少用于个股；再有，该指标只能产生买进讯号。依估波指标买进股票后，应另外寻求其他指标来辅助卖出讯号。估波指标的周期参数一般设置为11、14，加权平均参数为10，也可以结合指标的平均线进行分析
+  :: Chaikin(df):佳庆指标（Chaikin Oscillator）,是由马可?蔡金（Marc Chaikin）提出的，聚散指标（A/D）的改良版本。
+  :: DONCH(df, n):奇安通道指标,Donchian Channel,该指标是由Richard Donchian发明的，是有3条不同颜色的曲线组成的，该指标用周期（一般都是20）内的最高价和最低价来显示市场的波动性;当其通道窄时表示市场波动较小，反之通道宽则表示市场波动比较大。
+  :: EMA(df, n):指数平均数指标(Exponential Moving Average，EXPMA或EMA),指数平均数指标也叫EXPMA指标，它也是一种趋向类指标，其构造原理是仍然对价格收盘价进行算术平均，并根据计算结果来进行分析，用于判断价格未来走势的变动趋势。
+  :: EOM(df, n):简易波动指标(Ease of Movement Value)，又称EMV指标;它是由RichardW．ArmJr．根据等量图和压缩图的原理设计而成,目的是将价格与成交量的变化结合成一个波动指标来反映股价或指数的变动状况。由于股价的变化和成交量的变化都可以引发该指标数值的变动,因此,EMV实际上也是一个量价合成指标。
+  :: FORCE(df, n):劲道指数(Force Index);劲道指数是由亚历山大?埃尔德(Alexander Elder)博士设计的一种摆荡指标，藉以衡量每个涨势中的多头劲道与每个跌势中的空头劲道。劲道指数结合三项主要的市场资讯：价格变动的方向、它的幅度与成交量。它是由一个崭新而实用的角度，把成交量纳入交易决策中。
+  :: KELCH(df, n):肯特纳通道（Keltner Channel，KC）,肯特纳通道（KC）是一个移动平均通道，由叁条线组合而成(上通道、中通道及下通道)。通道，一般情况下是以上通道线及下通道线的分界作为买卖的最大可能性。若股价於边界出现不正常的波动，即表示买卖机会。
+  :: KST(df, r1, r2, r3, r4, n1, n2, n3, n4): 确然指标（KST）又称为完定指标，该指标参考长、中、短期的变速率ROC，以了解不同时间循环对市场的影响。该指标将数个周期的价格变动率函数作加权以及再平滑绘制长短曲线，其特色在通过修正的价格变动组合来判断趋势，精准掌握转折买卖点。
+  :: KST4(df, r1, r2, r3, r4, n1, n2, n3, n4): 	zw修订版，KST确然指标。
+  :: MA(df, n):移动平均线,Moving Average，即最常用的均线指标
+  :: MACD(df, n_fast, n_slow): #MACD指标信号和MACD的区别, MACD Signal and MACD difference，MACD是由一快及一慢指数移动平均（EMA）之间的差计算出来。“快”指短时期的EMA，而“慢”则指长时期的EMA，最常用的是12及26日EMA。
+  :: MFI(df, n): MFI,资金流量指标和比率,Money Flow Index and Ratio，资金流量指标又称为量相对强弱指标（Volume Relative Strength Index，VRSI）；根据成交量来计测市场供需关系和买卖力道。该指标是通过反映股价变动的四个元素：上涨的天数、下跌的天数、成交量增加幅度、成交量减少幅度；来研判量能的趋势，预测市场供求关系和买卖力道，属于量能反趋向指标。	
+  :: MOM(df, n):动量线，英文全名MOmentum，简称MOM。“动量”这一名词，市场上的解释相当广泛。以Momentum命名的指标，种类更是繁多。综合而言，动量可以视为一段期间内，股价涨跌变动的比率。
+  :: MassI(df):梅斯线（Mass Index），梅斯线是Donald Dorsey累积股价波幅宽度之后，所设计的震荡曲线。本指标最主要的作用，在于寻找飙涨股或者极度弱势股的重要趋势反转点。MASS指标是所有区间震荡指标中，风险系数最小的一个。		
+  :: OBV(df, n):能量潮指标（On Balance Volume，OBV），OBV指标是葛兰维（Joe Granville）于本世纪60年代提出的，并被广泛使用。股市技术分析的四大要素：价、量、时、空。OBV指标就是从“量”这个要素作为突破口，来发现热门股票、分析股价运动趋势的一种技术指标。它是将股市的人气——成交量与股价的关系数字化、直观化，以股市的成交量变化来衡量股市的推动力，从而研判股价的走势。关于成交量方面的研究，OBV能量潮指标是一种相当重要的分析指标之一。
+  :: PPSR(df):支点，支撑线和阻力线.Pivot Points, Supports and Resistances；PIVOT指标的观念很简单，不需要计算任何东西，它纯粹只是一个分析反转点的方法而已。PIVOT意思是指“轴心”，轴心是用来确认反转的基准，所以PIVOT指标其实就是找轴心的方法；PIVOT指标，经常与布林带数据一起分析。
+  :: ROC(df, n):变动率(Rate of change,ROC)，ROC是由当天的股价与一定的天数之前的某一天股价比较，其变动速度的大小,来反映股票市场变动的快慢程度。ROC，也叫做变动速度指标、变动率指标或变化速率指标。
+  :: RSI(df, n): RSI，相对强弱指标,Relative Strength Index，也称相对强弱指数、相对力度指数；RSI，是通过比较一段时期内的平均收盘涨数和平均收盘跌数来分析市场买沽盘的意向和实力，从而作出未来市场的走势。RSI通过特定时期内股价的变动情况计算市场买卖力量对比，来判断股票价格内部本质强弱、推测价格未来的变动方向的技术指标。
+  :: RSI100(df, n):zw版RSI相对强弱指数，取0..100之间的数值
+  :: STDDEV(df, n):标准偏差,Standard Deviation
+  :: STOD(df, n):随机指标D值,Stochastic oscillator %D；随机指标，又称KD指标，KDJ指标；随机指标综合了动量观念、强弱指标及移动平均线的优点，用来度量股价脱离价格正常范围的变异程度。随机指标考虑的不仅是收盘价，而且有近期的最高价和最低价，这避免了仅考虑收盘价而忽视真正波动幅度的弱点。随机指标一般是根据统计学的原理，通过一个特定的周期（常为9日、9周等）内出现过的最高价、最低价，及最后一个计算周期的收盘价及这三者之间的比例关系，来计算最后一个计算周期的未成熟随机值RSV，然后根据平滑移动平均线的方法来计算K值、D值与J值，并绘成曲线图来研判股票走势。
+  :: STOK(df):随机指标K值,Stochastic oscillator %K 
+  :: TRIX(df, n):TRIX指标又叫三重指数平滑移动平均指标，Triple Exponentially Smoothed Average
+  :: TSI(df, r, s): TSI，真实强度指数,True Strength Index，TSI是相对强弱指数 (RSI) 的变体。TSI 使用价格动量的双重平滑指数移动平均线，剔除价格的震荡变化并发现趋势的变化。r一般取25，是一般取13。
+  :: ULTOSC(df): UOS，终极指标（Ultimate Oscillator），终极指标，由拉瑞?威廉（Larry Williams）所创。他认为现行使用的各种振荡指标，对于周期参数的选择相当敏感。不同的市况，不同参数设定的振荡指标，产生的结果截然不同。因此，选择最佳的参数组含，成为使用振荡指标之前，最重要的一道手续。为了将参数周期调和至最佳状况，拉瑞?威廉经过不断测试的结果，先找出三个周期不同的振荡指标，再将这些周期参数，按照反比例的方式，制作成常数因子。然后，依照加权的方式，将三个周期不同的振荡指标，分别乘以不同比例的常数，加以综合制作成UOS指标。经过一连串参数顺化的过程后，UOS指标比一般单一参数的振荡指标，更能够顺应各种不同的市况。
+  :: Vortex(df, n):螺旋指标,Vortex Indicator，参见http://www.vortexindicator.com/VFX_VORTEX.PDF
