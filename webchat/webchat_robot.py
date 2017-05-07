@@ -21,7 +21,7 @@ import http.client
 from collections import defaultdict
 import logging.handlers
 
-LOG_FILE = 'wechat.log'
+LOG_FILE = 'webchat.log'
 
 # 实例化handler
 handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes = 1024*1024, backupCount = 5)
