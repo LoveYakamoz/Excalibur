@@ -928,10 +928,6 @@ if sys.stdout.encoding == 'cp936':
 
 if __name__ == '__main__':
     logger.info("start")
-    if not sys.platform.startswith('win'):
-        import coloredlogs
-
-        coloredlogs.install(level='DEBUG')
     logger.info("Version: %s" % "2017-4-18 BugFix: read UTF-8 BOM File")
     webwx = WebWeixin()
     webwx.start()
