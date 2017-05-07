@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # coding: utf-8
-import Image
 import codecs
 import urllib.request
 import urllib.parse
@@ -225,7 +224,7 @@ class WebWeixin(object):
         elif sys.platform.find('darwin') >= 0:
             self._showQRCodeImg('macos')
         else:
-            self._showQRCodeImg('linux')
+            pass
 
     def _showQRCodeImg(self, str):
         url = 'https://login.weixin.qq.com/qrcode/' + self.uuid
@@ -243,8 +242,7 @@ class WebWeixin(object):
         elif str == 'macos':
             subprocess.call(["open", QRCODE_PATH])
         else:
-            im = Image.open(QRCODE_PATH)
-            im.show()
+            pass
             return
 
     def waitForLogin(self, tip=1):
