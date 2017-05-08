@@ -709,14 +709,11 @@ class Pick_small_cap(Filter_query):
         return '按市值倒序选取股票'
 
 # 以下为选评分高于10分的股票
-
 class Pick_score_up(Filter_query):
-    def __init__(self, dst_stocks):
-        log.info("init pick score up")
-        self.dst_stocks = {}
     def filter(self, context, data, dst_stocks):
+        dst_stocks = []
         stock_list = get_index_stocks('000001.XSHG')
-        log.info("stock list : %d" % stock_list.size())
+        log.info("stock list : %d" % len(stock_list))
         for stock in stock_list:
             h = attribute_history(
                 stock, 130, unit='1d', fields=(
@@ -729,11 +726,13 @@ class Pick_score_up(Filter_query):
 
             score = (
                 cur_price - low_price_130) + (cur_price - high_price_130) + (cur_price - avg_15)
-            log.info("score: %d", score)
-            if score >= 0:
-                self.dst_stocks.append(stock)
+            if score >= 10:
+                log.info("score: %f", score)
+                dst_stocks.append(stock)
+        return query(valuation.code).filter(valuation.code.in_(dst_stocks))
+
     def __str__(self):
-        return '股票评分 [评分股数: %d ]' % (len(self.dst_stocks))
+        return '股票评分'
 
 
 class Filter_pe(Filter_query):
