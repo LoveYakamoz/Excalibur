@@ -1,16 +1,9 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 '''
     模块名：zwQTDraw.py
     默认缩写：zwdr,示例：import wQTDraw as zwdr
    【简介】
     zwQT量化软件，绘图模块
-     
-    zw量化，py量化第一品牌
-    网站:http://www.ziwang.com zw网站
-    py量化QQ总群  124134140   千人大群 zwPython量化&大数据 
-     
-    开发：zw量化开源团队 2016.04.01 首发
-  
 '''
 
 
@@ -31,22 +24,12 @@ import zwQTBox as zwx
 def dr_quant3x_init(qx,w,h):
     ''' zwQT默认绘图模版quant3x，
     初始化绘图环境，w、h 是图形大小尺寸
-    
     Args:
         qx (zwDatX): 需要显示的数据
         w (int): 图像宽度
         h (int): 图像高度
-            
     :ivar xcod (int): 股票代码
     '''
-
-
-    #-----------plt.env.init
-    #plt.rcParams['font.sans-serif'] = ['SimHei']
-    #mpl.rcParams['font.sans-serif'] = ['SimHei'] #指定默认字体 ???
-    #myfont = matplotlib.font_manager.FontProperties(fname='C:/Windows/Fonts/msyh.ttf')  
-    #mpl.rcParams['axes.unicode_minus'] = False #解决保存图像是负号'-'显示为方块的问题  
-    #Accent,brg, coolwarm, Dark2,rainrow,gnuplot,hot,hsv,jet,prism,raibow, Set1
     #-----------plt.init
     fig    = plt.figure(figsize=(w,h))
     left, width = 0, 1.0
@@ -62,9 +45,9 @@ def dr_quant3x_init(qx,w,h):
     qx.pltTop2.set_xticks([]);qx.pltTop2.set_yticks([])
     qx.pltMid2.set_xticks([]);qx.pltMid2.set_yticks([])
     qx.pltBot2.set_xticks([]);qx.pltBot2.set_yticks([])
-    
-    
-  
+
+
+
 def dr_quant3x00(qx,ktop2,kbot,kmidlst,midSgn0=''):
     '''
     zwQT默认绘图模版quant3x，
@@ -78,12 +61,12 @@ def dr_quant3x00(qx,ktop2,kbot,kmidlst,midSgn0=''):
           子列表元素1，为股票代码xcod，其他列名称，为格式为：
           [[xcod1,nam1,nam2,...],[xcod2,nam1,nam2,...],[xcod3,nam1,nam2,...]]
           注意，kmidlst数据源为：stkLib[xcod]，包含预处理扩充的数据列
-          
+
         midSgn0(str)，中部绘图区图标前缀
            其中，“<xcod>”为特殊符号，表示对应的股票代码
     【输出】
         无
-    
+
     '''
     df=pd.read_csv(qx.fn_qxLib,index_col=0,parse_dates=[0]);
     #---top.plt
@@ -95,7 +78,7 @@ def dr_quant3x00(qx,ktop2,kbot,kmidlst,midSgn0=''):
         df2['kvol']=df2['dprice']*df2['volume']/1e6
         qx.pltTop2.fill_between(df2.index,df2['kvol'],color='peru')
         qx.pltTop2.legend([ktop2],loc=1,ncol=2)
-        
+
     #---bot,plot
     if kbot!='':
         qx.pltBot.plot(df[kbot], color='red');
@@ -115,9 +98,9 @@ def dr_quant3x00(qx,ktop2,kbot,kmidlst,midSgn0=''):
             x10.append(css);
             qx.pltMid.plot(d20[ksgn])
     #x10=x10.sort;
-    qx.pltMid.legend(x10,loc='best',ncol=5 )    
+    qx.pltMid.legend(x10,loc='best',ncol=5 )
     plt.show()
-    
+
 
 def dr_quant3x(qx,ktop2,kbot,kmidlst,midSgn0='',inxSgn0=''):
     '''
@@ -132,13 +115,13 @@ def dr_quant3x(qx,ktop2,kbot,kmidlst,midSgn0='',inxSgn0=''):
           子列表元素1，为股票代码xcod，其他列名称，为格式为：
           [[xcod1,nam1,nam2,...],[xcod2,nam1,nam2,...],[xcod3,nam1,nam2,...]]
           注意，kmidlst数据源为：stkLib[xcod]，包含预处理扩充的数据列
-          
+
         midSgn0(str)，中部绘图区图标前缀
            其中，“<xcod>”为特殊符号，表示对应的股票代码
-       inxSgn0,大盘指数名称，为空，不显示大盘指数图形    
+       inxSgn0,大盘指数名称，为空，不显示大盘指数图形
     【输出】
         无
-    
+
     '''
     df=pd.read_csv(qx.fn_qxLib,index_col=0,parse_dates=[0]);
     #---top.plt
@@ -150,7 +133,7 @@ def dr_quant3x(qx,ktop2,kbot,kmidlst,midSgn0='',inxSgn0=''):
         df2['kvol']=df2['dprice']*df2['volume']/1e6
         qx.pltTop2.fill_between(df2.index,df2['kvol'],color='peru')
         qx.pltTop2.legend([ktop2],loc=1,ncol=2)
-        
+
     #---bot,plot
     if kbot!='':
         qx.pltBot.plot(df[kbot], color='red');
@@ -159,8 +142,8 @@ def dr_quant3x(qx,ktop2,kbot,kmidlst,midSgn0='',inxSgn0=''):
     if (qx.stkInxCode!='')and(inxSgn0!=''):
         ksgn=qx.stkInxPriceName;  #大盘指数数据列名称，默认是:close
         qx.pltBot2.plot(zw.stkInxLib[ksgn], color='blue');
-        qx.pltBot2.legend([inxSgn0],loc=4,ncol=2 )    
-        
+        qx.pltBot2.legend([inxSgn0],loc=4,ncol=2 )
+
     #---mid,plot
     x10=[];
     for x5 in kmidlst:
@@ -176,7 +159,7 @@ def dr_quant3x(qx,ktop2,kbot,kmidlst,midSgn0='',inxSgn0=''):
             x10.append(css);
             qx.pltMid.plot(d20[ksgn])
     #x10=x10.sort;
-    qx.pltMid.legend(x10,loc='best',ncol=5 )    
-    plt.show()    
-    
-    
+    qx.pltMid.legend(x10,loc='best',ncol=5 )
+    plt.show()
+
+
