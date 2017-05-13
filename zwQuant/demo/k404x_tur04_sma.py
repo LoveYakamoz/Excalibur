@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 #  python2.7 版本
-#  
-
+#
 import numpy as np
 import pandas as pd
 
@@ -44,9 +43,9 @@ class MyStrategy(strategy.BacktestingStrategy):
     def onExitCanceled(self, position):
         # If the exit was canceled, re-submit it.
         self.__position.exitMarket()
-        
+
     def getSMA(self):
-        return self.__sma        
+        return self.__sma
 
     def onBars(self, bars):
         # Wait for enough bars to be available to calculate a SMA.
@@ -95,7 +94,7 @@ plt.plot()
 
 
 
-#==============================    
+#==============================
 print("最终资产价值 Final portfolio value: $%.2f" % myStrategy.getResult())
 print("累计回报率 Cumulative returns: %.2f %%" % (retAnalyzer.getCumulativeReturns()[-1] * 100))
 print("夏普比率 Sharpe ratio: %.2f" % (sharpeRatioAnalyzer.getSharpeRatio(0.05)))
