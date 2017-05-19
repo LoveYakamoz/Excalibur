@@ -633,18 +633,17 @@ class WebWeixin(object):
                     srcName = 'SYSTEM'
 
         if (groupName is not None) and (len(self.ListenGroupList) > 0):
-            if groupName in self.ListenGroupList:
-                if (card == ''):
-                    print('%s |%s| %s -> %s: %s' % (
+            if (card == ''):
+                print('%s |%s| %s -> %s: %s' % (
                         message_id, groupName.strip(), srcName.strip(), dstName.strip(),
                         content.replace('<br/>', '\n')))
-                    self.notifyPerson(groupName.strip(), srcName.strip(), content.replace('<br/>', '\n'))
-                else:
-                    content = "标题：" + r"<a href=" + card['url'] + ">" + card['title'] + "</a>" + "\n" + "摘要：" + card[
+                self.notifyPerson(groupName.strip(), srcName.strip(), content.replace('<br/>', '\n'))
+            else:
+                content = "标题：" + r"<a href=" + card['url'] + ">" + card['title'] + "</a>" + "\n" + "摘要：" + card[
                         'description']
-                    print('%s |%s| %s -> %s: %s' % (
+                print('%s |%s| %s -> %s: %s' % (
                         message_id, groupName.strip(), srcName.strip(), dstName.strip(), content))
-                    self.notifyPerson(groupName.strip(), srcName.strip(), content)
+                self.notifyPerson(groupName.strip(), srcName.strip(), content)
 
     def _searchContent(self, key, content, fmat='attr'):
         if fmat == 'attr':
