@@ -718,6 +718,9 @@ class Pick_score_up(Filter_query):
             h = attribute_history(
                 stock, 130, unit='1d', fields=(
                     'close', 'high', 'low'), skip_paused=True)
+            if len(h) < 130:
+                log.info("This stock is not over 130 days, is %d" % len(h))
+                continue
             low_price_130 = h.low.min()
             high_price_130 = h.high.max()
 
