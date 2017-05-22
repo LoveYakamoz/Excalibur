@@ -918,6 +918,6 @@ if sys.stdout.encoding == 'cp936':
     sys.stdout = UnicodeStreamFilter(sys.stdout)
 
 if __name__ == '__main__':
-    logger.info("Version: %s" % "2.0 2017-05-22 BugFix: Listen all group")
+    logger.info("Version: %s" % "3.0 2017-05-22 BugFix: Listen all group")
     webwx = WebWeixin()
     webwx.start()
