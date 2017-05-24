@@ -65,6 +65,10 @@ def select_strategy(context):
         [True, '', '调仓日计数器', Period_condition, {
                 'period': period,  # 调仓频率,日
             }],
+        [True, '', '净值管理风控', Stop_loss_by__whole_value, {
+            'index': '000001.XSHG',
+            'check_peroid': 5,
+            }],
     ]
 
     # 配置 3.Query选股规则
