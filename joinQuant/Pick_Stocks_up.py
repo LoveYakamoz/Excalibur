@@ -65,7 +65,7 @@ def select_strategy(context):
         [True, '', '调仓日计数器', Period_condition, {
                 'period': period,  # 调仓频率,日
             }],
-        [True, '', '净值管理风控', Stop_loss_by__whole_value, {
+        [True, '', '净值管理风控', Stop_loss_by_net_worth, {
             'index': '000001.XSHG',
             'check_peroid': 5,
             }],
@@ -1324,8 +1324,6 @@ class Stop_loss_by_growth_rate(Adjust_condition):
         return not self.to_stop_loss
 
 ''' ----------------------三乌鸦止损------------------------------'''
-
-
 class Stop_loss_by_3_black_crows(Adjust_condition):
 
     def __init__(self, params):
@@ -1380,6 +1378,40 @@ class Stop_loss_by_3_black_crows(Adjust_condition):
     @property
     def can_adjust(self):
         return self.t_can_adjust
+
+''' ----------------------净值止损------------------------------'''
+class Stop_loss_by_net_worth(Adjust_condition):
+
+    def __init__(self, params):
+        self.index = params.get('index', '000001.XSHG')
+        self.check_period = params.get('check_period', 5)
+        # 临时参数
+        self.t_can_adjust = True
+
+    def update_params(self, context, params):
+        self.index = params.get('index', self.index)
+        self.check_period = params.get(
+            'check_peroid', self.check_period)
+
+    def initialize(self, context):
+        pass
+
+    def handle_data(self, context, data):
+        pass
+
+    def before_trading_start(self, context):
+        pass
+
+    def after_trading_end(self, context):
+        pass
+
+    def __str__(self):
+        return '净值止损器:[指数: %s] [净值跌: %d] [当前状态: %s]' % ()
+
+    @property
+    def can_adjust(self):
+        return self.t_can_adjust
+
 
 ''' ----------------------28指数值实时进行止损------------------------------'''
 
