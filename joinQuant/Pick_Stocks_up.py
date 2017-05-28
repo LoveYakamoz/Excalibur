@@ -742,16 +742,22 @@ class Pick_score_up(Filter_query):
 
             score = (
                 cur_price - low_price_130) + (cur_price - high_price_130) + (cur_price - avg_15)
-            if score >= 10:
-                log.info("stock: %s, score: %f", stock, score)
-                stock_scroe[stock] = score
+            if score >= -100:
+                #log.info("stock: %s, score: %f", stock, score)
+                stock_score[stock] = int(score)
 
-        sorted(stock_score.item(), lamda stock, score: cmp(stock[1], score[1]), reverse = True)
-        for (stock, score) in stock_list.item():
+        sorted(stock_score.items(), lambda x, y: cmp(x[1], y[1]), reverse = True)
+        #sorted(stock_score.items(), key=lambda d:d[1])
+        
+        #for ss in stock_score:
+        for (stock, score) in stock_score.items():
+            #log.info("stock: %s, score: %d", ss, stock_score[ss])
+            log.info("stock: %s, score: %f", stock, score)
             dst_stocks.append(stock)
 
         for stock in dst_stocks:
             log.info("stock: %s", stock)
+
         return query(valuation.code).filter(valuation.code.in_(dst_stocks))
 
     def __str__(self):
