@@ -66,17 +66,14 @@ def select_strategy(context):
                 'period': period,  # 调仓频率,日
             }],
         [True, '', '净值管理风控1', Stop_loss_by_currentday_net_worth, {
-            'index': '000001.XSHG',
             'check_days': 1,
             'back_percent': 2,
             }],
         [True, '', '净值管理风控2', Stop_loss_by_last3day_net_worth, {
-            'index': '000001.XSHG',
             'check_days': 3,
             'back_percent': 5,
             }],
         [True, '', '净值管理风控3', Stop_loss_by_last5day_net_worth, {
-            'index': '000001.XSHG',
             'check_days': 5,
             'back_percent': 8,
             }],
@@ -728,6 +725,7 @@ class Pick_score_up(Filter_query):
     def filter(self, context, data, dst_stocks):
         dst_stocks = []
         stock_list = get_index_stocks('000001.XSHG')
+        stock_score = {}
         log.info("stock list : %d" % len(stock_list))
         for stock in stock_list:
             h = attribute_history(
@@ -745,8 +743,15 @@ class Pick_score_up(Filter_query):
             score = (
                 cur_price - low_price_130) + (cur_price - high_price_130) + (cur_price - avg_15)
             if score >= 10:
-                log.info("score: %f", score)
-                dst_stocks.append(stock)
+                log.info("stock: %s, score: %f", stock, score)
+                stock_scroe[stock] = score
+
+        sorted(stock_score.item(), lamda stock, score: cmp(stock[1], score[1]), reverse = True)
+        for (stock, score) in stock_list.item():
+            dst_stocks.append(stock)
+
+        for stock in dst_stocks:
+            log.info("stock: %s", stock)
         return query(valuation.code).filter(valuation.code.in_(dst_stocks))
 
     def __str__(self):
@@ -1392,8 +1397,8 @@ class Stop_loss_by_3_black_crows(Adjust_condition):
 
 ''' ----------------------净值止损------------------------------'''
 def is_loss_big(context, check_days, back_percent):
-    if context.portfolio > g.currentday_max_portfolio:
-        g.currentday_max_portfolio = context.portfolio
+    if context.portfolio.total_value > g.currentday_max_portfolio:
+        g.currentday_max_portfolio = context.portfolio.total_value
 
     if context.portfolio <= 0.98 * g.currentday_max_portfolio:
         return True
