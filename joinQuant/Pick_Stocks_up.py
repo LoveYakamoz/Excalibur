@@ -65,9 +65,20 @@ def select_strategy(context):
         [True, '', '调仓日计数器', Period_condition, {
                 'period': period,  # 调仓频率,日
             }],
-        [True, '', '净值管理风控', Stop_loss_by_net_worth, {
+        [True, '', '净值管理风控1', Stop_loss_by_currentday_net_worth, {
             'index': '000001.XSHG',
-            'check_peroid': 5,
+            'check_days': 1,
+            'back_percent': 2,
+            }],
+        [True, '', '净值管理风控2', Stop_loss_by_last3day_net_worth, {
+            'index': '000001.XSHG',
+            'check_days': 3,
+            'back_percent': 5,
+            }],
+        [True, '', '净值管理风控3', Stop_loss_by_last5day_net_worth, {
+            'index': '000001.XSHG',
+            'check_days': 5,
+            'back_percent': 8,
             }],
     ]
 
@@ -114,26 +125,26 @@ def select_strategy(context):
         # 注意：Shipane_order 和 Shipane_sync_p 启用一个就行了。
         # 请配置正确的实盘易IP，端口，Key,client
 
-        [False, 'Shipane_order_moni', '实盘易跟order下单', Shipane_order, {
-            'host': '192.168.0.5',  # 实盘易IP
-            'port': 8888,  # 端口
+        [True, 'Shipane_order_moni', '实盘易跟order下单', Shipane_order, {
+            'host': '139.199.179.73',  # 实盘易IP
+            'port': 917,  # 端口
             'key': '',  # 实盘易 key
-            'client': 'title:moni',  # 设置操作的券商,只有一个可以为''
+            'client': 'title:htzq',  # 设置操作的券商,只有一个可以为''
             }],
 
         [False, '_shipane_moni_', '实盘易-对比持仓下单', Shipane_sync_p, {
-            'host': '192.168.0.5',  # 实盘易IP
-            'port': 8888,  # 端口
+            'host': '139.199.179.73',  # 实盘易IP
+            'port': 917,  # 端口
             'key': '',  # 实盘易 key
             'client': 'title:moni',  # 设置操作的券商,只有一个可以为''
             'strong_op': True,  # 设置是否为强力买卖模式,几十万以上建议开启。小资金无所谓，关闭效率高一点点
                 }],
 
         # 通过实盘易自动申购新股
-        [False, '_Purchase_new_stocks_', '实盘易申购新股', Purchase_new_stocks, {
+        [True, '_Purchase_new_stocks_', '实盘易申购新股', Purchase_new_stocks, {
             'times': [[9, 40]],  # 执行申购新股的时间
-            'host':'192.168.0.5',  # 实盘易IP
-            'port':8888,  # 端口
+            'host':'139.199.179.73',  # 实盘易IP
+            'port':917,  # 端口
             'key':'',  # 实盘易 key
             'clients':['title:moni']  # 执行申购新股的券商标题list，可以写多个，
                 }],
@@ -1380,30 +1391,54 @@ class Stop_loss_by_3_black_crows(Adjust_condition):
         return self.t_can_adjust
 
 ''' ----------------------净值止损------------------------------'''
-class Stop_loss_by_net_worth(Adjust_condition):
+def is_loss_big(context, check_days, back_percent):
+    if context.portfolio > g.currentday_max_portfolio:
+        g.currentday_max_portfolio = context.portfolio
+
+    if context.portfolio <= 0.98 * g.currentday_max_portfolio:
+        return True
+    else:
+        return False
+
+class Stop_loss_by_currentday_net_worth(Adjust_condition):
 
     def __init__(self, params):
         self.index = params.get('index', '000001.XSHG')
-        self.check_period = params.get('check_period', 5)
-        # 临时参数
+        self.check_days = params.get('check_days', 1)
+        self.back_percent = params.get('back_percent', 2)
         self.t_can_adjust = True
+        self.is_currentdays_loss_big = False
 
     def update_params(self, context, params):
         self.index = params.get('index', self.index)
-        self.check_period = params.get(
-            'check_peroid', self.check_period)
+        self.check_days = params.get('check_days', self.check_days)
+        self.back_percent = params.get('back_percent', self.back_percent)
 
     def initialize(self, context):
+        g.currentday_max_portfolio = 0
+        g.record = 0;
+        self.clear_position_days = -1
         pass
 
     def handle_data(self, context, data):
-        pass
+        if g.record % 5 != 0:
+            g.record += 1
+        else:
+            self.is_currentdays_loss_big = is_loss_big(context, self.check_days, self.back_percent)
+            if self.is_currentdays_loss_big:
+                self.clear_position_days = 2    #clear 2 next days
+
+            g.record += 1
+        if self.clear_position_days >= 0:
+            self.clear_position(context)
+            self.t_can_adjust = True
 
     def before_trading_start(self, context):
-        pass
+        if self.clear_position_days >= 0:
+            self.clear_position_days -= 1
 
     def after_trading_end(self, context):
-        pass
+        self.is_currentdays_loss_big = False
 
     def __str__(self):
         return '净值止损器:[指数: %s] [净值跌: %d] [当前状态: %s]' % ()
