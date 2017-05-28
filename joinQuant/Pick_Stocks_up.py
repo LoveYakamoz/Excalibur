@@ -751,9 +751,6 @@ class Pick_score_up(Filter_query):
             log.info("stock: %s --> score: %f", stock, score)
             dst_stocks.append(stock)
 
-        for stock in dst_stocks:
-            log.info("stock: %s", stock)
-
         return query(valuation.code).filter(valuation.code.in_(dst_stocks))
 
     def __str__(self):
