@@ -65,15 +65,15 @@ def select_strategy(context):
         [True, '', '调仓日计数器', Period_condition, {
                 'period': period,  # 调仓频率,日
             }],
-        [True, '', '净值管理风控1', Stop_loss_by_currentday_net_worth, {
+        [True, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
             'check_days': 1,
             'back_percent': 2,
             }],
-        [True, '', '净值管理风控2', Stop_loss_by_last3day_net_worth, {
+        [False, '', '三天净值管理风控2', Stop_loss_by_last3day_net_worth, {
             'check_days': 3,
             'back_percent': 5,
             }],
-        [True, '', '净值管理风控3', Stop_loss_by_last5day_net_worth, {
+        [False, '', '五天净值管理风控3', Stop_loss_by_last5day_net_worth, {
             'check_days': 5,
             'back_percent': 8,
             }],
@@ -1399,7 +1399,7 @@ def is_loss_big(context, check_days, back_percent):
     if context.portfolio.total_value > g.currentday_max_portfolio:
         g.currentday_max_portfolio = context.portfolio.total_value
 
-    if context.portfolio <= 0.98 * g.currentday_max_portfolio:
+    if context.portfolio <= (1 - back_percent / 100) * g.currentday_max_portfolio:
         return True
     else:
         return False
@@ -1430,9 +1430,11 @@ class Stop_loss_by_currentday_net_worth(Adjust_condition):
         else:
             self.is_currentdays_loss_big = is_loss_big(context, self.check_days, self.back_percent)
             if self.is_currentdays_loss_big:
+                log.info('current day max protfolio: %f, current tick protfolio: %f, so use risk management', g.currentday_max_protfolio, context.portfolio.total_value)
                 self.clear_position_days = 2    #clear 2 next days
 
             g.record += 1
+
         if self.clear_position_days >= 0:
             self.clear_position(context)
             self.t_can_adjust = True
@@ -1445,7 +1447,7 @@ class Stop_loss_by_currentday_net_worth(Adjust_condition):
         self.is_currentdays_loss_big = False
 
     def __str__(self):
-        return '净值止损器:[指数: %s] [净值跌: %d] [当前状态: %s]' % ()
+        return '当天净值止损器'
 
     @property
     def can_adjust(self):
