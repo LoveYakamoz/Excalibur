@@ -31,6 +31,8 @@ def select_strategy(context):
     # 规则配置list下标描述变量。提高可读性与未来添加更多规则配置。
     g.cs_enabled, g.cs_name, g.cs_memo, g.cs_class_name, g.cs_param = range(5)
 
+    # 默认不开仓的标志为-1
+    g.not_open_days = -1
     # 0.是否启用，1.描述，2.规则实现类名，3.规则传递参数(dict)]
     period = 3  # 调仓频率
     # 配置 1.持仓股票的处理规则 (这里主要配置是否进行个股止损止盈)
