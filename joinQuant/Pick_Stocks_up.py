@@ -1,4 +1,4 @@
-import copy
+mport copy
 import pandas as pd
 import requests
 from requests import Request
@@ -45,43 +45,45 @@ def select_strategy(context):
 
     # 配置 2.调仓条件判断规则
     g.adjust_condition_config = [
-        [True, '', '指数最高低价比值止损', Stop_loss_by_price, {
+        [False, '', '指数最高低价比值止损', Stop_loss_by_price, {
             'index': '000001.XSHG',  # 使用的指数,默认 '000001.XSHG'
              'day_count': 160,  # 可选 取day_count天内的最高价，最低价。默认160
              'multiple': 2.2  # 可选 最高价为最低价的multiple倍时，触 发清仓
             }],
-        [True, '', '指数三乌鸦止损', Stop_loss_by_3_black_crows, {
+        [False, '', '指数三乌鸦止损', Stop_loss_by_3_black_crows, {
             'index': '000001.XSHG',  # 使用的指数,默认 '000001.XSHG'
              'dst_drop_minute_count': 60,  # 可选，在三乌鸦触发情况下，一天之内有多少分钟涨幅<0,则触发止损，默认60分钟
             }],
-        [True, '', '调仓时间', Time_condition, {
-                'times': [[14, 50]],
-            }],
-        [True, '', '28调仓择时', Index28_condition, {  # 该调仓条件可能会产生清仓行为
+
+        [False, '', '28调仓择时', Index28_condition, {  # 该调仓条件可能会产生清仓行为
                 'index2': '000016.XSHG',  # 大盘指数
                 'index8': '399333.XSHE',  # 小盘指数
                 'index_growth_rate': 0.01,  # 判定调仓的二八指数20日增幅
             }],
-        [True, '', '调仓日计数器', Period_condition, {
+        [False, '', '调仓日计数器', Period_condition, {
                 'period': period,  # 调仓频率,日
+            }],
+        [True, '', '调仓时间', Time_condition, {
+                'times': [[14, 50]],
             }],
         [True, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
             'check_days': 1,
             'back_percent': 2,
             }],
-        [False, '', '三天净值管理风控2', Stop_loss_by_last3day_net_worth, {
+        [False, '', '三天净值管理风控', Stop_loss_by_last3day_net_worth, {
             'check_days': 3,
             'back_percent': 5,
             }],
-        [False, '', '五天净值管理风控3', Stop_loss_by_last5day_net_worth, {
+        [False, '', '五天净值管理风控', Stop_loss_by_last5day_net_worth, {
             'check_days': 5,
             'back_percent': 8,
             }],
+
     ]
 
     # 配置 3.Query选股规则
     g.pick_stock_by_query_config = [
-        [False, '', '选取小市值', Pick_small_cap, {}],
+        [True, '', '选取小市值', Pick_small_cap, {}],
         [True, '', '评分大于10', Pick_score_up, {}],
         [True, '', '过滤EPS', Filter_eps, {
             'eps_min': 0  # 最小EPS
@@ -122,7 +124,7 @@ def select_strategy(context):
         # 注意：Shipane_order 和 Shipane_sync_p 启用一个就行了。
         # 请配置正确的实盘易IP，端口，Key,client
 
-        [True, 'Shipane_order_moni', '实盘易跟order下单', Shipane_order, {
+        [False, 'Shipane_order_moni', '实盘易跟order下单', Shipane_order, {
             'host': '139.199.179.73',  # 实盘易IP
             'port': 917,  # 端口
             'key': '',  # 实盘易 key
@@ -138,7 +140,7 @@ def select_strategy(context):
                 }],
 
         # 通过实盘易自动申购新股
-        [True, '_Purchase_new_stocks_', '实盘易申购新股', Purchase_new_stocks, {
+        [False, '_Purchase_new_stocks_', '实盘易申购新股', Purchase_new_stocks, {
             'times': [[9, 40]],  # 执行申购新股的时间
             'host':'139.199.179.73',  # 实盘易IP
             'port':917,  # 端口
@@ -220,6 +222,9 @@ def initialize(context):
 
 
 def handle_data(context, data):
+    if g.not_open_days >= 0:
+        return
+
     # 执行其它辅助规则
     for rule in g.other_rules:
         rule.handle_data(context, data)
@@ -246,6 +251,7 @@ def handle_data(context, data):
     for rule in g.adjust_condition_rules:
         rule.handle_data(context, data)
         if not rule.can_adjust:
+            #log.info(rule)
             return
     # ---------------------调仓--------------------------
     log.info("handle_data: ==> 满足条件进行调仓")
@@ -589,13 +595,12 @@ class Adjust_position(Rule):
         pass
 
 '''-------------------------调仓时间控制器-----------------------'''
-
-
 class Time_condition(Adjust_condition):
 
     def __init__(self, params):
         # 配置调仓时间（24小时分钟制）
         self.times = params.get('times', [])
+        g.currentday_max_portfolio = 0;
 
     def update_params(self, context, params):
         self.times = params.get('times', self.times)
@@ -608,7 +613,11 @@ class Time_condition(Adjust_condition):
     def handle_data(self, context, data):
         hour = context.current_dt.hour
         minute = context.current_dt.minute
+
         self.t_can_adjust = [hour, minute] in self.times
+        if context.portfolio.total_value > g.currentday_max_portfolio:
+			g.currentday_max_portfolio = context.portfolio.total_value
+			#log.info('update currentday max portfolio: %f', g.currentday_max_portfolio)
         pass
 
     def __str__(self):
@@ -748,7 +757,7 @@ class Pick_score_up(Filter_query):
 
         stock_score_sort = sorted(stock_score.items(), key=lambda d:d[1], reverse = True)
         for (stock, score) in stock_score_sort:
-            log.info("stock: %s --> score: %f", stock, score)
+            #log.info("stock: %s --> score: %f", stock, score)
             dst_stocks.append(stock)
 
         return query(valuation.code).filter(valuation.code.in_(dst_stocks))
@@ -1395,59 +1404,49 @@ class Stop_loss_by_3_black_crows(Adjust_condition):
         return self.t_can_adjust
 
 ''' ----------------------净值止损------------------------------'''
-def is_loss_big(context, check_days, back_percent):
-    if context.portfolio.total_value > g.currentday_max_portfolio:
-        g.currentday_max_portfolio = context.portfolio.total_value
-
-    if context.portfolio <= (1 - back_percent / 100) * g.currentday_max_portfolio:
-        return True
-    else:
-        return False
+class Stop_loss_by_last3day_net_worth(Adjust_condition):
+    pass
+class Stop_loss_by_last5day_net_worth(Adjust_condition):
+    pass
 
 class Stop_loss_by_currentday_net_worth(Adjust_condition):
 
     def __init__(self, params):
-        self.index = params.get('index', '000001.XSHG')
         self.check_days = params.get('check_days', 1)
         self.back_percent = params.get('back_percent', 2)
         self.t_can_adjust = True
-        self.is_currentdays_loss_big = False
+
 
     def update_params(self, context, params):
-        self.index = params.get('index', self.index)
         self.check_days = params.get('check_days', self.check_days)
         self.back_percent = params.get('back_percent', self.back_percent)
 
     def initialize(self, context):
         g.currentday_max_portfolio = 0
         g.record = 0;
-        self.clear_position_days = -1
+        g.not_open_days = -1
         pass
 
     def handle_data(self, context, data):
-        if g.record % 5 != 0:
-            g.record += 1
-        else:
-            self.is_currentdays_loss_big = is_loss_big(context, self.check_days, self.back_percent)
-            if self.is_currentdays_loss_big:
-                log.info('current day max protfolio: %f, current tick protfolio: %f, so use risk management', g.currentday_max_protfolio, context.portfolio.total_value)
-                self.clear_position_days = 2    #clear 2 next days
-
-            g.record += 1
-
-        if self.clear_position_days >= 0:
-            self.clear_position(context)
-            self.t_can_adjust = True
+		if context.portfolio.total_value <= (1.0 - int(self.back_percent) / 100.0) * g.currentday_max_portfolio:
+			log.warn('currentday_max_portfolio: %f, current_portfolio: %f', g.currentday_max_portfolio, context.portfolio.total_value)
+			g.not_open_days = 2
+			self.t_can_adjust = False
+			self.clear_position(context)
 
     def before_trading_start(self, context):
-        if self.clear_position_days >= 0:
-            self.clear_position_days -= 1
+		g.currentday_max_portfolio = 0
+		pass
 
     def after_trading_end(self, context):
-        self.is_currentdays_loss_big = False
+		if g.not_open_days >= 0:
+			g.not_open_days -= 1
+		else:
+		    self.t_can_adjust = True
+		log.info("after trade open day: %d", g.not_open_days)
 
     def __str__(self):
-        return '当天净值止损器'
+        return '当天净值止损器: [回撤比例: %f]' % (self.back_percent)
 
     @property
     def can_adjust(self):
