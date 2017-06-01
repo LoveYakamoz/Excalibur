@@ -47,6 +47,7 @@ def select_strategy(context):
 
     # 配置 2.调仓条件判断规则
     g.adjust_condition_config = [
+        [True, '', '统计净值', Stat_portfolio, {}],
         [False, '', '指数最高低价比值止损', Stop_loss_by_price, {
             'index': '000001.XSHG',  # 使用的指数,默认 '000001.XSHG'
              'day_count': 160,  # 可选 取day_count天内的最高价，最低价。默认160
@@ -129,14 +130,14 @@ def select_strategy(context):
         [False, 'Shipane_order_moni', '实盘易跟order下单', Shipane_order, {
             'host': '139.199.179.73',  # 实盘易IP
             'port': 917,  # 端口
-            'key': '',  # 实盘易 key
+            'key': 'zyftiger',  # 实盘易 key
             'client': 'title:htzq',  # 设置操作的券商,只有一个可以为''
             }],
 
         [False, '_shipane_moni_', '实盘易-对比持仓下单', Shipane_sync_p, {
             'host': '139.199.179.73',  # 实盘易IP
             'port': 917,  # 端口
-            'key': '',  # 实盘易 key
+            'key': 'zyftiger',  # 实盘易 key
             'client': 'title:moni',  # 设置操作的券商,只有一个可以为''
             'strong_op': True,  # 设置是否为强力买卖模式,几十万以上建议开启。小资金无所谓，关闭效率高一点点
                 }],
@@ -146,7 +147,7 @@ def select_strategy(context):
             'times': [[9, 40]],  # 执行申购新股的时间
             'host':'139.199.179.73',  # 实盘易IP
             'port':917,  # 端口
-            'key':'',  # 实盘易 key
+            'key':'zyftiger',  # 实盘易 key
             'clients':['title:moni']  # 执行申购新股的券商标题list，可以写多个，
                 }],
 
