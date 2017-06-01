@@ -1,4 +1,4 @@
-mport copy
+import copy
 import pandas as pd
 import requests
 from requests import Request
@@ -1419,11 +1419,73 @@ class  Stat_portfolio(Adjust_condition):
 
 
 
-''' ----------------------净值止损------------------------------'''
+''' ----------------------三天净值止损------------------------------'''
+def get_lastNday_max_portfolio(N):
+    N_max_portfolio = 0
+    for i in range(0, N)[::-1]
+        if N_max_portfolio <= g.max_portfolio_everyday[i]:
+            N_max_portfolio = g.max_portfolio_everyday[i]
+
+    return N_max_portfolio
+
 class Stop_loss_by_last3day_net_worth(Adjust_condition):
-    pass
+
+    def __init__(self, params):
+        self.check_days = params.get('check_days', 3)
+        self.back_percent = params.get('back_percent', 2)
+        self.t_can_adjust = True
+
+    def initialize(self, context):
+        g.not_open_days = -1
+
+    def handle_data(self, context, data):
+        if (len(g.max_portfolio_everyday) < self.check_days):
+            self.t_can_adjust = True
+        else:
+            if (context.portfolio.total_value <=
+                  (1.0 - int(self.back_percent) / 100.0) * get_lastNday_max_portfolio(self.check_days)):
+                self.t_can_adjust = False
+                self.clear_position(context)
+            else:
+                self.t_can_adjust = True
+
+
+    def __str__(self):
+        return '三天净值止损器： [回撤比例: %f]' % (self.back_percent)
+
+    @property
+    def can_adjust(self):
+        return self.t_can_adjust
+
 class Stop_loss_by_last5day_net_worth(Adjust_condition):
-    pass
+
+    def __init__(self, params):
+        self.check_days = params.get('check_days', 5)
+        self.back_percent = params.get('back_percent', 8)
+        self.t_can_adjust = True
+
+    def initialize(self, context):
+        g.not_open_days = -1
+
+    def handle_data(self, context, data):
+        if (len(g.max_portfolio_everyday) < self.check_days):
+            self.t_can_adjust = True
+        else:
+            if (context.portfolio.total_value <=
+                  (1.0 - int(self.back_percent) / 100.0) * get_lastNday_max_portfolio(self.check_days)):
+                self.t_can_adjust = False
+                self.clear_position(context)
+            else:
+                self.t_can_adjust = True
+
+
+    def __str__(self):
+        return '五天净值止损器： [回撤比例: %f]' % (self.back_percent)
+
+    @property
+    def can_adjust(self):
+        return self.t_can_adjust
+
 
 class Stop_loss_by_currentday_net_worth(Adjust_condition):
 
@@ -1439,7 +1501,6 @@ class Stop_loss_by_currentday_net_worth(Adjust_condition):
 
     def initialize(self, context):
         g.currentday_max_portfolio = 0
-        g.record = 0;
         g.not_open_days = -1
         pass
 
@@ -1640,6 +1701,7 @@ class Stat(Rule):
                 total_profit / starting_cash * 100)
             s += '\n--------------------------------'
             self.log_info(s)
+            self.log_info('每日最大净值：')
             self.log_info(g.max_portfolio_everyday)
     # 统计单次盈利最高的股票
     def statis_most_win_percent(self):
