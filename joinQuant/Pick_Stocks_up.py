@@ -131,24 +131,24 @@ def select_strategy(context):
             'host': '139.199.179.73',  # 实盘易IP
             'port': 917,  # 端口
             'key': 'zyftiger',  # 实盘易 key
-            'client': 'title:htzq',  # 设置操作的券商,只有一个可以为''
+            'client': '',  # 设置操作的券商,只有一个可以为''
             }],
 
         [False, '_shipane_moni_', '实盘易-对比持仓下单', Shipane_sync_p, {
             'host': '139.199.179.73',  # 实盘易IP
             'port': 917,  # 端口
             'key': 'zyftiger',  # 实盘易 key
-            'client': 'title:moni',  # 设置操作的券商,只有一个可以为''
+            'client': '',  # 设置操作的券商,只有一个可以为''
             'strong_op': True,  # 设置是否为强力买卖模式,几十万以上建议开启。小资金无所谓，关闭效率高一点点
                 }],
 
         # 通过实盘易自动申购新股
-        [False, '_Purchase_new_stocks_', '实盘易申购新股', Purchase_new_stocks, {
+        [True, '_Purchase_new_stocks_', '实盘易申购新股', Purchase_new_stocks, {
             'times': [[9, 40]],  # 执行申购新股的时间
             'host':'139.199.179.73',  # 实盘易IP
             'port':917,  # 端口
             'key':'zyftiger',  # 实盘易 key
-            'clients':['title:moni']  # 执行申购新股的券商标题list，可以写多个，
+            'client':'' #执行申购新股的券商标题list，可以写多个，
                 }],
 
         [True, '', '统计', Stat, {}]
