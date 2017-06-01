@@ -33,6 +33,9 @@ def select_strategy(context):
 
     # 默认不开仓的标志为-1
     g.not_open_days = -1
+
+    # 每天最大净值
+    g.max_portfolio_everyday = []
     # 0.是否启用，1.描述，2.规则实现类名，3.规则传递参数(dict)]
     period = 3  # 调仓频率
     # 配置 1.持仓股票的处理规则 (这里主要配置是否进行个股止损止盈)
@@ -618,9 +621,6 @@ class Time_condition(Adjust_condition):
         minute = context.current_dt.minute
 
         self.t_can_adjust = [hour, minute] in self.times
-        if context.portfolio.total_value > g.currentday_max_portfolio:
-			g.currentday_max_portfolio = context.portfolio.total_value
-			#log.info('update currentday max portfolio: %f', g.currentday_max_portfolio)
         pass
 
     def __str__(self):
@@ -1407,6 +1407,19 @@ class Stop_loss_by_3_black_crows(Adjust_condition):
         return self.t_can_adjust
 
 ''' ----------------------净值止损------------------------------'''
+class  Stat_portfolio(Adjust_condition):
+
+    def handle_data(self, context, data):
+        if context.portfolio.total_value > g.currentday_max_portfolio:
+			g.currentday_max_portfolio = context.portfolio.total_value
+
+    def after_trading_end(self, context):
+        g.max_portfolio_everyday.append(g.currentday_max_portfolio)
+        g.currentday_max_portfolio = 0
+
+
+
+''' ----------------------净值止损------------------------------'''
 class Stop_loss_by_last3day_net_worth(Adjust_condition):
     pass
 class Stop_loss_by_last5day_net_worth(Adjust_condition):
@@ -1438,14 +1451,13 @@ class Stop_loss_by_currentday_net_worth(Adjust_condition):
 			self.clear_position(context)
 
     def before_trading_start(self, context):
-		g.currentday_max_portfolio = 0
 		pass
 
     def after_trading_end(self, context):
 		if g.not_open_days >= 0:
 			g.not_open_days -= 1
 		else:
-		    self.t_can_adjust = True
+            self.t_can_adjust = True
 		log.info("after trade open day: %d", g.not_open_days)
 
     def __str__(self):
@@ -1628,7 +1640,7 @@ class Stat(Rule):
                 total_profit / starting_cash * 100)
             s += '\n--------------------------------'
             self.log_info(s)
-
+            self.log_info(g.max_portfolio_everyday)
     # 统计单次盈利最高的股票
     def statis_most_win_percent(self):
         result = {}
