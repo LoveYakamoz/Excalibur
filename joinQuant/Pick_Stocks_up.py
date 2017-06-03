@@ -1,4 +1,4 @@
-import copy
+mport copy
 import pandas as pd
 import requests
 from requests import Request
@@ -67,7 +67,7 @@ def select_strategy(context):
                 'index8': '399333.XSHE',  # 小盘指数
                 'index_growth_rate': 0.01,  # 判定调仓的二八指数20日增幅
             }],
-        [True, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
+        [False, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
             'check_days': 1,
             'back_percent': 2,
             }],
@@ -75,7 +75,7 @@ def select_strategy(context):
             'check_days': 3,
             'back_percent': 5,
             }],
-        [False, '', '五天净值管理风控', Stop_loss_by_last5day_net_worth, {
+        [True, '', '五天净值管理风控', Stop_loss_by_last5day_net_worth, {
             'check_days': 5,
             'back_percent': 8,
             }],
@@ -91,7 +91,7 @@ def select_strategy(context):
     # 配置 3.Query选股规则
     g.pick_stock_by_query_config = [
         [True, '', '选取小市值', Pick_small_cap, {}],
-        [True, '', '评分大于10', Pick_score_up, {}],
+        [False, '', '评分大于10', Pick_score_up, {}],
         [True, '', '过滤EPS', Filter_eps, {
             'eps_min': 0  # 最小EPS
             }],
@@ -258,8 +258,8 @@ def handle_data(context, data):
     for rule in g.adjust_condition_rules:
         rule.handle_data(context, data)
         if g.not_open_days >= 0:
-            self.log_info("触发了净值风控策略")
-            break
+            log.info("触发了净值风控策略")
+            return
         if not rule.can_adjust:
             #log.info(rule)
             return
@@ -1412,6 +1412,8 @@ class Stop_loss_by_3_black_crows(Adjust_condition):
 
 ''' ----------------------净值止损------------------------------'''
 class  Stat_portfolio(Adjust_condition):
+    def initialize(self, context):
+        g.currentday_max_portfolio = 0
 
     def handle_data(self, context, data):
         if context.portfolio.total_value > g.currentday_max_portfolio:
@@ -1421,12 +1423,14 @@ class  Stat_portfolio(Adjust_condition):
         g.max_portfolio_everyday.append(g.currentday_max_portfolio)
         g.currentday_max_portfolio = 0
 
+    def __str__(self):
+        return '统计每天净值器'
 
 
 ''' ----------------------三天净值止损------------------------------'''
 def get_lastNday_max_portfolio(N):
     N_max_portfolio = 0
-    for i in range(0, N)[::-1]
+    for i in range(len(g.max_portfolio_everyday) - N, len(g.max_portfolio_everyday)):
         if N_max_portfolio <= g.max_portfolio_everyday[i]:
             N_max_portfolio = g.max_portfolio_everyday[i]
 
@@ -1446,14 +1450,21 @@ class Stop_loss_by_last3day_net_worth(Adjust_condition):
         if (len(g.max_portfolio_everyday) < self.check_days):
             self.t_can_adjust = True
         else:
-            if (context.portfolio.total_value <=
+            if (context.portfolio.total_value <
                   (1.0 - int(self.back_percent) / 100.0) * get_lastNday_max_portfolio(self.check_days)):
+                log.info("bp: %f, cd: %d, lastNmax:%f", self.back_percent, self.check_days, get_lastNday_max_portfolio(self.check_days))
                 self.t_can_adjust = False
                 self.clear_position(context)
                 g.not_open_days = 3
             else:
                 self.t_can_adjust = True
 
+    def after_trading_end(self, context):
+		if g.not_open_days >= 0:
+			g.not_open_days -= 1
+		else:
+		    self.t_can_adjust = True
+		log.info("after trade open day: %d", g.not_open_days)
 
     def __str__(self):
         return '三天净值止损器： [回撤比例: %f]' % (self.back_percent)
@@ -1476,14 +1487,19 @@ class Stop_loss_by_last5day_net_worth(Adjust_condition):
         if (len(g.max_portfolio_everyday) < self.check_days):
             self.t_can_adjust = True
         else:
-            if (context.portfolio.total_value <=
+            if (context.portfolio.total_value <
                   (1.0 - int(self.back_percent) / 100.0) * get_lastNday_max_portfolio(self.check_days)):
                 self.t_can_adjust = False
                 self.clear_position(context)
                 g.not_open_days = 5
             else:
                 self.t_can_adjust = True
-
+    def after_trading_end(self, context):
+		if g.not_open_days >= 0:
+			g.not_open_days -= 1
+		else:
+		    self.t_can_adjust = True
+		log.info("after trade open day: %d", g.not_open_days)
 
     def __str__(self):
         return '五天净值止损器： [回撤比例: %f]' % (self.back_percent)
@@ -1511,11 +1527,13 @@ class Stop_loss_by_currentday_net_worth(Adjust_condition):
         pass
 
     def handle_data(self, context, data):
-		if context.portfolio.total_value <= (1.0 - int(self.back_percent) / 100.0) * g.currentday_max_portfolio:
+		if context.portfolio.total_value < (1.0 - int(self.back_percent) / 100.0) * g.currentday_max_portfolio:
 			log.warn('currentday_max_portfolio: %f, current_portfolio: %f', g.currentday_max_portfolio, context.portfolio.total_value)
 			g.not_open_days = 2
 			self.t_can_adjust = False
 			self.clear_position(context)
+		else:
+		    self.t_can_adjust = True
 
     def before_trading_start(self, context):
 		pass
@@ -1524,7 +1542,7 @@ class Stop_loss_by_currentday_net_worth(Adjust_condition):
 		if g.not_open_days >= 0:
 			g.not_open_days -= 1
 		else:
-            self.t_can_adjust = True
+		    self.t_can_adjust = True
 		log.info("after trade open day: %d", g.not_open_days)
 
     def __str__(self):
@@ -1707,8 +1725,8 @@ class Stat(Rule):
                 total_profit / starting_cash * 100)
             s += '\n--------------------------------'
             self.log_info(s)
-            self.log_info('每日最大净值：')
-            self.log_info(g.max_portfolio_everyday)
+            #self.log_info('每日最大净值：')
+            #self.log_info(g.max_portfolio_everyday)
     # 统计单次盈利最高的股票
     def statis_most_win_percent(self):
         result = {}
