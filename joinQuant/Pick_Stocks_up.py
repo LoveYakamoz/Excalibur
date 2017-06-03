@@ -36,6 +36,7 @@ def select_strategy(context):
 
     # 每天最大净值
     g.max_portfolio_everyday = []
+
     # 0.是否启用，1.描述，2.规则实现类名，3.规则传递参数(dict)]
     period = 3  # 调仓频率
     # 配置 1.持仓股票的处理规则 (这里主要配置是否进行个股止损止盈)
@@ -66,12 +67,6 @@ def select_strategy(context):
                 'index8': '399333.XSHE',  # 小盘指数
                 'index_growth_rate': 0.01,  # 判定调仓的二八指数20日增幅
             }],
-        [False, '', '调仓日计数器', Period_condition, {
-                'period': period,  # 调仓频率,日
-            }],
-        [True, '', '调仓时间', Time_condition, {
-                'times': [[14, 50]],
-            }],
         [True, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
             'check_days': 1,
             'back_percent': 2,
@@ -85,6 +80,12 @@ def select_strategy(context):
             'back_percent': 8,
             }],
 
+        [True, '', '调仓时间', Time_condition, {
+                'times': [[14, 50]],
+            }],
+        [True, '', '调仓日计数器', Period_condition, {
+                'period': period,  # 调仓频率,日
+            }],
     ]
 
     # 配置 3.Query选股规则
@@ -203,7 +204,7 @@ def initialize(context):
     '''-----4.股票池过滤规则:-----'''
     g.filter_stock_list_rules = create_rules(g.filter_stock_list_config)
 
-    '''-----5.调仓规则:器-----'''
+    '''-----5.调仓规则器:-----'''
     g.adjust_position_rules = create_rules(g.adjust_position_config)
 
     '''-----6.其它规则:-------'''
@@ -256,6 +257,9 @@ def handle_data(context, data):
     # 判断是否满足调仓条件，所有规则以and 逻辑执行
     for rule in g.adjust_condition_rules:
         rule.handle_data(context, data)
+        if g.not_open_days >= 0:
+            self.log_info("触发了净值风控策略")
+            break
         if not rule.can_adjust:
             #log.info(rule)
             return
@@ -1446,6 +1450,7 @@ class Stop_loss_by_last3day_net_worth(Adjust_condition):
                   (1.0 - int(self.back_percent) / 100.0) * get_lastNday_max_portfolio(self.check_days)):
                 self.t_can_adjust = False
                 self.clear_position(context)
+                g.not_open_days = 3
             else:
                 self.t_can_adjust = True
 
@@ -1475,6 +1480,7 @@ class Stop_loss_by_last5day_net_worth(Adjust_condition):
                   (1.0 - int(self.back_percent) / 100.0) * get_lastNday_max_portfolio(self.check_days)):
                 self.t_can_adjust = False
                 self.clear_position(context)
+                g.not_open_days = 5
             else:
                 self.t_can_adjust = True
 
