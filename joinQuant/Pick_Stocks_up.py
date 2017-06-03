@@ -1,4 +1,4 @@
-mport copy
+import copy
 import pandas as pd
 import requests
 from requests import Request
