@@ -1989,7 +1989,7 @@ class Shipane_order(Rule):
     # 获取下单执行器
     def get_executor(self):
         if self.executor is None:
-            self.executor = shipane_sdk.JoinQuantExecutor(
+            self.executor = shipane_sdk.StrategyTrader(
                 host=self.host, port=self.port, key=self.key, client=self.client)
         return self.executor
 
