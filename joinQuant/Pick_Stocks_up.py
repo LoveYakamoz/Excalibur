@@ -2001,6 +2001,7 @@ class Shipane_order(Rule):
     def when_sell_stock(self, position, order, is_normal):
         try:
             self.get_executor().execute(order)
+            self.log_info('实盘易卖股成功:' + str(order))
         except:
             self.log_error('实盘易卖股失败:' + str(order))
         pass
@@ -2009,8 +2010,9 @@ class Shipane_order(Rule):
     def when_buy_stock(self, stock, order):
         try:
             self.get_executor().execute(order)
+            self.log_info('实盘易买股成功:' + str(order))
         except:
-            self.log_error('实盘易卖股失败:' + str(order))
+            self.log_error('实盘易买股失败:' + str(order))
         pass
 
 '''------------------------------通过实盘易申购新股----------------------'''
