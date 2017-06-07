@@ -79,9 +79,9 @@ def select_strategy(context):
                 'index_4': '000016.XSHG', # 上证 50
                 'index_growth_rate': 1.01
             }],
-        [True, '', '仓位设置器', Position_setting, {
-            }],
-        [True, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
+        #[True, '', '仓位设置器', Position_setting, {
+        #   }],
+        [False, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
             'check_days': 1,
             'back_percent': 2,
             }],
@@ -643,9 +643,6 @@ class Index_selection(Adjust_condition):
         return self.t_can_adjust
 
     def handle_data(self, context, data):
-        max_growth = 0
-        count_selected = 0
-        index.selected = ''
         index_growth_dict = {}
         index_growth_dict[self.CYBZ] = get_growth_rate(self.CYBZ)
         index_growth_dict[self.ZXBZ] = get_growth_rate(self.ZXBZ)
@@ -1450,6 +1447,8 @@ class  Stat_portfolio(Adjust_condition):
     def after_trading_end(self, context):
         g.max_portfolio_everyday.append(g.currentday_max_portfolio)
         g.currentday_max_portfolio = 0
+    def __str__(self):
+        return '净值统计'
 
 
 
