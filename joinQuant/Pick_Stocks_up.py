@@ -72,6 +72,15 @@ def select_strategy(context):
         [True, '', '调仓时间', Time_condition, {
                 'times': [[14, 50]],
             }],
+        [True, '', '指数选择器', Index_selection, {
+                'index_1': '399006.XSHE', # 创业板指
+                'index_2': '399005.XSHE', # 中小板指
+                'index_3': '399300.XSHE', # 沪深 300
+                'index_4': '000016.XSHG', # 上证 50
+                'index_growth_rate': 1.01
+            }],
+        [True, '', '仓位设置器', Position_setting, {
+            }],
         [True, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
             'check_days': 1,
             'back_percent': 2,
@@ -110,7 +119,7 @@ def select_strategy(context):
             'rank_stock_count': 20  # 评分股数
             }],
         [True, '', '获取最终选股数', Filter_buy_count, {
-            'buy_count': 3  # 最终入选股票数
+            'buy_count': 20  # 最终入选股票数
             }],
     ]
 
@@ -118,7 +127,7 @@ def select_strategy(context):
     g.adjust_position_config = [
         [True, '', '卖出股票', Sell_stocks, {}],
         [True, '', '买入股票', Buy_stocks, {
-            'buy_count': 3  # 最终买入股票数
+            'buy_count': 20  # 最终买入股票数
             }]
     ]
 
@@ -609,6 +618,48 @@ class Time_condition(Adjust_condition):
     def __str__(self):
         return '调仓时间控制器: [调仓时间: %s ]' % (
                 str(['%d:%d' % (x[0], x[1]) for x in self.times]))
+
+
+'''-------------------------指数选择器-----------------------'''
+class Index_selection(Adjust_condition):
+
+    def __init__(self, params):
+        self.CYBZ = params.get('index_1', '399006.XSHE')
+        self.ZXBZ = params.get('index_2', '399005.XSHE')
+        self.HS300 = params.get('index_3', '399300.XSHE')
+        self.SZ50 = params.get('index_4', '000016.XSHG')
+        self.index_growth_rate = params.get('index_growth_rate', 1.01)
+        self.t_can_adjust = True
+
+    def update_params(self, context, params):
+        self.CYBZ = params.get('index_1', '399006.XSHE')
+        self.ZXBZ = params.get('index_2', '399005.XSHE')
+        self.HS300 = params.get('index_3', '399300.XSHE')
+        self.SZ50 = params.get('index_4', '000016.XSHG')
+        self.index_growth_rate = params.get('index_growth_rate', 1.01)
+        self.t_can_adjust = True
+    @property
+    def can_adjust(self):
+        return self.t_can_adjust
+
+    def handle_data(self, context, data):
+        max_growth = 0
+        count_selected = 0
+        index.selected = ''
+        index_growth_dict = {}
+        index_growth_dict[self.CYBZ] = get_growth_rate(self.CYBZ)
+        index_growth_dict[self.ZXBZ] = get_growth_rate(self.ZXBZ)
+        index_growth_dict[self.HS300] = get_growth_rate(self.HS300)
+        index_growth_dict[self.SZ50] = get_growth_rate(self.SZ50)
+
+        index_growth_dict = sorted(index_growth_dict.items(), key=lambda d:d[1], reverse = True)
+        for (index, growth) in index_growth_dict:
+            log.info("index: %s ===> growth: %f", index, growth)
+
+    def __str__(self):
+        return '指数选择器'
+
+
 '''-------------------------调仓日计数器-----------------------'''
 
 
