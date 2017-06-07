@@ -643,6 +643,9 @@ class Index_selection(Adjust_condition):
         return self.t_can_adjust
 
     def handle_data(self, context, data):
+        count = 0
+        index_selected = None
+        index_selected_growth = 0
         index_growth_dict = {}
         index_growth_dict[self.CYBZ] = get_growth_rate(self.CYBZ)
         index_growth_dict[self.ZXBZ] = get_growth_rate(self.ZXBZ)
@@ -652,6 +655,15 @@ class Index_selection(Adjust_condition):
         index_growth_dict = sorted(index_growth_dict.items(), key=lambda d:d[1], reverse = True)
         for (index, growth) in index_growth_dict:
             log.info("index: %s ===> growth: %f", index, growth)
+            if growth > self.index_growth_rate:
+                count += 1
+        log.info("%d index growth over 1.01", count)
+        if count >  0:
+            index_selected = index_growth_dict.keys()[0]
+            index_selected_growth = index_growth_dict[index_selected]
+            log.info("index_selected: %s ===> growth: %f", index_selected, index_selected_growth)
+        else:
+            log.info("no index selected")
 
     def __str__(self):
         return '指数选择器'
