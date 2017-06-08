@@ -34,6 +34,9 @@ def select_strategy(context):
     # 默认不开仓的标志为-1
     g.not_open_days = -1
 
+    # 默认全仓
+    g.position_scale = 1
+    g.index_selected, g.index_selected_growth = 1
     # 每天最大净值
     g.max_portfolio_everyday = []
     # 0.是否启用，1.描述，2.规则实现类名，3.规则传递参数(dict)]
@@ -77,10 +80,8 @@ def select_strategy(context):
                 'index_2': '399005.XSHE', # 中小板指
                 'index_3': '399300.XSHE', # 沪深 300
                 'index_4': '000016.XSHG', # 上证 50
-                'index_growth_rate': 1.01
+                'index_growth_rate': 0.01
             }],
-        #[True, '', '仓位设置器', Position_setting, {
-        #   }],
         [False, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
             'check_days': 1,
             'back_percent': 2,
@@ -99,7 +100,8 @@ def select_strategy(context):
     # 配置 3.Query选股规则
     g.pick_stock_by_query_config = [
         [True, '', '选取小市值', Pick_small_cap, {}],
-        [True, '', '评分大于10', Pick_score_up, {}],
+        [False, '', '评分大于10', Pick_score_up, {}],
+        [True, '', '三日或五日均线向上', Pick_3or5_mean_up, {}],
         [True, '', '过滤EPS', Filter_eps, {
             'eps_min': 0  # 最小EPS
             }],
@@ -116,7 +118,7 @@ def select_strategy(context):
         [True, '', '过滤涨停', Filter_limitup, {}],
         [True, '', '过滤跌停', Filter_limitdown, {}],
         [True, '', '股票评分', Filter_rank, {
-            'rank_stock_count': 20  # 评分股数
+            'rank_stock_count': 50  # 评分股数
             }],
         [True, '', '获取最终选股数', Filter_buy_count, {
             'buy_count': 20  # 最终入选股票数
@@ -620,6 +622,7 @@ class Time_condition(Adjust_condition):
                 str(['%d:%d' % (x[0], x[1]) for x in self.times]))
 
 
+
 '''-------------------------指数选择器-----------------------'''
 class Index_selection(Adjust_condition):
 
@@ -628,7 +631,7 @@ class Index_selection(Adjust_condition):
         self.ZXBZ = params.get('index_2', '399005.XSHE')
         self.HS300 = params.get('index_3', '399300.XSHE')
         self.SZ50 = params.get('index_4', '000016.XSHG')
-        self.index_growth_rate = params.get('index_growth_rate', 1.01)
+        self.index_growth_rate = params.get('index_growth_rate', 0.01)
         self.t_can_adjust = True
 
     def update_params(self, context, params):
@@ -636,7 +639,7 @@ class Index_selection(Adjust_condition):
         self.ZXBZ = params.get('index_2', '399005.XSHE')
         self.HS300 = params.get('index_3', '399300.XSHE')
         self.SZ50 = params.get('index_4', '000016.XSHG')
-        self.index_growth_rate = params.get('index_growth_rate', 1.01)
+        self.index_growth_rate = params.get('index_growth_rate', 0.01)
         self.t_can_adjust = True
     @property
     def can_adjust(self):
@@ -658,12 +661,27 @@ class Index_selection(Adjust_condition):
             if growth > self.index_growth_rate:
                 count += 1
         log.info("%d index growth over 1.01", count)
-        if count >  0:
-            index_selected = index_growth_dict.keys()[0]
-            index_selected_growth = index_growth_dict[index_selected]
+
+        if count > 0:
+            g.index_selected = index_growth_dict.keys()[0]
+            g.index_selected_growth = index_growth_dict[index_selected]
             log.info("index_selected: %s ===> growth: %f", index_selected, index_selected_growth)
+
+            self.clear_position(context)
+
+            if count == 1:
+                g.position_scale = 0.3
+                self.log_info("only one index growth over 1.01, so position scale: 0.3")
+            elif count == 2:
+                g.position_scale = 0.7
+                self.log_info("only two indexes growth over 1.01, so position scale: 0.7")
+            else:
+                g.position_scale = 1
+                self.log_info("above three indexes growth over 1.01, so position scale: 1")
+            self.t_can_adjust = True
         else:
-            log.info("no index selected")
+            log.info("all indexes go down, so not selected any one")
+            self.t_can_adjust = False
 
     def __str__(self):
         return '指数选择器'
@@ -765,8 +783,6 @@ class Index28_condition(Adjust_condition):
                 self.index_growth_rate * 100)
 
 '''------------------小市值选股器-----------------'''
-
-
 class Pick_small_cap(Filter_query):
 
     def filter(self, context, data, q):
@@ -775,11 +791,25 @@ class Pick_small_cap(Filter_query):
     def __str__(self):
         return '按市值倒序选取股票'
 
+
+
+'''------------------三天或五天均线上选股器-----------------'''
+class Pick_3or5_mean_up(Filter_query):
+    def filter(self, context, data, dst_stocks):
+        stock_list = get_index_stocks(g.index_selected)
+
+        pass
+
+    def __str__(self):
+        return '三天或五天均线向上选股器'
+
+
+
 # 以下为选评分高于10分的股票
 class Pick_score_up(Filter_query):
     def filter(self, context, data, dst_stocks):
         dst_stocks = []
-        stock_list = get_index_stocks('000001.XSHG')
+        stock_list = get_index_stocks(g.index_selected)
         stock_score = {}
         log.info("stock list : %d" % len(stock_list))
         for stock in stock_list:
