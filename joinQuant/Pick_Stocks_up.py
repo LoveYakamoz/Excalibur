@@ -687,7 +687,7 @@ class Index_selection(Adjust_condition):
             self.t_can_adjust = False
 
     def __str__(self):
-        return '指数选择器'
+        return '指数选择器, 仓位控制器'
 
 
 '''-------------------------调仓日计数器-----------------------'''
@@ -1149,7 +1149,7 @@ class Buy_stocks(Adjust_position):
         # 此处只根据可用金额平均分配购买，不能保证每个仓位平均分配
         position_count = len(context.portfolio.positions)
         if self.buy_count > position_count:
-            value = context.portfolio.cash / (self.buy_count - position_count)
+            value = context.portfolio.cash * g.position_scale / (self.buy_count - position_count)
             for stock in buy_stocks:
                 if context.portfolio.positions[stock].total_amount == 0:
                     if self.open_position(stock, value):
