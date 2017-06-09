@@ -100,8 +100,8 @@ def select_strategy(context):
     # 配置 3.Query选股规则
     g.pick_stock_by_query_config = [
         [True, '', '选取小市值', Pick_small_cap, {}],
+        [True, '', '斜率最高指数选股器', Pick_stock_by_index, {}],
         [False, '', '评分大于10', Pick_score_up, {}],
-        [True, '', '三日或五日均线向上', Pick_3or5_mean_up, {}],
         [True, '', '过滤EPS', Filter_eps, {
             'eps_min': 0  # 最小EPS
             }],
@@ -117,8 +117,11 @@ def select_strategy(context):
         [True, '', '过滤停牌', Filter_paused_stock, {}],
         [True, '', '过滤涨停', Filter_limitup, {}],
         [True, '', '过滤跌停', Filter_limitdown, {}],
+        [True, '', '三日或五日均线向上', Filter_3or5_mean_up, {
+            'day_count1': 3,
+            'day_count2': 5}],
         [True, '', '股票评分', Filter_rank, {
-            'rank_stock_count': 50  # 评分股数
+            'rank_stock_count': 20  # 评分股数
             }],
         [True, '', '获取最终选股数', Filter_buy_count, {
             'buy_count': 20  # 最终入选股票数
@@ -792,18 +795,16 @@ class Pick_small_cap(Filter_query):
         return '按市值倒序选取股票'
 
 
-
-'''------------------三天或五天均线上选股器-----------------'''
-class Pick_3or5_mean_up(Filter_query):
+'''------------------指数选股器-----------------'''
+class Pick_stock_by_index(Filter_query):
     def filter(self, context, data, dst_stocks):
         stock_list = get_index_stocks(g.index_selected)
 
-        pass
+        return query(valuation.code).filter(valuation.code.in_(stock_list))
+
 
     def __str__(self):
-        return '三天或五天均线向上选股器'
-
-
+        return '按斜率最高指数选取股票'
 
 # 以下为选评分高于10分的股票
 class Pick_score_up(Filter_query):
@@ -993,22 +994,21 @@ class Filter_st(Filter_stock_list):
         return '过滤ST股票'
 
 
-class Filter_growth_is_down(Filter_stock_list):
-
+'''------------------三天或五天均线上选股器-----------------'''
+class Filter_3or5_mean_up(Filter_query):
     def __init__(self, params):
-        self.day_count = params.get('day_count', 20)
+        self.day_count1 = params.get('day_count1', 3)
+        self.day_count2 = params.get('day_count2', 5)
 
     def update_params(self, context, params):
-        self.day_count = params.get('day_count', self.day_count)
+        self.day_count1 = params.get('day_count1', self.day_count1)
+        self.day_count2 = params.get('day_count2', self.day_count2)
 
     def filter(self, context, data, stock_list):
-        return [
-            stock for stock in stock_list if get_growth_rate(
-                stock, self.day_count) > 0]
+        return [stock for stock in stock_list if (get_growth_rate(stock, self.day_count1) > 0) or (get_growth_rate(stock, self.day_count2) > 0 ]
 
     def __str__(self):
-        return '过滤n日增长率为负的股票'
-
+        return '三天或五天均线向上选股器'
 
 class Filter_blacklist(Filter_stock_list):
 
