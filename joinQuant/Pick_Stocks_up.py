@@ -670,7 +670,7 @@ class Index_selection(Adjust_condition):
         if count > 0:
             g.index_selected = index_growth_dict_sorted[0][0]
             g.index_selected_growth = index_growth_dict_sorted[0][1]
-            log.info("index_selected: %s ===> growth: %f", index_selected, index_selected_growth)
+            log.info("index_selected: %s ===> growth: %f", g.index_selected, g.index_selected_growth)
 
             self.clear_position(context)
 
