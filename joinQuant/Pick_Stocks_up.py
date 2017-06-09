@@ -36,7 +36,8 @@ def select_strategy(context):
 
     # 默认全仓
     g.position_scale = 1
-    g.index_selected, g.index_selected_growth = 1
+    g.index_selected = ''
+    g.index_selected_growth = 1
     # 每天最大净值
     g.max_portfolio_everyday = []
     # 0.是否启用，1.描述，2.规则实现类名，3.规则传递参数(dict)]
@@ -69,11 +70,12 @@ def select_strategy(context):
                 'index8': '399333.XSHE',  # 小盘指数
                 'index_growth_rate': 0.01,  # 判定调仓的二八指数20日增幅
             }],
-        [False, '', '调仓日计数器', Period_condition, {
-                'period': period,  # 调仓频率,日
-            }],
+
         [True, '', '调仓时间', Time_condition, {
                 'times': [[14, 50]],
+            }],
+        [True, '', '调仓日计数器', Period_condition, {
+                'period': period,  # 调仓频率,日
             }],
         [True, '', '指数选择器', Index_selection, {
                 'index_1': '399006.XSHE', # 创业板指
@@ -82,7 +84,7 @@ def select_strategy(context):
                 'index_4': '000016.XSHG', # 上证 50
                 'index_growth_rate': 0.01
             }],
-        [False, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
+        [True, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
             'check_days': 1,
             'back_percent': 2,
             }],
@@ -149,7 +151,7 @@ def select_strategy(context):
         [False, '_shipane_moni_', '实盘易-对比持仓下单', Shipane_sync_p, {}],
 
         # 通过实盘易自动申购新股
-        [True,'_Purchase_new_stocks_','实盘易申购新股',Purchase_new_stocks,{'times': [[9, 40]]}],
+        [False,'_Purchase_new_stocks_','实盘易申购新股',Purchase_new_stocks,{'times': [[9, 40]]}],
 
         [True, '', '统计', Stat, {}]
     ]
@@ -658,16 +660,16 @@ class Index_selection(Adjust_condition):
         index_growth_dict[self.HS300] = get_growth_rate(self.HS300)
         index_growth_dict[self.SZ50] = get_growth_rate(self.SZ50)
 
-        index_growth_dict = sorted(index_growth_dict.items(), key=lambda d:d[1], reverse = True)
-        for (index, growth) in index_growth_dict:
+        index_growth_dict_sorted = sorted(index_growth_dict.items(), key=lambda d:d[1], reverse = True)
+        for (index, growth) in index_growth_dict_sorted:
             log.info("index: %s ===> growth: %f", index, growth)
             if growth > self.index_growth_rate:
                 count += 1
         log.info("%d index growth over 1.01", count)
 
         if count > 0:
-            g.index_selected = index_growth_dict.keys()[0]
-            g.index_selected_growth = index_growth_dict[index_selected]
+            g.index_selected = index_growth_dict_sorted[0][0]
+            g.index_selected_growth = index_growth_dict_sorted[0][1]
             log.info("index_selected: %s ===> growth: %f", index_selected, index_selected_growth)
 
             self.clear_position(context)
@@ -797,10 +799,14 @@ class Pick_small_cap(Filter_query):
 
 '''------------------指数选股器-----------------'''
 class Pick_stock_by_index(Filter_query):
-    def filter(self, context, data, dst_stocks):
-        stock_list = get_index_stocks(g.index_selected)
+    def filter(self, context, data, q):
+        if g.index_selected != '':
+            self.log_info("selected index: %s" % g.index_selected)
+            stock_list = get_index_stocks(g.index_selected)
 
-        return query(valuation.code).filter(valuation.code.in_(stock_list))
+            return query(valuation.code).filter(valuation.code.in_(stock_list))
+        else:
+            self.log_info("no selected index")
 
 
     def __str__(self):
@@ -1005,7 +1011,7 @@ class Filter_3or5_mean_up(Filter_query):
         self.day_count2 = params.get('day_count2', self.day_count2)
 
     def filter(self, context, data, stock_list):
-        return [stock for stock in stock_list if (get_growth_rate(stock, self.day_count1) > 0) or (get_growth_rate(stock, self.day_count2) > 0 ]
+        return [stock for stock in stock_list if (get_growth_rate(stock, self.day_count1) > 0) or (get_growth_rate(stock, self.day_count2) > 0) ]
 
     def __str__(self):
         return '三天或五天均线向上选股器'
