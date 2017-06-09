@@ -84,7 +84,7 @@ def select_strategy(context):
                 'index_4': '000016.XSHG', # 上证 50
                 'index_growth_rate': 0.01
             }],
-        [True, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
+        [False, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
             'check_days': 1,
             'back_percent': 2,
             }],
@@ -458,10 +458,16 @@ def clear_position(sender, context):
 
 
 def order_target_value_(sender, security, value):
+    df = get_fundamentals(query(
+        valuation, income
+    ).filter(
+        valuation.code == security
+    ))
+
     if value == 0:
-        sender.log_debug("Selling out %s" % (security))
+        sender.log_info("Selling out %s" % (security))
     else:
-        sender.log_debug("Order %s to value %f" % (security, value))
+        sender.log_info("Order %s to value %f, Total market_cap: %f " % (security, value, df['market_cap']))
 
     # 如果股票停牌，创建报单会失败，order_target_value 返回None
     # 如果股票涨跌停，创建报单会成功，order_target_value 返回Order，但是报单会取消
