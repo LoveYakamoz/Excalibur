@@ -184,22 +184,22 @@ def initialize(context):
     g.is_sim_trade = context.run_params.type == 'sim_trade'
 
     select_strategy(context)
-    '''-----1.持仓股票的处理规则:-----'''
+    '''-----1.持仓股票的处理规则-----'''
     g.position_stock_rules = create_rules(g.position_stock_config)
 
-    '''-----2.调仓条件判断规则:-----'''
+    '''-----2.调仓条件判断规则-----'''
     g.adjust_condition_rules = create_rules(g.adjust_condition_config)
 
-    '''-----3.Query选股规则:-----'''
+    '''-----3.Query选股规则-----'''
     g.pick_stock_by_query_rules = create_rules(g.pick_stock_by_query_config)
 
-    '''-----4.股票池过滤规则:-----'''
+    '''-----4.股票池过滤规则-----'''
     g.filter_stock_list_rules = create_rules(g.filter_stock_list_config)
 
     '''-----5.调仓规则器-----'''
     g.adjust_position_rules = create_rules(g.adjust_position_config)
 
-    '''-----6.其它规则:-------'''
+    '''-----6.其它规则-------'''
     g.other_rules = create_rules(g.other_config)
 
     # 把所有规则合并排重生成一个总的规则收录器。以方便各处共同调用的
