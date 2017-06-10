@@ -81,7 +81,7 @@ def select_strategy(context):
                 'index_4': '000016.XSHG', # 上证 50
                 'index_growth_rate': 0.01
             }],
-        [False, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
+        [True, '', '当天净值管理风控', Stop_loss_by_currentday_net_worth, {
             'check_days': 1,
             'back_percent': 2,
             }],
@@ -111,7 +111,7 @@ def select_strategy(context):
 
     # 配置 4.股票池过滤规则
     g.filter_stock_list_config = [
-        [True, '_filter_gem_', '过滤创业板', Filter_gem, {}],
+        [False, '_filter_gem_', '过滤创业板', Filter_gem, {}],
         [True, '', '过滤ST', Filter_st, {}],
         [True, '', '过滤停牌', Filter_paused_stock, {}],
         [True, '', '过滤涨停', Filter_limitup, {}],
@@ -265,8 +265,11 @@ def handle_data(context, data):
 
     # 过滤股票列表
     stock_list = list(get_fundamentals(q)['code']) if q is not None else []
+    log.info("before filter: ", stock_list)
     for rule in g.filter_stock_list_rules:
         stock_list = rule.filter(context, data, stock_list)
+        log.info("after filter: ", rule)
+        log.info("stock list: ", stock_list)
 
     log.info("handle_data: 选股后可买股票: %s" % (stock_list))
 
@@ -686,6 +689,7 @@ class Index_selection(Adjust_condition):
             self.t_can_adjust = True
         else:
             log.info("all indexes go down, so not selected any one")
+            self.clear_position(context)
             self.t_can_adjust = False
 
     def __str__(self):
@@ -803,8 +807,8 @@ class Pick_stock_by_index(Filter_query):
         if g.index_selected != '':
             self.log_info("selected index: %s" % g.index_selected)
             stock_list = get_index_stocks(g.index_selected)
-
-            return query(valuation.code).filter(valuation.code.in_(stock_list))
+            self.log_info(stock_list)
+            return query(valuation).filter(valuation.code.in_(stock_list)).order_by(valuation.market_cap.asc())
         else:
             self.log_info("no selected index")
 
@@ -1490,7 +1494,7 @@ class  Stat_portfolio(Adjust_condition):
 
     def handle_data(self, context, data):
         if context.portfolio.total_value > g.currentday_max_portfolio:
-			g.currentday_max_portfolio = context.portfolio.total_value
+            g.currentday_max_portfolio = context.portfolio.total_value
 
     def after_trading_end(self, context):
         g.max_portfolio_everyday.append(g.currentday_max_portfolio)
@@ -1525,21 +1529,21 @@ class Stop_loss_by_currentday_net_worth(Adjust_condition):
         pass
 
     def handle_data(self, context, data):
-		if context.portfolio.total_value <= (1.0 - int(self.back_percent) / 100.0) * g.currentday_max_portfolio:
-			log.warn('currentday_max_portfolio: %f, current_portfolio: %f', g.currentday_max_portfolio, context.portfolio.total_value)
-			g.not_open_days = 2
-			self.t_can_adjust = False
-			self.clear_position(context)
+        if context.portfolio.total_value <= (1.0 - int(self.back_percent) / 100.0) * g.currentday_max_portfolio:
+            log.warn('currentday_max_portfolio: %f, current_portfolio: %f', g.currentday_max_portfolio, context.portfolio.total_value)
+            g.not_open_days = 2
+            self.t_can_adjust = False
+            self.clear_position(context)
 
     def before_trading_start(self, context):
-		pass
+        pass
 
     def after_trading_end(self, context):
-		if g.not_open_days >= 0:
-			g.not_open_days -= 1
-		else:
-		    self.t_can_adjust = True
-		log.info("after trade open day: %d", g.not_open_days)
+        if g.not_open_days >= 0:
+            g.not_open_days -= 1
+        else:
+            self.t_can_adjust = True
+        log.info("after trade open day: %d", g.not_open_days)
 
     def __str__(self):
         return '当天净值止损器: [回撤比例: %f]' % (self.back_percent)
@@ -1721,8 +1725,8 @@ class Stat(Rule):
                 total_profit / starting_cash * 100)
             s += '\n--------------------------------'
             self.log_info(s)
-            self.log_info('每日最大净值：')
-            self.log_info(g.max_portfolio_everyday)
+            #self.log_info('每日最大净值：')
+            #self.log_info(g.max_portfolio_everyday)
     # 统计单次盈利最高的股票
     def statis_most_win_percent(self):
         result = {}
@@ -2075,3 +2079,4 @@ def get_growth_rate(security, n=20):
 
 def get_close_price(security, n, unit='1d'):
     return attribute_history(security, n, unit, ('close'), True)['close'][0]
+
