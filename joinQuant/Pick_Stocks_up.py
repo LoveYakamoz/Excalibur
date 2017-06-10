@@ -5,7 +5,6 @@ from requests import Request
 from six.moves.urllib.parse import urlencode
 import datetime
 try:
-    # 实盘易操作SDK,新版SDK已解决聚宽序列化问题。
     import shipane_sdk
 except:
     pass
@@ -21,8 +20,6 @@ def select_strategy(context):
     5.调仓规则
     6.其它规则(如统计)
 
-    每个步骤的规则组合为一个二维数组
-    一维指定由什么规则组成，注意顺序，程序将会按顺序创建，按顺序执行。
     不同的规则组合可能存在一定的顺序关系。
     二维指定具体规则配置，由 [0.是否启用，1.描述，2.规则实现类名，3.规则传递参数(dict)]] 组成。
     注：所有规则类都必需继承自Rule类或Rule类的子类
@@ -144,10 +141,7 @@ def select_strategy(context):
     # 配置 6.其它规则
     g.other_config = [
         # 注意：Shipane_order 和 Shipane_sync_p 启用一个就行了。
-        # 请配置正确的实盘易IP，端口，Key,client
-
         [False, 'Shipane_order_moni', '实盘易跟order下单', Shipane_order, {}],
-
         [False, '_shipane_moni_', '实盘易-对比持仓下单', Shipane_sync_p, {}],
 
         # 通过实盘易自动申购新股
@@ -202,7 +196,7 @@ def initialize(context):
     '''-----4.股票池过滤规则:-----'''
     g.filter_stock_list_rules = create_rules(g.filter_stock_list_config)
 
-    '''-----5.调仓规则:器-----'''
+    '''-----5.调仓规则器-----'''
     g.adjust_position_rules = create_rules(g.adjust_position_config)
 
     '''-----6.其它规则:-------'''
