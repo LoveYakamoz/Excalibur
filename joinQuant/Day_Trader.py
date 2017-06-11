@@ -223,7 +223,7 @@ def initialize(context):
 def handle_data(context, data):
     if g.not_open_days >= 0:
         return
-
+    g.clear_by_index = False
     # 执行其它辅助规则
     for rule in g.other_rules:
         rule.handle_data(context, data)
@@ -641,6 +641,7 @@ class Index_selection(Adjust_condition):
         self.SZ50 = params.get('index_4', '000016.XSHG')
         self.index_growth_rate = params.get('index_growth_rate', 0.01)
         self.t_can_adjust = True
+        g.clear_by_index = False
 
     def update_params(self, context, params):
         self.CYBZ = params.get('index_1', '399006.XSHE')
@@ -649,6 +650,7 @@ class Index_selection(Adjust_condition):
         self.SZ50 = params.get('index_4', '000016.XSHG')
         self.index_growth_rate = params.get('index_growth_rate', 0.01)
         self.t_can_adjust = True
+        g.clear_by_index = False
     @property
     def can_adjust(self):
         return self.t_can_adjust
@@ -669,7 +671,7 @@ class Index_selection(Adjust_condition):
             if growth > self.index_growth_rate:
                 count += 1
         log.info("%d index growth over 1.01", count)
-
+        g.clear_by_index = True
         if count > 0:
             g.index_selected = index_growth_dict_sorted[0][0]
             g.index_selected_growth = index_growth_dict_sorted[0][1]
@@ -691,7 +693,7 @@ class Index_selection(Adjust_condition):
             log.info("all indexes go down, so not selected any one")
             self.clear_position(context)
             self.t_can_adjust = False
-
+        g.clear_by_index = False
     def __str__(self):
         return '指数选择器, 仓位控制器'
 
@@ -725,14 +727,17 @@ class Period_condition(Adjust_condition):
         pass
 
     def when_sell_stock(self, position, order, is_normal):
-        if not is_normal:
+        if not is_normal and g.clear_by_index != True:
             # 个股止损止盈时，即非正常卖股时，重置计数，原策略是这么写的
+            self.log_info("sell stock day count: %d ---> 0" % self.day_count)
             self.day_count = 0
         pass
     # 清仓时调用的函数
 
     def when_clear_position(self, context):
-        self.day_count = 0
+        if g.clear_by_index != True:
+            self.log_info("clear position day count: %d ---> 0" % self.day_count)
+            self.day_count = 0
         pass
 
     def __str__(self):
