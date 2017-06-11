@@ -921,6 +921,6 @@ if sys.stdout.encoding == 'cp936':
     sys.stdout = UnicodeStreamFilter(sys.stdout)
 
 if __name__ == '__main__':
-    logger.info("Version: %s" % "4.0 2017-06-11 BugFix: Add 10 seconds sleep before request for Python socket.error: [Errno 10054]")
+    logger.info("Version: %s" % "4.0 2017-06-11 BugFix: Add 3 seconds sleep before request for Python socket.error: [Errno 10054]")
     webwx = WebWeixin()
     webwx.start()
