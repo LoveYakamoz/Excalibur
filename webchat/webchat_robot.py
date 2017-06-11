@@ -845,6 +845,8 @@ class WebWeixin(object):
             response = urllib.request.urlopen(request)
             data = response.read().decode('utf-8')
             logger.debug(url)
+            response.close()
+            time.sleep(3)  # 这里时间自己设定, 10 seconds
             return data
         except urllib.error.HTTPError as e:
             logger.error('HTTPError = ' + str(e.code))
@@ -870,6 +872,7 @@ class WebWeixin(object):
         try:
             response = urllib.request.urlopen(request)
             data = response.read()
+            response.close()
             if jsonfmt:
                 return json.loads(data.decode('utf-8'))
             return data
@@ -918,6 +921,6 @@ if sys.stdout.encoding == 'cp936':
     sys.stdout = UnicodeStreamFilter(sys.stdout)
 
 if __name__ == '__main__':
-    logger.info("Version: %s" % "3.0 2017-05-22 BugFix: Listen all group")
+    logger.info("Version: %s" % "4.0 2017-06-11 BugFix: Add 10 seconds sleep before request for Python socket.error: [Errno 10054]")
     webwx = WebWeixin()
     webwx.start()
