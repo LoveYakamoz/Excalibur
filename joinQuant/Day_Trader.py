@@ -116,7 +116,9 @@ def select_strategy(context):
         [True, '', '过滤停牌', Filter_paused_stock, {}],
         [True, '', '过滤涨停', Filter_limitup, {}],
         [True, '', '过滤跌停', Filter_limitdown, {}],
-        [True, '', '三日或五日均线向上', Filter_3or5_mean_up, {
+        [True, '', '过滤次新', Filter_new_stock, {
+            'day_count': 130}],
+        [False, '', '三日或五日均线向上', Filter_3or5_mean_up, {
             'day_count1': 3,
             'day_count2': 5}],
         [True, '', '股票评分', Filter_rank, {
@@ -809,9 +811,15 @@ class Pick_small_cap(Filter_query):
 '''------------------指数选股器-----------------'''
 class Pick_stock_by_index(Filter_query):
     def filter(self, context, data, q):
+        stock_list = []
         if g.index_selected != '':
             self.log_info("selected index: %s" % g.index_selected)
-            stock_list = get_index_stocks(g.index_selected)
+            if g.index_selected == '399300.XSHE':
+                stock_list.append('510310.XSHG')
+            elif g.index_selected == '000016.XSHG':
+                stock_list.append('510050.XSHG')
+            else:
+                stock_list = get_index_stocks(g.index_selected)
             self.log_info(stock_list)
             return query(valuation).filter(valuation.code.in_(stock_list)).order_by(valuation.market_cap.asc())
         else:
