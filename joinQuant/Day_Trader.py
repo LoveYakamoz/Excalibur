@@ -266,12 +266,18 @@ def handle_data(context, data):
         q = rule.filter(context, data, q)
 
     # 过滤股票列表
-    stock_list = list(get_fundamentals(q)['code']) if q is not None else []
+    stock_list = []
+    if g.index_selected == '399300.XSHE':
+        stock_list.append('510310.XSHG')
+    elif g.index_selected == '000016.XSHG':
+        stock_list.append('510050.XSHG')
+    else:
+        stock_list = list(get_fundamentals(q)['code']) if q is not None else []
     log.info("before filter: ", stock_list)
     for rule in g.filter_stock_list_rules:
         stock_list = rule.filter(context, data, stock_list)
         log.info("after filter: ", rule)
-        log.info("stock list: ", stock_list)
+        #log.info("stock list: ", stock_list)
 
     log.info("handle_data: 选股后可买股票: %s" % (stock_list))
 
@@ -464,9 +470,11 @@ def order_target_value_(sender, security, value):
     ))
 
     if value == 0:
-        sender.log_info("Selling out %s" % (security))
+        #sender.log_info("Selling out %s" % (security))
+        pass
     else:
-        sender.log_info("Order %s to value %f, Total market_cap: %f " % (security, value, df['market_cap']))
+        #sender.log_info("Order %s to value %f, Total market_cap: %f " % (security, value, df['market_cap']))
+        pass
 
     # 如果股票停牌，创建报单会失败，order_target_value 返回None
     # 如果股票涨跌停，创建报单会成功，order_target_value 返回Order，但是报单会取消
@@ -815,12 +823,12 @@ class Pick_stock_by_index(Filter_query):
         if g.index_selected != '':
             self.log_info("selected index: %s" % g.index_selected)
             if g.index_selected == '399300.XSHE':
-                stock_list.append('510310.XSHG')
+                pass
             elif g.index_selected == '000016.XSHG':
-                stock_list.append('510050.XSHG')
+                pass
             else:
                 stock_list = get_index_stocks(g.index_selected)
-            self.log_info(stock_list)
+            #self.log_info(stock_list)
             return query(valuation).filter(valuation.code.in_(stock_list)).order_by(valuation.market_cap.asc())
         else:
             self.log_info("no selected index")
@@ -1171,7 +1179,14 @@ class Buy_stocks(Adjust_position):
         # 根据股票数量分仓
         # 此处只根据可用金额平均分配购买，不能保证每个仓位平均分配
         position_count = len(context.portfolio.positions)
-        if self.buy_count > position_count:
+        if g.index_selected == '399300.XSHE' or g.index_selected == '000016.XSHG':
+            value = context.portfolio.cash * g.position_scale
+            for stock in buy_stocks:
+                if context.portfolio.positions[stock].total_amount == 0:
+                    if self.open_position(stock, value):
+                        if len(context.portfolio.positions) == self.buy_count:
+                            break
+        elif self.buy_count > position_count:
             value = context.portfolio.cash * g.position_scale / (self.buy_count - position_count)
             for stock in buy_stocks:
                 if context.portfolio.positions[stock].total_amount == 0:

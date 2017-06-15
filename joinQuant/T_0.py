@@ -4,9 +4,15 @@ import talib
 
 
 def initialize(context):
-    
-    # 获得沪深300的股票列表, 5天波动率大于2%，单价大于10.00元, 每标的买入100万元
+    log.info("---> initialize @ %s" % (str(context.current_dt))) 
 
+    # 获得沪深300的股票列表, 5天波动率大于2%，单价大于10.00元, 每标的买入100万元
+    stock_list = get_index_stocks('399300.XSHE')
+    for stock in stock_list:
+
+    # 设置基准
+    set_benchmar('000300.XSHG')
+    set_option('use_real_price', True)
     pass
 
 def process_initialize(context):
