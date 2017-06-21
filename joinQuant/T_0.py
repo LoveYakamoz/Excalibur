@@ -36,60 +36,23 @@ def initialize(context):
     if g.count < g.position_count:
         g.position_count = g.count
         
-    # 0. 获取VAR1:=LLV(LOW,89); # 89日的最小值
-    # 1. 获取VAR2:=HHV(HIGH,233); # 233日的最大值
-    for i in range(g.position_count):
-        low_df = get_price(g.basestock_df.ix[i, 0], count = 89, end_date=str(context.current_dt), frequency='daily', fields=['low'])
-        g.basestock_df.iat[i, 4] = low_df.sort(['low'], ascending = True).iat[0,0]
-        
-        high_df = get_price(g.basestock_df.ix[i, 0], count = 233, end_date=str(context.current_dt), frequency='daily', fields=['high'])
-        g.basestock_df.iat[i, 5] = high_df.sort(['high'], ascending = False).iat[0,0]
-        
-        #print "stock: %s, lowest_89: %f, highest_233: %f" % (g.basestock_df.ix[i, 0], g.basestock_df.iat[i, 4], g.basestock_df.iat[i, 5])
-        
-    for i in range(g.position_count):
-        stock = g.basestock_df.ix[i, 0]
-        lowest_89 = g.basestock_df.iat[i, 4]
-        highest_233 = g.basestock_df.iat[i, 5]
-        close_m = get_price(stock, count = 4, end_date=str(context.current_dt), frequency='1m', fields=['close'])
-        close =  np.array([close_m.iat[0,0], close_m.iat[1,0], close_m.iat[2,0], close_m.iat[3,0]]).astype(float)
-        
-        for j in range(4):
-            close[j] = (close[j] - lowest_89)/(highest_233 - lowest_89)
-        operator_line =  ta.MA(close, 4)
-        g.basestock_df.iat[i, 6] = operator_line[3]
-        
-    print g.basestock_df, g.count 
+    log.info(g.basestock_df, g.count)
     
 
     # 设置基准
     set_benchmark('000300.XSHG')
     set_option('use_real_price', True)
-    pass
+
 
 def process_initialize(context):
     pass
 
 
 def before_trading_start(context):
-    # 0. 更新89日的最小值
-    # 1. 更新233日的最大值
-    log.info("***************************************************************************")
-    log.info("before_trading_start: update lowest_89 and highest_233")
-    for i in range(g.position_count):
-        low_df = get_price(g.basestock_df.ix[i, 0], count = 1, end_date=str(context.current_dt), frequency='daily', fields=['low'])
-        if g.basestock_df.iat[i, 4] > low_df.iat[0,0]:
-            log.info("update: lowest_89, stock: %s from %f to %f", g.basestock_df.ix[i, 0], g.basestock_df.iat[i, 4], low_df.iat[0,0])
-            g.basestock_df.iat[i, 4] = low_df.iat[0,0]
-        
-        high_df = get_price(g.basestock_df.ix[i, 0], count = 1, end_date=str(context.current_dt), frequency='daily', fields=['high'])
-        if g.basestock_df.iat[i, 5] < high_df.iat[0,0]:
-            log.info("update: highest_233, stock: %s from %f to %f", g.basestock_df.ix[i, 0], g.basestock_df.iat[i, 5], high_df.iat[0,0])
-            g.basestock_df.iat[i, 5] = high_df.iat[0,0]
+    pass
         
 def buy_stock(context, stock, amount, limit_price):
     buy_order = order(stock, amount, LimitOrderStyle(limit_price))
-    #log.info("status: %d", buy_order.status)
     log.info("buy_order: ", buy_order)
     
 def sell_stock(context, stock, amount, limit_price):
@@ -131,7 +94,38 @@ def buy_sell(context, stock, close_price):
     yesterday = get_price(stock, count = 1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
     limit_price = close_price - yesterday.iat[0, 0] * 0.06
     sell_stock(context, stock, amount, limit_price)
+
+def get_minute_count(context):
+    '''
+     9:30 -- 11:30
+     13:00 --- 15:00
+     '''
+    current_hour = context.current_dt.hour
+    current_min  = context.current_dt.minute
     
+    if current_hour < 12:
+        minute_count = (current_hour - 9) * 60 + current_min - 29
+    else:
+        minute_count = (current_hour - 11) * 60 + current_min + 120
+
+    return minute_count
+    
+def update_89_lowest(context):
+    minute_count = get_minute_count(context)
+    if minute_count > 89:
+        minute_count = 89
+    for i in range(g.position_count):
+        low_df = get_price(g.basestock_df.ix[i, 0], count = minute_count, end_date=str(context.current_dt), frequency='1m', fields=['close'])
+        g.basestock_df.iat[i, 4] = low_df.sort(['close'], ascending = True).iat[0,0]
+        
+def update_233_highest(context):
+    minute_count = get_minute_count(context) 
+    if minute_count > 233:
+        minute_count = 233
+    for i in range(g.position_count):
+        high_df = get_price(g.basestock_df.ix[i, 0], count = minute_count, end_date=str(context.current_dt), frequency='1m', fields=['close'])
+        g.basestock_df.iat[i, 5] = high_df.sort(['close'], ascending = False).iat[0,0]
+
 def handle_data(context, data):
     # 0. 购买30支股票
     if str(context.run_params.start_date) ==  str(context.current_dt.strftime("%Y-%m-%d")):
@@ -142,36 +136,43 @@ def handle_data(context, data):
                 log.info(myorder)
             g.firstrun = False
         return
+    
     hour = context.current_dt.hour
     minute = context.current_dt.minute
-    
-        #强制买回
+
+    update_89_lowest(context)
+    update_233_highest(context)
+    # TODO: 在14：45前不再有新的原子操作
     
     if hour >= 14:
         # 不再产生新的交易
+        return
+    
+    if get_minute_count(context) < 4:
         return
     # 1. 循环股票列表，看当前价格是否有买入或卖出信号
     for i in range(g.position_count):
         stock = g.basestock_df.ix[i, 0]
         lowest_89 = g.basestock_df.iat[i, 4]
         highest_233 = g.basestock_df.iat[i, 5]
-        
         close_m = get_price(stock, count = 4, end_date=str(context.current_dt), frequency='1m', fields=['close'])
         
         close =  np.array([close_m.iat[0,0], close_m.iat[1,0], close_m.iat[2,0], close_m.iat[3,0]]).astype(float)
         for j in range(4):
-            close[j] = (close[j] - lowest_89)/(highest_233 - lowest_89)
+            close[j] = ((close[j] - lowest_89) * 1.0 / (highest_233 - lowest_89)) * 4
         operator_line =  ta.MA(close, 4)
         
         if g.basestock_df.iat[i, 6] < 0.1 and operator_line[3] > 0.1 and g.basestock_df.iat[i, 6] != 0.0:
-            log.info("WARNNIG: Time: %s, BUY SIGNAL for %s, from %f to %f, close_price: %f", str(context.current_dt), stock, g.basestock_df.iat[i, 6], operator_line[3], close_m.iat[3,0])
+            log.info("WARNNIG: Time: %s, BUY SIGNAL for %s, from %f to %f, close_price: %f", 
+                    str(context.current_dt), stock, g.basestock_df.iat[i, 6], operator_line[3], close_m.iat[3,0])
             buy_sell(context, stock, close_m.iat[3,0])
         elif g.basestock_df.iat[i, 6] > 3.9 and operator_line[3] < 3.9:
-            log.info("WARNNING: Time: %s, SELL SIGNAL for %s, from %f to %f, close_price: %f", str(context.current_dt), stock, g.basestock_df.iat[i, 6], operator_line[3], close_m.iat[3,0])
+            log.info("WARNNING: Time: %s, SELL SIGNAL for %s, from %f to %f, close_price: %f", 
+                    str(context.current_dt), stock, g.basestock_df.iat[i, 6], operator_line[3], close_m.iat[3,0])
             sell_buy(context, stock, close_m.iat[3,0])
         g.basestock_df.iat[i, 6] = operator_line[3]
         
-            
+      
 def after_trading_data(context):
     
     pass
