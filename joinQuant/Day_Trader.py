@@ -116,8 +116,7 @@ def select_strategy(context):
         [True, '', '过滤停牌', Filter_paused_stock, {}],
         [True, '', '过滤涨停', Filter_limitup, {}],
         [True, '', '过滤跌停', Filter_limitdown, {}],
-        [True, '', '过滤次新', Filter_new_stock, {
-            'day_count': 130}],
+        [True, '', '过滤次新', Filter_new_stock, {'day_count': 130}],
         [False, '', '三日或五日均线向上', Filter_3or5_mean_up, {
             'day_count1': 3,
             'day_count2': 5}],
@@ -165,13 +164,9 @@ def create_rule(class_type, name, params, memo):
     return obj
 
 # 根据规则配置创建规则执行器
-
-
 def create_rules(config):
     # config里 0.是否启用，1.描述，2.规则实现类名，3.规则传递参数(dict)]
-    return [create_rule(c[g.cs_class_name], c[g.cs_name], c[g.cs_param], c[
-                        g.cs_memo]) for c in config if c[g.cs_enabled]]
-
+    return [create_rule(c[g.cs_class_name],c[g.cs_name],c[g.cs_param],c[g.cs_memo]) for c in config if c[g.cs_enabled]]
 
 def initialize(context):
     log.info("==> initialize @ %s" % (str(context.current_dt)))
