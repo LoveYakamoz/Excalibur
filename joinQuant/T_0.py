@@ -165,7 +165,7 @@ def reset_position(context):
         src_position = g.basestock_df.ix[i, 8]
         cur_position = context.portfolio.positions[stock].total_amount
         if src_position != cur_position:
-            _order = order_value(stock, src_position - cur_position)
+            _order = order(stock, src_position - cur_position)
             log.warn("reset posiont: ", _order)
         
         
