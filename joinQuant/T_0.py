@@ -9,7 +9,7 @@ class Status(Enum):
     BOUGHT_SELLING  = 2  # 买入挂单已经成交，卖出挂单还未成交
     BOUGHT_SOLD     = 3  # 买入挂单已经成交，卖出挂单已经成交
     BUYING_SOLD     = 4  # 买入挂单还未成交，卖出挂单已经成交
-
+    NONE            = 5  # 不再做任何交易
     
     
 def initialize(context):
@@ -20,6 +20,7 @@ def initialize(context):
     g.first_value = 1000000
     g.total_value = 100000000
     g.position_count = 30
+    g.expected_revenue = 0.003
     # 获得沪深300的股票列表, 5天波动率大于2%，单价大于10.00元, 每标的买入100万元
     stock_list = get_index_stocks('399300.XSHE')
     for stock in stock_list:
@@ -92,7 +93,7 @@ def sell_buy(context, stock, close_price, index):
     
     yesterday = get_price(stock, count = 1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
 
-    limit_price = close_price - yesterday.iat[0, 0] * 0.006
+    limit_price = close_price - yesterday.iat[0, 0] * g.expected_revenue
     buy_ret = buy_stock(context, stock, amount, limit_price, index)
     
     g.basestock_df.iat[index, 7] = Status.BUYING_SELLING
@@ -116,7 +117,7 @@ def buy_sell(context, stock, close_price, index):
     
 
     yesterday = get_price(stock, count = 1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
-    limit_price = close_price - yesterday.iat[0, 0] * 0.006
+    limit_price = close_price - yesterday.iat[0, 0] * g.expected_revenue
     sell_stock(context, stock, amount, limit_price, index)
     g.basestock_df.iat[index, 7] = Status.BUYING_SELLING
     
@@ -174,17 +175,25 @@ def update_socket_statue(context):
     orders = get_orders()
     if len(orders) == 0:
         return
-
+    hour = context.current_dt.hour
+    minute = context.current_dt.minute
     for i in range(g.position_count):
         stock = g.basestock_df.ix[i, 0]
         sell_order_id = g.basestock_df.ix[i, 9]
         buy_order_id = g.basestock_df.ix[i, 10]
         status = g.basestock_df.ix[i, 7]
-        if status != Status.INIT and sell_order_id != -1 and buy_order_id != -1:
-            if orders.get(sell_order_id).status == OrderStatus.held and orders.get(buy_order_id).status == OrderStatus.held:
-                g.basestock_df.ix[i, 9] = -1
-                g.basestock_df.ix[i, 10] = -1
-                g.basestock_df.ix[i, 7] = Status.INIT
+        if (status != Status.INIT) and (Status != Status.NONE) and (sell_order_id != -1) and (buy_order_id != -1):
+            sell_order =  orders.get(sell_order_id)
+            buy_order = orders.get(buy_order_id)
+            if (sell_order is not None) and (buy_order is not None):
+                if sell_order.status == OrderStatus.held and buy_order.status == OrderStatus.held:
+                    g.basestock_df.ix[i, 9] = -1
+                    g.basestock_df.ix[i, 10] = -1
+                    g.basestock_df.ix[i, 7] = Status.INIT
+        
+        if hour == 14 and g.basestock_df.ix[i, 7] == Status.INIT:
+            g.basestock_df.ix[i, 7] = Status.NONE
+            
             
 def handle_data(context, data):
     # 0. 购买30支股票
@@ -206,7 +215,7 @@ def handle_data(context, data):
         cancel_open_order(context)
         reset_position(context)
         return
-    elif hour == 14 and minute >= 0:
+    if hour == 14 and minute > 45:
         return
     update_89_lowest(context)
     update_233_highest(context)
