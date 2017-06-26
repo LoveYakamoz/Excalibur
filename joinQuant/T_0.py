@@ -44,7 +44,7 @@ def initialize(context):
     if g.count < g.position_count:
         g.position_count = g.count
         
-    log.info(g.basestock_df, g.count)
+    
     
 
     # 设置基准
@@ -65,14 +65,14 @@ def buy_stock(context, stock, amount, limit_price, index):
     buy_order = order(stock, amount, LimitOrderStyle(limit_price))
     
     if buy_order is not None:
-        log.info("buy_order: ", buy_order)
+        #log.info("buy_order: ", buy_order)
         g.basestock_df.iat[index, 10] = buy_order.order_id;
     
 def sell_stock(context, stock, amount, limit_price, index):
     sell_order = order(stock, -amount, LimitOrderStyle(limit_price))
     
     if sell_order is not None:
-        log.info("sell_order: ", sell_order)
+        #log.info("sell_order: ", sell_order)
         g.basestock_df.iat[index, 9] = sell_order.order_id;
     
 def sell_buy(context, stock, close_price, index):
@@ -165,6 +165,7 @@ def reset_position(context):
         src_position = g.basestock_df.ix[i, 8]
         cur_position = context.portfolio.positions[stock].total_amount
         if src_position != cur_position:
+            log.info("src_position : cur_position", src_position, cur_position)
             _order = order(stock, src_position - cur_position)
             log.warn("reset posiont: ", _order)
         
@@ -190,16 +191,23 @@ def handle_data(context, data):
     if str(context.run_params.start_date) ==  str(context.current_dt.strftime("%Y-%m-%d")):
         if g.firstrun is True:
             for i in range(g.position_count):
-                log.info("Buy[%d]---> stock: %s, value: %d", i + 1, g.basestock_df.ix[i, 0], g.first_value)
+                #log.info("Buy[%d]---> stock: %s, value: %d", i + 1, g.basestock_df.ix[i, 0], g.first_value)
                 myorder = order_value(g.basestock_df.ix[i, 0], 1000000)
                 g.basestock_df.ix[i, 8] = myorder.amount
-                log.info(myorder)
+                #log.info(myorder)
             g.firstrun = False
+            log.info("\n", g.basestock_df, g.count)
         return
     
     hour = context.current_dt.hour
     minute = context.current_dt.minute
-
+    
+    if hour == 14 and minute == 45:
+        cancel_open_order(context)
+        reset_position(context)
+        return
+    elif hour == 14 and minute >= 0:
+        return
     update_89_lowest(context)
     update_233_highest(context)
     
@@ -207,10 +215,7 @@ def handle_data(context, data):
     update_socket_statue(context)
     
     
-    if hour == 14 and minute == 45:
-        cancel_open_order(context)
-        reset_position(context)
-        return
+    
     
     if get_minute_count(context) < 4:
         return
