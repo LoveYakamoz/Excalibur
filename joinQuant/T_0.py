@@ -116,7 +116,7 @@ def buy_sell(context, stock, close_price, index):
     
 
     yesterday = get_price(stock, count = 1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
-    limit_price = close_price - yesterday.iat[0, 0] * 0.06
+    limit_price = close_price - yesterday.iat[0, 0] * 0.006
     sell_stock(context, stock, amount, limit_price, index)
     g.basestock_df.iat[index, 7] = Status.BUYING_SELLING
     
