@@ -359,7 +359,7 @@ def after_code_changed(context):
                     c[g.cs_class_name],
                     c[g.cs_name],
                     c[g.cs_param],
-                    c[g.cs_mome])
+                    c[g.cs_memo])
                 nl.append(new_r)
                 # 调用初始化时该执行的函数
                 rule.initialize(context)
