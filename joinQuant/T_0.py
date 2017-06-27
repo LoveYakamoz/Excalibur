@@ -14,13 +14,19 @@ class Status(Enum):
     
 def initialize(context):
     log.info("---> initialize @ %s" % (str(context.current_dt))) 
+	
+	# 记录股票详细信息
     g.basestock_df = pd.DataFrame(columns=("stock", "close", "min_vol", "max_vol", "lowest", "highest", "operator", "status", "position", "sell_order_id", "buy_order_id"))
-    g.count = 0
+    
+	# 第一天运行时，需要选股入池，并且当天不可进行股票交易
     g.firstrun = True
-    g.first_value = 1000000
-    g.total_value = 100000000
+	
+	# 默认股票池容量
     g.position_count = 30
-    g.expected_revenue = 0.003
+	
+	# 记录进入股票池中的股票数量
+    select_count = 0
+    g.expected_revenue = 0.003  # 期望收益率
     # 获得沪深300的股票列表, 5天波动率大于2%，单价大于10.00元, 每标的买入100万元
     stock_list = get_index_stocks('399300.XSHE')
     for stock in stock_list:
@@ -35,93 +41,95 @@ def initialize(context):
             max_vol = vol_df.iat[4, 0]
             #选择最近5天的波动率最小值大于0.02
             if min_vol > 0.02:
-                g.basestock_df.loc[g.count] = [stock, df.ix[5, 'close'], min_vol, max_vol, 0, 0, 0, Status.INIT, 0, -1, -1]
-                g.count += 1
+                g.basestock_df.loc[select_count] = [stock, df.ix[5, 'close'], min_vol, max_vol, 0, 0, 0, Status.INIT, 0, -1, -1]
+                select_count += 1
             else:
                 pass
         else:
             pass
-    
-    if g.count < g.position_count:
-        g.position_count = g.count
+    	
+    if select_count < g.position_count:
+        g.position_count = select_count
         
-    
-    
-
     # 设置基准
     set_benchmark('000300.XSHG')
     set_option('use_real_price', True)
 
-
-def process_initialize(context):
-    pass
-
-
+# 在每天交易开始时，将状态置为可交易状态
 def before_trading_start(context):
     log.info("初始化买卖状态为INIT")
     for i in range(g.position_count):
         g.basestock_df.iat[i, 7] = Status.INIT
     
+# 购买股票，并记录订单号，便于查询订单状态	
 def buy_stock(context, stock, amount, limit_price, index):
     buy_order = order(stock, amount, LimitOrderStyle(limit_price))
     
     if buy_order is not None:
-        #log.info("buy_order: ", buy_order)
         g.basestock_df.iat[index, 10] = buy_order.order_id;
-    
+
+# 卖出股票，并记录订单号，便于查询订单状态		
 def sell_stock(context, stock, amount, limit_price, index):
     sell_order = order(stock, -amount, LimitOrderStyle(limit_price))
     
     if sell_order is not None:
-        #log.info("sell_order: ", sell_order)
         g.basestock_df.iat[index, 9] = sell_order.order_id;
     
+# 产生先卖后买信号
 def sell_buy(context, stock, close_price, index):
     if g.basestock_df.iat[index, 7] != Status.INIT:
         log.warn("NO Chance to SELL_BUY, current status: ", g.basestock_df.iat[index, 7])
         return
-    
+
+	# 每次交易量为持仓量的1/4    
     amount = 0.25 * context.portfolio.positions[stock].total_amount
     
     if amount % 100 != 0:
         amount_new = amount - (amount % 100)
         amount = amount_new
 
+	# 以收盘价 + 0.01 挂单卖出
     limit_price = close_price + 0.01
 
     sell_ret = sell_stock(context, stock, amount, limit_price, index)
     
+	# 以收盘价 - 价差 * expected_revenue 挂单买入
     yesterday = get_price(stock, count = 1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
-
     limit_price = close_price - yesterday.iat[0, 0] * g.expected_revenue
     buy_ret = buy_stock(context, stock, amount, limit_price, index)
     
+	#更新交易状态
     g.basestock_df.iat[index, 7] = Status.BUYING_SELLING
     
+# 产生先买后卖信号	
 def buy_sell(context, stock, close_price, index):
+	# 如果当前不是INIT状态，则表示已经处于一次交易中（未撮合完成），不能新开交易；或者是14点后，不允许再有新的交易
     if g.basestock_df.iat[index, 7] != Status.INIT:
         log.warn("NO Chance to BUY_SELL, current status: ", g.basestock_df.iat[index, 7])
         return
     
+	# 每次交易量为持仓量的1/4
     amount = 0.25 * context.portfolio.positions[stock].total_amount
     
+	
     if amount % 100 != 0:
         amount_new = amount - (amount % 100)
         #log.info("amount from %d to %d", amount, amount_new)
         amount = amount_new
     
-    current_data = get_current_data()
-
+	# 以收盘价 - 0.01 挂单买入
     limit_price = close_price - 0.01
     buy_stock(context, stock, amount, limit_price, index)
     
-
+	# 以收盘价 + 价差 * expected_revenue 挂单卖出
     yesterday = get_price(stock, count = 1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
-    limit_price = close_price - yesterday.iat[0, 0] * g.expected_revenue
+    limit_price = close_price + yesterday.iat[0, 0] * g.expected_revenue
     sell_stock(context, stock, amount, limit_price, index)
+	
+	#更新交易状态
     g.basestock_df.iat[index, 7] = Status.BUYING_SELLING
     
-    
+# 计算当前时间点，是开市以来第几分钟   
 def get_minute_count(context):
     '''
      9:30 -- 11:30
@@ -136,7 +144,8 @@ def get_minute_count(context):
         minute_count = (current_hour - 11) * 60 + current_min + 120
 
     return minute_count
-    
+  
+# 获取89分钟内的最低价，不足89分钟，则计算到当前时间点
 def update_89_lowest(context):
     minute_count = get_minute_count(context)
     if minute_count > 89:
@@ -145,6 +154,7 @@ def update_89_lowest(context):
         low_df = get_price(g.basestock_df.ix[i, 0], count = minute_count, end_date=str(context.current_dt), frequency='1m', fields=['close'])
         g.basestock_df.iat[i, 4] = low_df.sort(['close'], ascending = True).iat[0,0]
         
+# 获取233分钟内的最高价，不足233分钟，则计算到当前时间点		
 def update_233_highest(context):
     minute_count = get_minute_count(context)
     if minute_count > 233:
@@ -152,14 +162,15 @@ def update_233_highest(context):
     for i in range(g.position_count):
         high_df = get_price(g.basestock_df.ix[i, 0], count = minute_count, end_date=str(context.current_dt), frequency='1m', fields=['close'])
         g.basestock_df.iat[i, 5] = high_df.sort(['close'], ascending = False).iat[0,0]
-        
+
+# 取消所有未完成的订单（未撮合成的订单）        
 def cancel_open_order(context):
     orders = get_open_orders()
     for _order in orders.values():
         cancel_order(_order)
         log.warn("cancel order: ", _order)
     
-
+# 恢复所有股票到原有仓位
 def reset_position(context):
     for i in range(g.position_count):
         stock = g.basestock_df.ix[i, 0]
@@ -177,6 +188,7 @@ def update_socket_statue(context):
         return
     hour = context.current_dt.hour
     minute = context.current_dt.minute
+    
     for i in range(g.position_count):
         stock = g.basestock_df.ix[i, 0]
         sell_order_id = g.basestock_df.ix[i, 9]
@@ -185,89 +197,87 @@ def update_socket_statue(context):
         if (status != Status.INIT) and (Status != Status.NONE) and (sell_order_id != -1) and (buy_order_id != -1):
             sell_order =  orders.get(sell_order_id)
             buy_order = orders.get(buy_order_id)
+            
             if (sell_order is not None) and (buy_order is not None):
                 if sell_order.status == OrderStatus.held and buy_order.status == OrderStatus.held:
                     g.basestock_df.ix[i, 9] = -1
                     g.basestock_df.ix[i, 10] = -1
-                    g.basestock_df.ix[i, 7] = Status.INIT
+                    g.basestock_df.ix[i, 7] = Status.INIT  #一次完整交易（买/卖)结束，可以进行下一次交易
         
+        # 每天14点后， 不再进行新的买卖
         if hour == 14 and g.basestock_df.ix[i, 7] == Status.INIT:
             g.basestock_df.ix[i, 7] = Status.NONE
             
+        
             
 def handle_data(context, data):
-    # 0. 购买30支股票
-    if str(context.run_params.start_date) ==  str(context.current_dt.strftime("%Y-%m-%d")):
+    # 0. 平均购买价值1000000元的30个股票，并记录持仓数量
+    if str(context.run_params.start_date) == str(context.current_dt.strftime("%Y-%m-%d")):
         if g.firstrun is True:
-            for i in range(g.position_count):
-                #log.info("Buy[%d]---> stock: %s, value: %d", i + 1, g.basestock_df.ix[i, 0], g.first_value)
+            for i in range(g.position_count):                
                 myorder = order_value(g.basestock_df.ix[i, 0], 1000000)
                 g.basestock_df.ix[i, 8] = myorder.amount
-                #log.info(myorder)
+                
             g.firstrun = False
-            log.info("\n", g.basestock_df, g.count)
+            log.info("\n", g.basestock_df, g.position_count)
         return
     
     hour = context.current_dt.hour
     minute = context.current_dt.minute
     
+	# 每天14点45分钟 将未完成的订单强制恢复到原有持仓量
     if hour == 14 and minute == 45:
         cancel_open_order(context)
-        reset_position(context)
+        reset_position(context)     
+		
+	# 14点45分钟后， 不再有新的交易 
+    if hour == 14 and minute >= 45:
         return
-    if hour == 14 and minute > 45:
-        return
+    
+	# 更新89分钟内的最低收盘价，不足89分钟，则按到当前时间的最低收盘价
     update_89_lowest(context)
+	
+	# 更新233分钟内的最高收盘价，不足233分钟，则按到当前时间的最高收盘价
     update_233_highest(context)
     
-    # 根据订单状态来更新 buying -> bought or selling -> sold
+    # 根据订单状态来更新，如果交易均结束（买与卖均成交），则置为INIT状态，表示可以再进行交易
     update_socket_statue(context)
     
     
     
-    
+    # 因为要计算移动平均线，所以每天前4分钟，不做交易
     if get_minute_count(context) < 4:
         return
+		
+		
     # 1. 循环股票列表，看当前价格是否有买入或卖出信号
     for i in range(g.position_count):
-        stock = g.basestock_df.ix[i, 0]
+        stock = g.basestock_df.iat[i, 0]
         lowest_89 = g.basestock_df.iat[i, 4]
         highest_233 = g.basestock_df.iat[i, 5]
+		
+		# 如果在开市前几分钟，价格不变化，则求突破线时，会出现除数为0，如果遇到这种情况，表示不会有突破，所以直接过掉
         if lowest_89 == highest_233:
             continue
+		
+		#求取当前是否有突破
         close_m = get_price(stock, count = 4, end_date=str(context.current_dt), frequency='1m', fields=['close'])
-        
         close =  np.array([close_m.iat[0,0], close_m.iat[1,0], close_m.iat[2,0], close_m.iat[3,0]]).astype(float)
-        #log.info("handle MA: ", stock, close)
         for j in range(4):
             close[j] = ((close[j] - lowest_89) * 1.0 / (highest_233 - lowest_89)) * 4
         operator_line =  ta.MA(close, 4)
         
+		# 买入信号产生
         if g.basestock_df.iat[i, 6] < 0.1 and operator_line[3] > 0.1 and g.basestock_df.iat[i, 6] != 0.0:
             log.info("WARNNIG: Time: %s, BUY SIGNAL for %s, from %f to %f, close_price: %f", 
                     str(context.current_dt), stock, g.basestock_df.iat[i, 6], operator_line[3], close_m.iat[3,0])
             buy_sell(context, stock, close_m.iat[3,0], i)
+		# 卖出信息产生
         elif g.basestock_df.iat[i, 6] > 3.9 and operator_line[3] < 3.9:
             log.info("WARNNING: Time: %s, SELL SIGNAL for %s, from %f to %f, close_price: %f", 
                     str(context.current_dt), stock, g.basestock_df.iat[i, 6], operator_line[3], close_m.iat[3,0])
             sell_buy(context, stock, close_m.iat[3,0], i)
+			
+		# 记录当前操盘线值
         g.basestock_df.iat[i, 6] = operator_line[3]
         
-      
-def after_trading_end(context):
-    '''
-    log.info("~~~~~~~~~~~~~~~未成交订单~~~~~~~~~~~~~~~~~~~~")
-    orders = get_open_orders()
-    for _order in orders.values():
-        log.info(_order)
-    log.info("~~~~~~~~~~~~~~~所有订单~~~~~~~~~~~~~~~~~~~~")
-    orders = get_orders()
-    for _order in orders.values():
-        log.info(_order)
-    log.info("~~~~~~~~~~~~~~~成交信息~~~~~~~~~~~~~~~~~~~~~")
-    trades = get_trades()
-    for _trade in trades.values():
-        log.info(_trade)
-    log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    '''
-    pass
