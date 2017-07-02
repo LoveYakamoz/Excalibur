@@ -8,6 +8,8 @@ g.basestock_pool = []
 g.repeat_signal_count = 0
 g.reset_order_count = 0
 g.success_count = 0
+g.up = 0.3 
+g.down = 3.7
 # 一次突破时，反向挂单时间（距离突破点）， 单位：分钟
 g.delay_time = 30
 class Status(Enum):
@@ -418,12 +420,12 @@ def handle_data(context, data):
         '''
         
         # 买入信号产生
-        if g.basestock_pool[i].operator_value < 0.1 and operator_line[3] > 0.1 and g.basestock_pool[i].operator_value != 0.0:
+        if g.basestock_pool[i].operator_value < g.up and operator_line[3] > g.up and g.basestock_pool[i].operator_value != 0.0:
             log.info("BUY SIGNAL for %s, from %f to %f, close_price: %f", stock, g.basestock_pool[i].operator_value, operator_line[3], close_m.iat[3,0])
             
             buy_sell(context, stock, close_m.iat[3,0], i)
         # 卖出信息产生
-        elif g.basestock_pool[i].operator_value > 3.9 and operator_line[3] < 3.9:
+        elif g.basestock_pool[i].operator_value > g.down and operator_line[3] < g.down:
             log.info("SELL SIGNAL for %s, from %f to %f, close_price: %f", stock, g.basestock_pool[i].operator_value, operator_line[3], close_m.iat[3,0])
             
             sell_buy(context, stock, close_m.iat[3,0], i)
