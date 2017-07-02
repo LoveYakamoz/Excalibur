@@ -5,7 +5,9 @@ import talib as ta
 
 # 持仓股票池
 g.basestock_pool = []
-
+g.repeat_signal_count = 0
+g.reset_order_count = 0
+g.success_count = 0
 # 一次突破时，反向挂单时间（距离突破点）， 单位：分钟
 g.delay_time = 30
 class Status(Enum):
@@ -43,7 +45,9 @@ class BaseStock(object):
         , self.stock, self.close, self.min_vol, self.max_vol, self.lowest, self.highest, self.operator_value, self.position, self.sell_order_id, self.buy_order_id)
 def initialize(context):
     log.info("---> initialize @ %s" % (str(context.current_dt))) 
-
+    g.repeat_signal_count = 0
+    g.reset_order_count = 0
+    g.success_count = 0
     # 第一天运行时，需要选股入池，并且当天不可进行股票交易
     g.firstrun = True
     
@@ -100,20 +104,23 @@ def before_trading_start(context):
         g.basestock_pool[i].break_throught_time = None
         g.basestock_pool[i].delay_amount = 0
         g.basestock_pool[i].delay_price = 0
-    
+    g.repeat_signal_count = 0
+    g.reset_order_count = 0
+    g.success_count = 0
 # 购买股票，并记录订单号，便于查询订单状态	
 def buy_stock(context, stock, amount, limit_price, index):
     buy_order = order(stock, amount, LimitOrderStyle(limit_price))
     g.basestock_pool[index].buy_price = limit_price
     if buy_order is not None:
         g.basestock_pool[index].buy_order_id = buy_order.order_id
-
+        log.info("股票: %s, 以%f价格挂单，买入%d", stock, limit_price, amount)
 # 卖出股票，并记录订单号，便于查询订单状态		
 def sell_stock(context, stock, amount, limit_price, index):
     sell_order = order(stock, amount, LimitOrderStyle(limit_price))
     g.basestock_pool[index].sell_price = limit_price
     if sell_order is not None:
         g.basestock_pool[index].sell_order_id = sell_order.order_id
+        log.info("股票: %s, 以%f价格挂单，卖出%d", stock, limit_price, amount)
 # 产生先卖后买信号
 def sell_buy(context, stock, close_price, index):
     # 每次交易量为持仓量的1/4    
@@ -129,19 +136,22 @@ def sell_buy(context, stock, close_price, index):
     # 如果当前不是INIT状态，则表示已经处于一次交易中（未撮合完成）	
     if g.basestock_pool[index].status == Status.WORKING:
         #30分钟内出现同向信号
-        if ((context.current_dt - g.basestock_pool[index].break_throught_time).seconds < (g.delay_time * 60)):
-            #新的卖出价低于之前，以现有价格买入，并当日不做回转交易
-            if limit_price < g.basestock_pool[index].buy_price:
+        if (get_delta_minute(context.current_dt, g.basestock_pool[index].break_throught_time) < g.delay_time):
+            #新的卖出价高于之前，以现有价格买入，并当日不做回转交易
+            if limit_price > g.basestock_pool[index].sell_price:
                 src_position = g.basestock_pool[index].position
                 cur_position = context.portfolio.positions[stock].total_amount
-                _order = order(stock, (src_position - cur_position))
+                _order = order(stock, (src_position - cur_position), LimitOrderStyle(limit_price))
+                log.warn("[30分钟内信号重复]股票: %s, 以%f价格挂单，买入%d", stock, limit_price, (src_position - cur_position))
                 g.basestock_pool[index].status = Status.NONE
-        else:
-            log.warn("NO Chance to SELL_BUY, current status: ", g.basestock_pool[index].status)
-            return
+                g.repeat_signal_count += 1
+                return
+            else:
+                log.warn("NO Chance to SELL_BUY, current status: ", g.basestock_pool[index].status)
+                return
     
     sell_ret = sell_stock(context, stock, -amount, limit_price, index)
-    
+    g.basestock_pool[index].break_throught_time = context.current_dt
     # 以收盘价 - 价差 * expected_revenue 挂单买入
     yesterday = get_price(stock, count = 1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
     limit_price = close_price - yesterday.iat[0, 0] * g.expected_revenue
@@ -179,20 +189,23 @@ def buy_sell(context, stock, close_price, index):
     if g.basestock_pool[index].status == Status.WORKING:
         #30分钟内出现同向信号
         
-        if ((context.current_dt - g.basestock_pool[index].break_throught_time).seconds < (g.delay_time * 60)):
+        if (get_delta_minute(context.current_dt, g.basestock_pool[index].break_throught_time) < g.delay_time):
             #新的买入价低于之前，以现有价格卖出，并当日不做回转交易
             if limit_price < g.basestock_pool[index].buy_price:
                 src_position = g.basestock_pool[index].position
                 cur_position = context.portfolio.positions[stock].total_amount
-                _order = order(stock, (src_position - cur_position))
+                _order = order(stock, (src_position - cur_position), LimitOrderStyle(limit_price))
+                log.warn("[30分钟内信号重复]股票: %s, 以%f价格挂单，卖出%d", stock, limit_price, (src_position - cur_position))
                 g.basestock_pool[index].status = Status.NONE
-        else:
-            log.warn("NO Chance to BUY_SELL, current status: ", g.basestock_pool[index].status)
-            return
+                g.repeat_signal_count += 1
+                return
+            else:
+                log.warn("NO Chance to BUY_SELL, current status: ", g.basestock_pool[index].status)
+                return
     
 
     buy_stock(context, stock, amount, limit_price, index)
-    
+    g.basestock_pool[index].break_throught_time = context.current_dt
     # 以收盘价 + 价差 * expected_revenue 挂单卖出
     yesterday = get_price(stock, count = 1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
     limit_price = close_price + yesterday.iat[0, 0] * g.expected_revenue
@@ -209,16 +222,16 @@ def buy_sell(context, stock, close_price, index):
     
     
 # 计算当前时间点，是开市以来第几分钟   
-def get_minute_count(context):
+def get_minute_count(current_dt):
     '''
      9:30 -- 11:30
      13:00 --- 15:00
      '''
-    current_hour = context.current_dt.hour
-    current_min  = context.current_dt.minute
+    current_hour = current_dt.hour
+    current_min  = current_dt.minute
     
     if current_hour < 12:
-        minute_count = (current_hour - 9) * 60 + current_min - 29
+        minute_count = (current_hour - 9) * 60 + current_min - 30
     else:
         minute_count = (current_hour - 13) * 60 + current_min + 120
 
@@ -226,7 +239,7 @@ def get_minute_count(context):
   
 # 获取89分钟内的最低价，不足89分钟，则计算到当前时间点
 def update_89_lowest(context):
-    minute_count = get_minute_count(context)
+    minute_count = get_minute_count(context.current_dt)
     if minute_count > 89:
         minute_count = 89
     for i in range(g.position_count):
@@ -235,7 +248,7 @@ def update_89_lowest(context):
         
 # 获取233分钟内的最高价，不足233分钟，则计算到当前时间点		
 def update_233_highest(context):
-    minute_count = get_minute_count(context)
+    minute_count = get_minute_count(context.current_dt)
     if minute_count > 233:
         minute_count = 233
     for i in range(g.position_count):
@@ -259,6 +272,7 @@ def reset_position(context):
             log.info("src_position : cur_position", src_position, cur_position)
             _order = order(stock, src_position - cur_position)
             log.warn("reset posiont: ", _order)
+            g.reset_order_count += 1
         
         
 def update_socket_statue(context):
@@ -287,11 +301,17 @@ def update_socket_statue(context):
                     g.basestock_pool[i].delay_amount = 0
                     g.basestock_pool[i].delay_price = 0
                     g.basestock_pool[i].break_throught_time = None
-                    
+                    g.success_count += 1
         # 每天14点后， 不再进行新的买卖
         if hour == 14 and g.basestock_pool[i].status == Status.INIT:
             g.basestock_pool[i].status = Status.NONE
 
+def get_delta_minute(datetime1, datetime2):
+    minute1 = get_minute_count(datetime1)
+    minute2 = get_minute_count(datetime2)
+    
+    return abs(minute2 - minute1)
+    
 '''
     在突破点半小时后，进行反向挂单
 '''
@@ -307,7 +327,7 @@ def resting_reverse_order(context):
         if g.basestock_pool[i].status == Status.NONE or break_throught_time is None:
             continue
             
-        if ((context.current_dt - break_throught_time).seconds > (g.delay_time * 60)):
+        if (get_delta_minute(context.current_dt, break_throught_time) > g.delay_time):
             if delay_amount > 0:    # 反向买入
                 _order = order(stock, delay_amount, LimitOrderStyle(delay_price))
                 if _order is not None:
@@ -356,7 +376,7 @@ def handle_data(context, data):
         return
 
     # 因为要计算移动平均线，所以每天前4分钟，不做交易
-    if get_minute_count(context) < 4:
+    if get_minute_count(context.current_dt) < 4:
         return
         
     # 更新89分钟内的最低收盘价，不足89分钟，则按到当前时间的最低收盘价
@@ -377,6 +397,9 @@ def handle_data(context, data):
         lowest_89 = g.basestock_pool[i].lowest_89
         highest_233 = g.basestock_pool[i].highest_233
         
+        if g.basestock_pool[i].status == Status.NONE:
+            continue
+        
         # 如果在开市前几分钟，价格不变化，则求突破线时，会出现除数为0，如果遇到这种情况，表示不会有突破，所以直接过掉
         if lowest_89 == highest_233:
             continue
@@ -388,24 +411,28 @@ def handle_data(context, data):
         for j in range(4):
             close[j] = ((close[j] - lowest_89) * 1.0 / (highest_233 - lowest_89)) * 4
         operator_line =  ta.MA(close, 4)
-
+        
+        '''
         log.info("股票代码：%s, 前一分钟操盘线值: %f, 当前操作线值: %f, 两者之差的绝对值: %f", stock,
                 g.basestock_pool[i].operator_value, operator_line[3], abs(g.basestock_pool[i].operator_value - operator_line[3]))
+        '''
         
         # 买入信号产生
         if g.basestock_pool[i].operator_value < 0.1 and operator_line[3] > 0.1 and g.basestock_pool[i].operator_value != 0.0:
-            log.info("WARNNIG: Time: %s, BUY SIGNAL for %s, from %f to %f, close_price: %f", 
-                    str(context.current_dt), stock, g.basestock_pool[i].operator_value, operator_line[3], close_m.iat[3,0])
-            g.basestock_pool[i].break_throught_time = context.current_dt
+            log.info("BUY SIGNAL for %s, from %f to %f, close_price: %f", stock, g.basestock_pool[i].operator_value, operator_line[3], close_m.iat[3,0])
+            
             buy_sell(context, stock, close_m.iat[3,0], i)
         # 卖出信息产生
         elif g.basestock_pool[i].operator_value > 3.9 and operator_line[3] < 3.9:
-            log.info("WARNNING: Time: %s, SELL SIGNAL for %s, from %f to %f, close_price: %f", 
-                    str(context.current_dt), stock, g.basestock_pool[i].operator_value, operator_line[3], close_m.iat[3,0])
-            g.basestock_pool[i].break_throught_time = context.current_dt
+            log.info("SELL SIGNAL for %s, from %f to %f, close_price: %f", stock, g.basestock_pool[i].operator_value, operator_line[3], close_m.iat[3,0])
+            
             sell_buy(context, stock, close_m.iat[3,0], i)
             
         # 记录当前操盘线值
         g.basestock_pool[i].operator_value = operator_line[3]
-        
+
+def after_trading_end(context):
+    log.info("===========================================================================")
+    log.info("[统计数据]成功交易次数: %d, 重复信号交易次数: %d, 收盘前强制交易次数: %d",  g.success_count, g.repeat_signal_count, g.reset_order_count)
+    log.info("===========================================================================")
         
