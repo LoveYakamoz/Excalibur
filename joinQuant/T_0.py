@@ -245,8 +245,8 @@ def update_89_lowest(context):
     if minute_count > 89:
         minute_count = 89
     for i in range(g.position_count):
-        low_df = get_price(g.basestock_pool[i].stock, count = minute_count, end_date=str(context.current_dt), frequency='1m', fields=['close'])
-        g.basestock_pool[i].lowest_89 = low_df.sort(['close'], ascending = True).iat[0,0]
+        low_df = get_price(g.basestock_pool[i].stock, count = minute_count, end_date=str(context.current_dt), frequency='1m', fields=['low'])
+        g.basestock_pool[i].lowest_89 = low_df.sort(['low'], ascending = True).iat[0,0]
         
 # 获取233分钟内的最高价，不足233分钟，则计算到当前时间点		
 def update_233_highest(context):
@@ -254,8 +254,8 @@ def update_233_highest(context):
     if minute_count > 233:
         minute_count = 233
     for i in range(g.position_count):
-        high_df = get_price(g.basestock_pool[i].stock, count = minute_count, end_date=str(context.current_dt), frequency='1m', fields=['close'])
-        g.basestock_pool[i].highest_233 = high_df.sort(['close'], ascending = False).iat[0,0]
+        high_df = get_price(g.basestock_pool[i].stock, count = minute_count, end_date=str(context.current_dt), frequency='1m', fields=['high'])
+        g.basestock_pool[i].highest_233 = high_df.sort(['high'], ascending = False).iat[0,0]
 
 # 取消所有未完成的订单（未撮合成的订单）        
 def cancel_open_order(context):
