@@ -8,8 +8,8 @@ g.basestock_pool = []
 g.repeat_signal_count = 0
 g.reset_order_count = 0
 g.success_count = 0
-g.up = 0.3 
-g.down = 3.7
+g.up = 0.1
+g.down = 3.9
 # 一次突破时，反向挂单时间（距离突破点）， 单位：分钟
 g.delay_time = 30
 class Status(Enum):
