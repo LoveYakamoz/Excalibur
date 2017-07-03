@@ -16,12 +16,16 @@ g.up = 0.1
 g.down = 3.9
 
 #MA平均的天数
-g.ma_day_count = 6
+g.ma_day_count = 4
 
 #每次调整的比例
 g.adjust_scale = 0.25 
 # 一次突破时，反向挂单时间（距离突破点）， 单位：分钟
 g.delay_time = 30
+
+# 期望收益率
+g.expected_revenue = 0.003
+
 class Status(Enum):
     INIT    = 0  # 在每天交易开始时，置为INIT
     WORKING = 1  # 处于买/卖中
@@ -68,7 +72,7 @@ def initialize(context):
     
     # 记录进入股票池中的股票数量
     select_count = 0
-    g.expected_revenue = 0.003  # 期望收益率
+
     # 获得沪深300的股票列表, 5天波动率大于2%，单价大于10.00元, 每标的买入100万元
     stock_list = get_index_stocks('399300.XSHE')
     for stock in stock_list:
