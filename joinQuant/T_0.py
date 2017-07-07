@@ -185,7 +185,7 @@ def sell_buy(context, stock, close_price, index):
                 g.basestock_pool[index].delay_amount = -amount
                 g.basestock_pool[index].delay_price = limit_price
                 g.basestock_pool[index].break_throught_type = Break.DOWN
-                log.info("待股票%s买入挂单完成后，需要挂出卖出单：%d, 卖出价%f", stock, -amount, limit_price)
+                log.info("待股票: %s买入挂单完成后，需要挂出卖出单：%d, 卖出价%f", stock, -amount, limit_price)
                 g.basestock_pool[index].break_throught_time = context.current_dt
                 g.basestock_pool[index].status = Status.WORKING
                 
@@ -206,7 +206,7 @@ def sell_buy(context, stock, close_price, index):
         g.basestock_pool[index].delay_amount = amount
         g.basestock_pool[index].delay_price = limit_price
         g.basestock_pool[index].break_throught_type = Break.DOWN
-        log.info("待股票%s卖出挂单完成后，需要挂出买入单：%d, 买入价%f", stock, amount, limit_price)        
+        log.info("待股票: %s卖出挂单完成后，需要挂出买入单：%d, 买入价%f", stock, amount, limit_price)        
         g.basestock_pool[index].status = Status.WORKING  #更新交易状态
 
     
@@ -258,7 +258,7 @@ def buy_sell(context, stock, close_price, index):
                 g.basestock_pool[index].delay_amount = amount
                 g.basestock_pool[index].delay_price = limit_price
                 g.basestock_pool[index].break_throught_type = Break.DOWN
-                log.info("待股票%s卖出挂单完成后，需要挂出买入单：%d, 买入价%f", stock, amount, limit_price)
+                log.info("待股票: %s卖出挂单完成后，需要挂出买入单：%d, 买入价%f", stock, amount, limit_price)
                 g.basestock_pool[index].break_throught_time = context.current_dt
                 g.basestock_pool[index].status = Status.WORKING
                 g.repeat_signal_count += 1
@@ -278,7 +278,7 @@ def buy_sell(context, stock, close_price, index):
         g.basestock_pool[index].delay_amount = -amount
         g.basestock_pool[index].delay_price = limit_price
         g.basestock_pool[index].break_throught_type = Break.UP
-        log.info("待股票%s买入挂单完成后，需要挂出卖出单：%d, 卖出价%f, index:%d", stock, -amount, limit_price, index)
+        log.info("待股票: %s买入挂单完成后，需要挂出卖出单：%d, 卖出价%f, index:%d", stock, -amount, limit_price, index)
         g.basestock_pool[index].status = Status.WORKING   #更新交易状态
     
     
@@ -308,7 +308,7 @@ def update_89_lowest(context):
         g.basestock_pool[i].lowest_89 = min(low_df['low'])
         #low_df.sort(['low'], ascending = True).iat[0,0]
         
-# 获取233分钟内的最高价，不足233分钟，则计算到当前时间点		
+# 获取233分钟内的最高价，不足233分钟，则计算到当前时间点
 def update_233_highest(context):
     minute_count = get_minute_count(context.current_dt)
     if minute_count > 233:
@@ -489,20 +489,14 @@ def handle_data(context, data):
             close[j] = ((close[j] - lowest_89) * 1.0 / (highest_233 - lowest_89)) * 4
         operator_line =  ta.MA(close, g.ma_day_count)
         
-        '''
-        log.info("股票代码：%s, 前一分钟操盘线值: %f, 当前操作线值: %f, 两者之差的绝对值: %f", stock,
-                g.basestock_pool[i].operator_value, operator_line[3], abs(g.basestock_pool[i].operator_value - operator_line[3]))
-        '''
         
         # 买入信号产生
         if g.basestock_pool[i].operator_value < g.up and operator_line[g.ma_day_count-1] > g.up and g.basestock_pool[i].operator_value != 0.0:
-            log.info("BUY SIGNAL for %s, from %f to %f, close_price: %f", stock, g.basestock_pool[i].operator_value, operator_line[g.ma_day_count-1], close_m.iat[g.ma_day_count-1,0])
-            
+            log.info("BUY SIGNAL for %s, from %f to %f, close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value, operator_line[g.ma_day_count-1], close_m.iat[g.ma_day_count-1,0], lowest_89, highest_233)
             buy_sell(context, stock, close_m.iat[g.ma_day_count-1,0], i)
         # 卖出信息产生
         elif g.basestock_pool[i].operator_value > g.down and operator_line[g.ma_day_count-1] < g.down:
-            log.info("SELL SIGNAL for %s, from %f to %f, close_price: %f", stock, g.basestock_pool[i].operator_value, operator_line[g.ma_day_count-1], close_m.iat[g.ma_day_count-1,0])
-            
+            log.info("SELL SIGNAL for %s, from %f to %f, close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value, operator_line[g.ma_day_count-1], close_m.iat[g.ma_day_count-1,0], lowest_89, highest_233)
             sell_buy(context, stock, close_m.iat[g.ma_day_count-1,0], i)
             
         # 记录当前操盘线值
