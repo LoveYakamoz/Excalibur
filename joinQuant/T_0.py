@@ -2,8 +2,15 @@ from jqdata import *
 import numpy as np
 import pandas as pd
 import talib as ta
+# 股票池来源
+class Source(Enum):
+    AUTO  = 0  # 程序根据波动率及股价自动从沪深300中获取股票
+    CLIENT = 1 # 使用用户提供的股票
 
-# 持仓股票池
+g.stocks_source = Source.AUTO  # 默认使用自动的方法获得股票
+g.stock_id_list_from_client = []
+
+# 持仓股票池详细信息
 g.basestock_pool = []
 
 #用于统计结果
@@ -64,21 +71,13 @@ class BaseStock(object):
     def print_stock(self):
         log.info("stock: %s, close: %f, min_vol: %f, max_vol: %f, lowest: %f, hightest: %f, operator_value: %f, position: %f, sell_roder_id: %d, buy_order_id: %d"
         , self.stock, self.close, self.min_vol, self.max_vol, self.lowest, self.highest, self.operator_value, self.position, self.sell_order_id, self.buy_order_id)
-def initialize(context):
-    log.info("---> initialize @ %s" % (str(context.current_dt))) 
-    g.repeat_signal_count = 0
-    g.reset_order_count = 0
-    g.success_count = 0
-    # 第一天运行时，需要选股入池，并且当天不可进行股票交易
-    g.firstrun = True
-    
-    # 默认股票池容量
-    g.position_count = 30
-    
-    # 记录进入股票池中的股票数量
+
+'''
+    获得沪深300的股票列表, 5天波动率大于2%，单价大于10.00元, 每标的买入100万元
+'''
+def get_stocks_by_vol(context):
     select_count = 0
 
-    # 获得沪深300的股票列表, 5天波动率大于2%，单价大于10.00元, 每标的买入100万元
     stock_list = get_index_stocks('399300.XSHE')
     for stock in stock_list:
         df = get_price(stock, count = 6, end_date = str(context.current_dt), frequency = 'daily', fields = ['high','low', 'close'])
@@ -99,14 +98,46 @@ def initialize(context):
                 pass
         else:
             pass
-        
     if select_count < g.position_count:
         g.position_count = select_count
+
+'''
+    直接从客户得到股票列表
+'''
+def get_stocks_by_client(context):
+    for stock_id in g.stock_id_list_from_client:
+        stock_obj = BaseStock(stock, 0, 0, 0, 0, 0, 0, Status.INIT, 0, -1, -1)
+        g.basestock_pool.append(stock_obj)
+        select_count += 1
+    
+    if select_count < g.position_count:
+        g.position_count = select_count
+    
+def initialize(context):
+    log.info("---> initialize @ %s" % (str(context.current_dt))) 
+    g.repeat_signal_count = 0
+    g.reset_order_count = 0
+    g.success_count = 0
+    # 第一天运行时，需要选股入池，并且当天不可进行股票交易
+    g.firstrun = True
+    
+    # 默认股票池容量
+    g.position_count = 30
+    
+    if g.stocks_source == Source.AUTO:
+        log.info("程序根据波动率及股价自动从沪深300中获取股票")
+        get_stocks_by_vol(context)
+        
+    elif g.stocks_source == Source.CLIENT:
+        log.info("使用用户提供的股票")        
+        get_stocks_by_client(context)
+    else:
+        log.error("未提供获得股票方法！！！")
         
     # 设置基准
     set_benchmark('000300.XSHG')
     set_option('use_real_price', True)
-
+    
 # 在每天交易开始时，将状态置为可交易状态
 def before_trading_start(context):
     log.info("初始化买卖状态为INIT")
