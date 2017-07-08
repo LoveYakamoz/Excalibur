@@ -8,7 +8,14 @@ class Source(Enum):
     CLIENT = 1 # 使用用户提供的股票
 
 g.stocks_source = Source.AUTO  # 默认使用自动的方法获得股票
-g.stock_id_list_from_client = []
+g.stock_id_list_from_client = ["000031.XSHE", "000059.XSHE", "000060.XSHE", "000401.XSHE", 
+                               "000423.XSHE", "000528.XSHE", "000562.XSHE", "600036.XSHG", 
+                               "000568.XSHE", "000612.XSHE", "000728.XSHE", "000768.XSHE", 
+                               "000800.XSHE", "000878.XSHE", "000898.XSHE", "000927.XSHE", 
+                               "000937.XSHE", "002024.XSHE", "002142.XSHE", "600009.XSHG", 
+                               "600026.XSHG", "600037.XSHG", "000024.XSHE", "000527.XSHE",  
+                               "600104.XSHG", "600109.XSHG", "600161.XSHG", "600251.XSHG", 
+                               "600266.XSHG", "600096.XSHG"]
 
 # 持仓股票池详细信息
 g.basestock_pool = []
@@ -105,8 +112,9 @@ def get_stocks_by_vol(context):
     直接从客户得到股票列表
 '''
 def get_stocks_by_client(context):
+    select_count = 0
     for stock_id in g.stock_id_list_from_client:
-        stock_obj = BaseStock(stock, 0, 0, 0, 0, 0, 0, Status.INIT, 0, -1, -1)
+        stock_obj = BaseStock(stock_id, 0, 0, 0, 0, 0, 0, Status.INIT, 0, -1, -1)
         g.basestock_pool.append(stock_obj)
         select_count += 1
     
@@ -461,7 +469,10 @@ def handle_data(context, data):
         if g.firstrun is True:
             for i in range(g.position_count):                
                 myorder = order_value(g.basestock_pool[i].stock, 1000000)
-                g.basestock_pool[i].position = myorder.amount
+                if myorder is not None:
+                    g.basestock_pool[i].position = myorder.amount
+                else:
+                    log.error("股票: %s 买入失败", g.basestock_pool[i].stock)
             log.info("====================================================================")
             for i in range(g.position_count):                
                 g.basestock_pool[i].print_stock()    
@@ -518,7 +529,12 @@ def handle_data(context, data):
         close =  np.array(close).astype(float)
         for j in range(g.ma_day_count):
             close[j] = ((close[j] - lowest_89) * 1.0 / (highest_233 - lowest_89)) * 4
-        operator_line =  ta.MA(close, g.ma_day_count)
+            
+        if close is not None:
+            operator_line =  ta.MA(close, g.ma_day_count)
+        else:
+			log.warn("股票: %s 可能由于停牌等原因无法求解MA"， stock)
+            continue
         
         
         # 买入信号产生
