@@ -2,6 +2,7 @@ from jqdata import *
 import numpy as np
 import pandas as pd
 import talib as ta
+from math import isnan
 # 股票池来源
 class Source(Enum):
     AUTO  = 0  # 程序根据波动率及股价自动从沪深300中获取股票
@@ -393,9 +394,6 @@ def update_socket_statue(context):
         if (status == Status.WORKING) and ((sell_order_id != -1) and (buy_order_id != -1)):
             sell_order =  orders.get(sell_order_id)
             buy_order = orders.get(buy_order_id)
-            if stock == '002065.XSHE':
-                log.info("sell id : %d, buy_id : %d", sell_order_id, buy_order_id)
-                log.info(sell_order.status, buy_order.status)
             if (sell_order is not None) and (buy_order is not None):
                 if sell_order.status == OrderStatus.held and buy_order.status == OrderStatus.held:
                     log.info("股票:%s回转交易完成 ==============> SUCCESS", stock)
@@ -511,8 +509,19 @@ def handle_data(context, data):
     # 1. 循环股票列表，看当前价格是否有买入或卖出信号
     for i in range(g.position_count):
         stock = g.basestock_pool[i].stock
-        lowest_89 = g.basestock_pool[i].lowest_89
-        highest_233 = g.basestock_pool[i].highest_233
+        
+        if isnan(g.basestock_pool[i].lowest_89) is True:
+            log.error("stock: %s's lowest_89 is None", stock)
+            continue
+        else:
+            lowest_89 = g.basestock_pool[i].lowest_89
+            
+        if  isnan(g.basestock_pool[i].highest_233) is True:
+            log.error("stock: %s's highest_233 is None", stock)
+            continue
+        else:
+            highest_233 = g.basestock_pool[i].highest_233
+            
         if g.basestock_pool[i].status == Status.NONE:
             continue
         
@@ -533,7 +542,7 @@ def handle_data(context, data):
         if close is not None:
             operator_line =  ta.MA(close, g.ma_day_count)
         else:
-			log.warn("股票: %s 可能由于停牌等原因无法求解MA"， stock)
+            log.warn("股票: %s 可能由于停牌等原因无法求解MA", stock)
             continue
         
         
