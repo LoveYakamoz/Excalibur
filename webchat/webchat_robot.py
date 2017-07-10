@@ -24,7 +24,7 @@ import logging.handlers
 LOG_FILE = 'webchat.log'
 
 # 实例化handler
-handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes = 1024*1024, backupCount = 5)
+handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes = 4*1024*1024, backupCount = 5)
 fmt = '%(asctime)s - %(filename)s:%(lineno)s - %(name)s - %(message)s'
 
 formatter = logging.Formatter(fmt)
@@ -33,7 +33,6 @@ handler.setFormatter(formatter)
 logger = logging.getLogger('Robot')
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
-
 
 def catchKeyboardInterrupt(fn):
     def wrapper(*args):
@@ -158,7 +157,7 @@ class WebWeixin(object):
             for line in lines:
                 self.NotifyPersionList_1.append(line.strip())
 
-            print("Notify_Person_1:", self.NotifyPersionList_1)
+            #logger.info("Notify_Person_1: ", self.NotifyPersionList_1)
         finally:
             if fp:
                 fp.close()
@@ -167,7 +166,7 @@ class WebWeixin(object):
             lines = fp.readlines()
             for line in lines:
                 self.NotifyPersionList_2.append(line.strip())
-            print("Notify_Person_2:", self.NotifyPersionList_2)
+            #logger.info("Notify_Person_2: ", self.NotifyPersionList_2)
         finally:
             if fp:
                 fp.close()
@@ -180,7 +179,7 @@ class WebWeixin(object):
             lines = fp.readlines()
             for line in lines:
                 self.KeyWords_1.append(line.strip())
-            print("KeyWords_1:", self.KeyWords_1)
+            #logger.info("KeyWords_1: ", self.KeyWords_1)
         finally:
             if fp:
                 fp.close()
@@ -189,7 +188,7 @@ class WebWeixin(object):
             lines = fp.readlines()
             for line in lines:
                 self.KeyWords_2.append(line.strip())
-            print("KeyWords_2:", self.KeyWords_2)
+            #logger.info("KeyWords_2: ", self.KeyWords_2)
         finally:
             if fp:
                 fp.close()
@@ -197,7 +196,6 @@ class WebWeixin(object):
     def getListenGroupFromFile(self):
         for group in self.GroupList:
             self.ListenGroupList.append(group)
-        print("Listen_Group:", self.ListenGroupList)
 
     def getUUID(self):
         url = 'https://login.weixin.qq.com/jslogin'
@@ -400,7 +398,7 @@ class WebWeixin(object):
 
         return dic['ContactList']
 
-    def testsynccheck(self):
+    def get_valid_sync_channel(self):
         SyncHost = ['wx2.qq.com',
                     'webpush.wx2.qq.com',
                     'wx8.qq.com',
@@ -421,7 +419,9 @@ class WebWeixin(object):
             self.syncHost = host
             [retcode, selector] = self.synccheck()
             if retcode == '0':
+                logger.info('sync channel is : %s' % (self.syncHost))
                 return True
+        logger.error('no valid channel for sync')
         return False
 
     def synccheck(self):
@@ -561,7 +561,6 @@ class WebWeixin(object):
             return self.User['NickName']  # self
 
         if id[:2] == '@@':
-            # Ⱥ
             name = self.getGroupName(id)
         else:
             for member in self.SpecialUsersList:
@@ -634,14 +633,14 @@ class WebWeixin(object):
 
         if (groupName is not None) and (len(self.ListenGroupList) > 0):
             if (card == ''):
-                print('%s |%s| %s -> %s: %s' % (
+                logger.info('%s |%s| %s -> %s: %s' % (
                         message_id, groupName.strip(), srcName.strip(), dstName.strip(),
                         content.replace('<br/>', '\n')))
                 self.notifyPerson(groupName.strip(), srcName.strip(), content.replace('<br/>', '\n'))
             else:
                 content = "标题：" + r"<a href=" + card['url'] + ">" + card['title'] + "</a>" + "\n" + "摘要：" + card[
                         'description']
-                print('%s |%s| %s -> %s: %s' % (
+                logger.info('%s |%s| %s -> %s: %s' % (
                         message_id, groupName.strip(), srcName.strip(), dstName.strip(), content))
                 self.notifyPerson(groupName.strip(), srcName.strip(), content)
 
@@ -661,7 +660,7 @@ class WebWeixin(object):
 
     def handleMsg(self, r):
         for msg in r['AddMsgList']:
-            print('[*] a new message come... please check')
+            logger.info('[*] a new message come... please check')
 
             msgType = msg['MsgType']
             name = self.getUserRemarkName(msg['FromUserName'])
@@ -676,12 +675,12 @@ class WebWeixin(object):
             elif msgType == 49:  # link
                 appMsgType = defaultdict(lambda: "")
                 appMsgType.update({5: '链接', 3: '音乐', 7: '微博'})
-                print('=========================')
-                print('= Title: %s' % msg['FileName'])
-                print('= Desc : %s' % self._searchContent('des', content, 'xml'))
-                print('= Link : %s' % msg['Url'])
-                print('= From : %s' % self._searchContent('appname', content, 'xml'))
-                print('=========================')
+                logger.info('=========================')
+                logger.info('= Title: %s' % msg['FileName'])
+                logger.info('= Desc : %s' % self._searchContent('des', content, 'xml'))
+                logger.info('= Link : %s' % msg['Url'])
+                logger.info('= From : %s' % self._searchContent('appname', content, 'xml'))
+                logger.info('=========================')
                 card = {
                     'title': msg['FileName'],
                     'description': self._searchContent('des', content, 'xml'),
@@ -693,24 +692,28 @@ class WebWeixin(object):
                 self._showMsg(raw_msg, card)
 
             else:
-                print('[*] message type: %d, maybe emotion, picture, link or money' %
+                logger.info('[*] message type: %d, maybe emotion, picture, link or money' %
                       (msg['MsgType']))
 
     def listenMsgMode(self):
-        print('[*] Enter listen mode ... Successfully')
-        self._run('[*] Enter sync check ... ', self.testsynccheck)
+        logger.info('[*] Enter listen mode ... Successfully')
+        self._run('[*] Enter sync check, select channel ... ', self.get_valid_sync_channel)
 
         while True:
             self.lastCheckTs = time.time()
             [retcode, selector] = self.synccheck()
             if self.DEBUG:
-                print('retcode: %s, selector: %s' % (retcode, selector))
+                logger.info('retcode: %s, selector: %s' % (retcode, selector))
             logging.debug('retcode: %s, selector: %s' % (retcode, selector))
             if retcode == '1100':
-                print('[*] You logout wechat in phone, goodbye')
+                logger.info('[*] You logout wechat in phone, goodbye')
                 break
-            if retcode == '1101':
-                print('[*] You have login web wechar other place, goodbye')
+            elif retcode == '1101':
+                logger.info('[*] You have login web wechar other place, goodbye')
+                break
+            elif retcode == '1102':
+                logger.warn('[*] current channel: %s lost heart-beat, so change channel' % (self.syncHost))
+                self.get_valid_sync_channel()
                 break
             elif retcode == '0':
                 if selector == '2':
@@ -843,8 +846,7 @@ class WebWeixin(object):
             request.add_header('Range', 'bytes=0-')
         try:
             response = urllib.request.urlopen(request)
-            data = response.read().decode('utf-8')
-            logger.debug(url)
+            data = response.read().decode('utf-8')            
             response.close()
             time.sleep(3)  # 这里时间自己设定, 10 seconds
             return data
@@ -921,6 +923,6 @@ if sys.stdout.encoding == 'cp936':
     sys.stdout = UnicodeStreamFilter(sys.stdout)
 
 if __name__ == '__main__':
-    logger.info("Version: %s" % "4.0 2017-06-11 BugFix: Add 3 seconds sleep before request for Python socket.error: [Errno 10054]")
+    logger.info("Version: %s" % "5.0 2017-06-11 BugFix: change sync channel automatically")
     webwx = WebWeixin()
     webwx.start()
