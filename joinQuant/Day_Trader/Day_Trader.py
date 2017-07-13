@@ -2062,6 +2062,7 @@ class Purchase_new_stocks(Rule):
     def initialize(self,context):
         g.__manager = shipane_sdk.StrategyManager(context, 'manager-1')
     def update_params(self, context, params):
+        g.__manager = shipane_sdk.StrategyManager(context, 'manager-1')
         self.times = params.get('times', [[10, 00]])
 
     def handle_data(self, context, data):
