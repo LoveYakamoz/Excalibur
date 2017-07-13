@@ -702,14 +702,13 @@ class WebWeixin(object):
         while True:
             self.lastCheckTs = time.time()
             [retcode, selector] = self.synccheck()
-            if self.DEBUG:
-                logger.info('retcode: %s, selector: %s' % (retcode, selector))
-            logging.debug('retcode: %s, selector: %s' % (retcode, selector))
+            
+            logging.info('retcode: %s, selector: %s' % (retcode, selector))
             if retcode == '1100':
                 logger.info('[*] You logout wechat in phone, goodbye')
                 break
             elif retcode == '1101':
-                logger.info('[*] You have login web wechar other place, goodbye')
+                logger.info('[*] You have login web wechat other place, goodbye')
                 break
             elif retcode == '1102':
                 logger.warn('[*] current channel: %s lost heart-beat, so change channel' % (self.syncHost))
@@ -722,7 +721,9 @@ class WebWeixin(object):
                         self.handleMsg(r)
                 elif selector == '0':
                     time.sleep(1)
+
             if (time.time() - self.lastCheckTs) <= 20:
+                logger.info('sleep %f seconds' % (time.time() - self.lastCheckTs))
                 time.sleep(time.time() - self.lastCheckTs)
 
     def sendMsg(self, name, word, isfile=False):
@@ -923,6 +924,6 @@ if sys.stdout.encoding == 'cp936':
     sys.stdout = UnicodeStreamFilter(sys.stdout)
 
 if __name__ == '__main__':
-    logger.info("Version: %s" % "5.0 2017-06-11 BugFix: change sync channel automatically")
+    logger.info("Version: %s" % "6.0 2017-07-14 BugFix: add log for retcode")
     webwx = WebWeixin()
     webwx.start()
