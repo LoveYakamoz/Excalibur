@@ -703,7 +703,7 @@ class WebWeixin(object):
             self.lastCheckTs = time.time()
             [retcode, selector] = self.synccheck()
             
-            logging.info('retcode: %s, selector: %s' % (retcode, selector))
+            logger.info('retcode: %s, selector: %s' % (retcode, selector))
             if retcode == '1100':
                 logger.info('[*] You logout wechat in phone, goodbye')
                 break
@@ -849,7 +849,7 @@ class WebWeixin(object):
             response = urllib.request.urlopen(request)
             data = response.read().decode('utf-8')            
             response.close()
-            time.sleep(3)  # 这里时间自己设定, 10 seconds
+            time.sleep(3)  # 这里时间自己设定, 单位: seconds
             return data
         except urllib.error.HTTPError as e:
             logger.error('HTTPError = ' + str(e.code))
