@@ -456,6 +456,7 @@ class WebWeixin(object):
         }
         dic = self._post(url, params)
         if dic == '':
+            logger.error('请求失败: %s' % (url))
             return None
         if self.DEBUG:
             print(json.dumps(dic, indent=4))
@@ -715,7 +716,7 @@ class WebWeixin(object):
                 self.get_valid_sync_channel()
                 break
             elif retcode == '0':
-                if selector == '2':
+                if selector == '2' or selector == '6':
                     r = self.webwxsync()
                     if r is not None:
                         self.handleMsg(r)
@@ -723,7 +724,6 @@ class WebWeixin(object):
                     time.sleep(1)
 
             if (time.time() - self.lastCheckTs) <= 20:
-                logger.info('sleep %f seconds' % (time.time() - self.lastCheckTs))
                 time.sleep(time.time() - self.lastCheckTs)
 
     def sendMsg(self, name, word, isfile=False):
@@ -924,6 +924,6 @@ if sys.stdout.encoding == 'cp936':
     sys.stdout = UnicodeStreamFilter(sys.stdout)
 
 if __name__ == '__main__':
-    logger.info("Version: %s" % "6.0 2017-07-14 BugFix: add log for retcode")
+    logger.info("Version: %s" % "7.0 2017-07-14 BugFix: process selector 6")
     webwx = WebWeixin()
     webwx.start()
