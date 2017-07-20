@@ -632,7 +632,7 @@ class WebWeixin(object):
                     groupName = srcName
                     srcName = 'SYSTEM'
 
-        if (groupName is not None) and (len(self.ListenGroupList) > 0):
+        if (groupName is not None):
             if (card == ''):
                 logger.info('%s |%s| %s -> %s: %s' % (
                         message_id, groupName.strip(), srcName.strip(), dstName.strip(),
