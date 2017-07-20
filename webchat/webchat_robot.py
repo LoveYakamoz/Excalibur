@@ -924,6 +924,6 @@ if sys.stdout.encoding == 'cp936':
     sys.stdout = UnicodeStreamFilter(sys.stdout)
 
 if __name__ == '__main__':
-    logger.info("Version: %s" % "7.0 2017-07-14 BugFix: process selector 6")
+    logger.info("Version: %s" % "7.0 2017-07-14 BugFix: 不再从文件读取监听群信息")
     webwx = WebWeixin()
     webwx.start()
