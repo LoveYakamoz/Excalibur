@@ -374,7 +374,7 @@ class WebWeixin(object):
             return False
 
         ContactList = dic['ContactList']
-        self.GroupList = ContactList
+        #self.GroupList = ContactList
 
         for i in range(len(ContactList) - 1, -1, -1):
             Contact = ContactList[i]
@@ -924,6 +924,6 @@ if sys.stdout.encoding == 'cp936':
     sys.stdout = UnicodeStreamFilter(sys.stdout)
 
 if __name__ == '__main__':
-    logger.info("Version: %s" % "7.0 2017-07-14 BugFix: 不再从文件读取监听群信息")
+    logger.info("Version: %s" % "8.0 2017-07-14 BugFix: 不使用batch方法更新群组")
     webwx = WebWeixin()
     webwx.start()
