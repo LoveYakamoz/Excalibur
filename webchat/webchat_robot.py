@@ -626,6 +626,8 @@ class WebWeixin(object):
                 logger.info('%s |%s| %s -> %s: %s' % (
                     message_id, groupName.strip(), srcName.strip(), dstName.strip(), content))
                 self.notifyPerson(groupName.strip(), srcName.strip(), content)
+        else:
+            logger.warn('groupName is none, but content: %s', content)
 
     def _searchContent(self, key, content, fmat='attr'):
         if fmat == 'attr':
