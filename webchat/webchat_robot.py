@@ -1,30 +1,33 @@
 #!/usr/bin/env python
 # coding: utf-8
 import codecs
-import urllib.request
-import urllib.parse
-import urllib.error
-import http.cookiejar
-import requests
-import xml.dom.minidom
 import json
-import time
-import re
-import sys
-import os
-import subprocess
-import random
-import multiprocessing
-import platform
 import logging
-import http.client
-from collections import defaultdict
 import logging.handlers
+import multiprocessing
+import os
+import platform
+import random
+import re
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+import xml.dom.minidom
+from collections import defaultdict
+
+import requests
+
+import http.client
+import http.cookiejar
 
 LOG_FILE = 'webchat.log'
 
 # 实例化handler
-handler = logging.handlers.RotatingFileHandler(LOG_FILE, maxBytes = 4*1024*1024, backupCount = 5)
+handler = logging.handlers.RotatingFileHandler(
+    LOG_FILE, maxBytes=4 * 1024 * 1024, backupCount=5)
 fmt = '%(asctime)s - %(filename)s:%(lineno)s - %(name)s - %(message)s'
 
 formatter = logging.Formatter(fmt)
@@ -33,6 +36,7 @@ handler.setFormatter(formatter)
 logger = logging.getLogger('Robot')
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
+
 
 def catchKeyboardInterrupt(fn):
     def wrapper(*args):
@@ -52,7 +56,8 @@ def SaveContact(ContactList, GroupList):
             fp.write('NickName: %s, RemarkName: %s, City: %s, Signature: %s, UserName: %s \n' % (
                 contact['NickName'], contact['RemarkName'], contact['City'], contact['Signature'], contact['UserName']))
 
-        fp.write("==============================================================================\n")
+        fp.write(
+            "==============================================================================\n")
 
         for group in GroupList:
             fp.write('NickName: %s, RemarkName: %s, City: %s, Signature: %s, UserName: %s \n' % (
@@ -128,7 +133,8 @@ class WebWeixin(object):
         self.media_count = -1
 
         self.cookie = http.cookiejar.CookieJar()
-        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(self.cookie))
+        opener = urllib.request.build_opener(
+            urllib.request.HTTPCookieProcessor(self.cookie))
         opener.addheaders = [('User-agent', self.user_agent)]
         urllib.request.install_opener(opener)
 
@@ -308,13 +314,13 @@ class WebWeixin(object):
         self.User = dic['User']
         # synckey for synccheck
         self.synckey = '|'.join(
-                [str(keyVal['Key']) + '_' + str(keyVal['Val']) for keyVal in self.SyncKey['List']])
+            [str(keyVal['Key']) + '_' + str(keyVal['Val']) for keyVal in self.SyncKey['List']])
 
         return dic['BaseResponse']['Ret'] == 0
 
     def webwxstatusnotify(self):
         url = self.base_uri + \
-              '/webwxstatusnotify?lang=zh_CN&pass_ticket=%s' % (self.pass_ticket)
+            '/webwxstatusnotify?lang=zh_CN&pass_ticket=%s' % (self.pass_ticket)
         params = {
             'BaseRequest': self.BaseRequest,
             "Code": 3,
@@ -362,8 +368,8 @@ class WebWeixin(object):
 
     def webwxbatchgetcontact(self):
         url = self.base_uri + \
-              '/webwxbatchgetcontact?type=ex&r=%s&pass_ticket=%s' % (
-                  int(time.time()), self.pass_ticket)
+            '/webwxbatchgetcontact?type=ex&r=%s&pass_ticket=%s' % (
+                int(time.time()), self.pass_ticket)
         params = {
             'BaseRequest': self.BaseRequest,
             "Count": len(self.GroupList),
@@ -385,8 +391,8 @@ class WebWeixin(object):
 
     def getNameById(self, id):
         url = self.base_uri + \
-              '/webwxbatchgetcontact?type=ex&r=%s&pass_ticket=%s' % (
-                  int(time.time()), self.pass_ticket)
+            '/webwxbatchgetcontact?type=ex&r=%s&pass_ticket=%s' % (
+                int(time.time()), self.pass_ticket)
         params = {
             'BaseRequest': self.BaseRequest,
             "Count": 1,
@@ -434,21 +440,22 @@ class WebWeixin(object):
             'synckey': self.synckey,
             '_': int(time.time()),
         }
-        url = 'https://' + self.syncHost + '/cgi-bin/mmwebwx-bin/synccheck?' + urllib.parse.urlencode(params)
+        url = 'https://' + self.syncHost + \
+            '/cgi-bin/mmwebwx-bin/synccheck?' + urllib.parse.urlencode(params)
         data = self._get(url)
         if data == '':
             return [-1, -1]
 
         pm = re.search(
-                r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}', data)
+            r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}', data)
         retcode = pm.group(1)
         selector = pm.group(2)
         return [retcode, selector]
 
     def webwxsync(self):
         url = self.base_uri + \
-              '/webwxsync?sid=%s&skey=%s&pass_ticket=%s' % (
-                  self.sid, self.skey, self.pass_ticket)
+            '/webwxsync?sid=%s&skey=%s&pass_ticket=%s' % (
+                self.sid, self.skey, self.pass_ticket)
         params = {
             'BaseRequest': self.BaseRequest,
             'SyncKey': self.SyncKey,
@@ -465,14 +472,14 @@ class WebWeixin(object):
         if dic['BaseResponse']['Ret'] == 0:
             self.SyncKey = dic['SyncKey']
             self.synckey = '|'.join(
-                    [str(keyVal['Key']) + '_' + str(keyVal['Val']) for keyVal in self.SyncKey['List']])
+                [str(keyVal['Key']) + '_' + str(keyVal['Val']) for keyVal in self.SyncKey['List']])
         return dic
 
     def webwxsendtextmsg(self, word, to='filehelper'):
         url = self.base_uri + \
-              '/webwxsendmsg?pass_ticket=%s' % (self.pass_ticket)
+            '/webwxsendmsg?pass_ticket=%s' % (self.pass_ticket)
         clientMsgId = str(int(time.time() * 1000)) + \
-                      str(random.random())[:5].replace('.', '')
+            str(random.random())[:5].replace('.', '')
         params = {
             'BaseRequest': self.BaseRequest,
             'Msg': {
@@ -505,7 +512,7 @@ class WebWeixin(object):
 
     def webwxgeticon(self, id):
         url = self.base_uri + \
-              '/webwxgeticon?username=%s&skey=%s' % (id, self.skey)
+            '/webwxgeticon?username=%s&skey=%s' % (id, self.skey)
         data = self._get(url)
         if data == '':
             return ''
@@ -514,7 +521,7 @@ class WebWeixin(object):
 
     def webwxgetheadimg(self, id):
         url = self.base_uri + \
-              '/webwxgetheadimg?username=%s&skey=%s' % (id, self.skey)
+            '/webwxgetheadimg?username=%s&skey=%s' % (id, self.skey)
         data = self._get(url)
         if data == '':
             return ''
@@ -523,7 +530,7 @@ class WebWeixin(object):
 
     def webwxgetmsgimg(self, msgid):
         url = self.base_uri + \
-              '/webwxgetmsgimg?MsgID=%s&skey=%s' % (msgid, self.skey)
+            '/webwxgetmsgimg?MsgID=%s&skey=%s' % (msgid, self.skey)
         data = self._get(url)
         if data == '':
             return ''
@@ -532,7 +539,7 @@ class WebWeixin(object):
 
     def webwxgetvoice(self, msgid):
         url = self.base_uri + \
-              '/webwxgetvoice?msgid=%s&skey=%s' % (msgid, self.skey)
+            '/webwxgetvoice?msgid=%s&skey=%s' % (msgid, self.skey)
         data = self._get(url)
         if data == '':
             return ''
@@ -598,7 +605,8 @@ class WebWeixin(object):
                 print("FIND", ret)
                 idlist.append(ret)
         for member in self.GroupList:
-            print("remark name: %s, NickName: %s" % (member['RemarkName'], member['NickName']))
+            print("remark name: %s, NickName: %s" %
+                  (member['RemarkName'], member['NickName']))
             if name == member['RemarkName'] or name == member['NickName']:
                 ret = member['UserName']
                 print("FIND", ret)
@@ -618,7 +626,7 @@ class WebWeixin(object):
             srcName = self.getUserRemarkName(msg['raw_msg']['FromUserName'])
             dstName = self.getUserRemarkName(msg['raw_msg']['ToUserName'])
             content = msg['raw_msg']['Content'].replace(
-                    '&lt;', '<').replace('&gt;', '>')
+                '&lt;', '<').replace('&gt;', '>')
             message_id = msg['raw_msg']['MsgId']
 
             if msg['raw_msg']['FromUserName'][:2] == '@@':
@@ -635,14 +643,15 @@ class WebWeixin(object):
         if (groupName is not None):
             if (card == ''):
                 logger.info('%s |%s| %s -> %s: %s' % (
-                        message_id, groupName.strip(), srcName.strip(), dstName.strip(),
-                        content.replace('<br/>', '\n')))
-                self.notifyPerson(groupName.strip(), srcName.strip(), content.replace('<br/>', '\n'))
+                    message_id, groupName.strip(), srcName.strip(), dstName.strip(),
+                    content.replace('<br/>', '\n')))
+                self.notifyPerson(
+                    groupName.strip(), srcName.strip(), content.replace('<br/>', '\n'))
             else:
                 content = "标题：" + r"<a href=" + card['url'] + ">" + card['title'] + "</a>" + "\n" + "摘要：" + card[
-                        'description']
+                    'description']
                 logger.info('%s |%s| %s -> %s: %s' % (
-                        message_id, groupName.strip(), srcName.strip(), dstName.strip(), content))
+                    message_id, groupName.strip(), srcName.strip(), dstName.strip(), content))
                 self.notifyPerson(groupName.strip(), srcName.strip(), content)
 
     def _searchContent(self, key, content, fmat='attr'):
@@ -654,7 +663,7 @@ class WebWeixin(object):
             pm = re.search('<{0}>([^<]+)</{0}>'.format(key), content)
             if not pm:
                 pm = re.search(
-                        '<{0}><\!\[CDATA\[(.*?)\]\]></{0}>'.format(key), content)
+                    '<{0}><\!\[CDATA\[(.*?)\]\]></{0}>'.format(key), content)
             if pm:
                 return pm.group(1)
         return '未知'
@@ -671,16 +680,19 @@ class WebWeixin(object):
                 raw_msg = {'raw_msg': msg}
                 self._showMsg(raw_msg)
             elif msgType == 51:
-                raw_msg = {'raw_msg': msg, 'message': '[*] Access to contact information Successfully'}
+                raw_msg = {
+                    'raw_msg': msg, 'message': '[*] Access to contact information Successfully'}
                 self._showMsg(raw_msg)
             elif msgType == 49:  # link
                 appMsgType = defaultdict(lambda: "")
                 appMsgType.update({5: '链接', 3: '音乐', 7: '微博'})
                 logger.info('=========================')
                 logger.info('= Title: %s' % msg['FileName'])
-                logger.info('= Desc : %s' % self._searchContent('des', content, 'xml'))
+                logger.info('= Desc : %s' %
+                            self._searchContent('des', content, 'xml'))
                 logger.info('= Link : %s' % msg['Url'])
-                logger.info('= From : %s' % self._searchContent('appname', content, 'xml'))
+                logger.info('= From : %s' %
+                            self._searchContent('appname', content, 'xml'))
                 logger.info('=========================')
                 card = {
                     'title': msg['FileName'],
@@ -694,25 +706,28 @@ class WebWeixin(object):
 
             else:
                 logger.info('[*] message type: %d, maybe emotion, picture, link or money' %
-                      (msg['MsgType']))
+                            (msg['MsgType']))
 
     def listenMsgMode(self):
         logger.info('[*] Enter listen mode ... Successfully')
-        self._run('[*] Enter sync check, select channel ... ', self.get_valid_sync_channel)
+        self._run('[*] Enter sync check, select channel ... ',
+                  self.get_valid_sync_channel)
 
         while True:
             self.lastCheckTs = time.time()
             [retcode, selector] = self.synccheck()
-            
+
             logger.info('retcode: %s, selector: %s' % (retcode, selector))
             if retcode == '1100':
                 logger.info('[*] You logout wechat in phone, goodbye')
                 break
             elif retcode == '1101':
-                logger.info('[*] You have login web wechat other place, goodbye')
+                logger.info(
+                    '[*] You have login web wechat other place, goodbye')
                 break
             elif retcode == '1102':
-                logger.warn('[*] current channel: %s lost heart-beat, so change channel' % (self.syncHost))
+                logger.warn(
+                    '[*] current channel: %s lost heart-beat, so change channel' % (self.syncHost))
                 self.get_valid_sync_channel()
                 break
             elif retcode == '0':
@@ -768,12 +783,14 @@ class WebWeixin(object):
 
         self._run('[*] Login ... ', self.login)
         self._run('[*] Wechat init ... ', self.webwxinit)
-        self._run('[*] Turn on status notifications ... ', self.webwxstatusnotify)
+        self._run('[*] Turn on status notifications ... ',
+                  self.webwxstatusnotify)
         self._run('[*] Get contact ... ', self.webwxgetcontact)
 
         self._echo('[*] Group number: %d | Contact number: %d | Special number: %d | Public(service) number %d \n'
                    % (
-                       len(self.GroupList), len(self.ContactList), len(self.SpecialUsersList),
+                       len(self.GroupList), len(self.ContactList), len(
+                           self.SpecialUsersList),
                        len(self.PublicUsersList)))
 
         self._run('[*] Get Group ... ', self.webwxbatchgetcontact)
@@ -847,7 +864,7 @@ class WebWeixin(object):
             request.add_header('Range', 'bytes=0-')
         try:
             response = urllib.request.urlopen(request)
-            data = response.read().decode('utf-8')            
+            data = response.read().decode('utf-8')
             response.close()
             time.sleep(3)  # 这里时间自己设定, 单位: seconds
             return data
@@ -868,9 +885,10 @@ class WebWeixin(object):
 
             request = urllib.request.Request(url=url, data=data)
             request.add_header(
-                    'ContentType', 'application/json; charset=UTF-8')
+                'ContentType', 'application/json; charset=UTF-8')
         else:
-            request = urllib.request.Request(url=url, data=urllib.parse.urlencode(params).encode(encoding='utf-8'))
+            request = urllib.request.Request(
+                url=url, data=urllib.parse.urlencode(params).encode(encoding='utf-8'))
 
         try:
             response = urllib.request.urlopen(request)
@@ -895,13 +913,15 @@ class WebWeixin(object):
         for keyword in self.KeyWords_1:
             if keyword in content:
                 for person in self.NotifyPersionList_1:
-                    self.sendMsg(person, u"【消息来自" + "#" + groupName + "#" + groupmember + "，由微信机器人发送，请勿回复】" + content)
+                    self.sendMsg(person, u"【消息来自" + "#" + groupName +
+                                 "#" + groupmember + "，由微信机器人发送，请勿回复】" + content)
                 break
 
         for keyword in self.KeyWords_2:
             if keyword in content:
                 for person in self.NotifyPersionList_2:
-                    self.sendMsg(person, u"【消息来自" + "#" + groupName + "#" + groupmember + "，由微信机器人发送，请勿回复】" + content)
+                    self.sendMsg(person, u"【消息来自" + "#" + groupName +
+                                 "#" + groupmember + "，由微信机器人发送，请勿回复】" + content)
                 break
 
 
