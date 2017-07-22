@@ -1,0 +1,40 @@
+2017-07-22 11:56:00,661 - webchat_robot.py:924 - Robot - Version: 8.0 2017-07-14 BugFix: 不使用batch方法更新群组
+2017-07-22 11:56:00,885 - webchat_robot.py:815 - Robot - [*] Get uuid ... Successful
+2017-07-22 11:56:00,901 - webchat_robot.py:754 - Robot - [*] Get QR code ... successfully
+2017-07-22 11:56:22,481 - webchat_robot.py:815 - Robot - [*] Login ... Successful
+2017-07-22 11:56:23,247 - webchat_robot.py:815 - Robot - [*] Wechat init ... Successful
+2017-07-22 11:56:23,661 - webchat_robot.py:815 - Robot - [*] Turn on status notifications ... Successful
+2017-07-22 11:56:28,663 - webchat_robot.py:815 - Robot - [*] Get contact ... Successful
+2017-07-22 11:56:30,504 - webchat_robot.py:815 - Robot - [*] Get Group ... Successful
+2017-07-22 11:58:49,639 - webchat_robot.py:924 - Robot - Version: 8.0 2017-07-14 BugFix: 不使用batch方法更新群组
+2017-07-22 11:58:49,869 - webchat_robot.py:815 - Robot - [*] Get uuid ... Successful
+2017-07-22 11:58:49,870 - webchat_robot.py:754 - Robot - [*] Get QR code ... successfully
+2017-07-22 11:59:28,405 - webchat_robot.py:815 - Robot - [*] Login ... Successful
+2017-07-22 11:59:29,081 - webchat_robot.py:815 - Robot - [*] Wechat init ... Successful
+2017-07-22 11:59:29,356 - webchat_robot.py:815 - Robot - [*] Turn on status notifications ... Successful
+2017-07-22 11:59:34,328 - webchat_robot.py:815 - Robot - [*] Get contact ... Successful
+2017-07-22 11:59:35,953 - webchat_robot.py:815 - Robot - [*] Get Group ... Successful
+2017-07-22 12:11:28,525 - webchat_robot.py:925 - Robot - Version: 8.0 2017-07-14 BugFix: 不使用batch方法更新群组
+2017-07-22 12:11:28,771 - webchat_robot.py:816 - Robot - [*] Get uuid ... Successful
+2017-07-22 12:11:28,771 - webchat_robot.py:755 - Robot - [*] Get QR code ... successfully
+2017-07-22 12:11:46,342 - webchat_robot.py:816 - Robot - [*] Login ... Successful
+2017-07-22 12:11:47,081 - webchat_robot.py:816 - Robot - [*] Wechat init ... Successful
+2017-07-22 12:11:47,354 - webchat_robot.py:816 - Robot - [*] Turn on status notifications ... Successful
+2017-07-22 12:11:52,214 - webchat_robot.py:816 - Robot - [*] Get contact ... Successful
+2017-07-22 12:11:53,873 - webchat_robot.py:816 - Robot - [*] Get Group ... Successful
+2017-07-22 12:13:33,015 - webchat_robot.py:926 - Robot - Version: 8.0 2017-07-14 BugFix: 不使用batch方法更新群组
+2017-07-22 12:13:33,243 - webchat_robot.py:817 - Robot - [*] Get uuid ... Successful
+2017-07-22 12:13:33,243 - webchat_robot.py:756 - Robot - [*] Get QR code ... successfully
+2017-07-22 12:13:49,453 - webchat_robot.py:817 - Robot - [*] Login ... Successful
+2017-07-22 12:13:51,201 - webchat_robot.py:817 - Robot - [*] Wechat init ... Successful
+2017-07-22 12:13:51,463 - webchat_robot.py:817 - Robot - [*] Turn on status notifications ... Successful
+2017-07-22 12:13:57,085 - webchat_robot.py:817 - Robot - [*] Get contact ... Successful
+2017-07-22 12:13:58,754 - webchat_robot.py:817 - Robot - [*] Get Group ... Successful
+2017-07-22 12:22:57,135 - webchat_robot.py:926 - Robot - Version: 8.0 2017-07-14 BugFix: 不使用batch方法更新群组
+2017-07-22 12:22:57,380 - webchat_robot.py:817 - Robot - [*] Get uuid ... Successful
+2017-07-22 12:22:57,382 - webchat_robot.py:756 - Robot - [*] Get QR code ... successfully
+2017-07-22 12:23:19,786 - webchat_robot.py:817 - Robot - [*] Login ... Successful
+2017-07-22 12:23:20,725 - webchat_robot.py:817 - Robot - [*] Wechat init ... Successful
+2017-07-22 12:23:20,989 - webchat_robot.py:817 - Robot - [*] Turn on status notifications ... Successful
+2017-07-22 12:23:25,841 - webchat_robot.py:817 - Robot - [*] Get contact ... Successful
+2017-07-22 12:23:27,452 - webchat_robot.py:817 - Robot - [*] Get Group ... Successful
