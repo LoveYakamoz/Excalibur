@@ -7,7 +7,6 @@ import logging.handlers
 import multiprocessing
 import os
 import platform
-import random
 import re
 import subprocess
 import sys
@@ -22,6 +21,7 @@ import requests
 
 import http.client
 import http.cookiejar
+import random
 
 LOG_FILE = 'webchat.log'
 
@@ -116,8 +116,7 @@ class WebWeixin(object):
         self.interactive = False
         self.autoOpen = False
         self.saveFolder = os.path.join(os.getcwd(), 'saved')
-        self.saveSubFolders = {'webwxgeticon': 'icons', 'webwxgetheadimg': 'headimgs', 'webwxgetmsgimg': 'msgimgs',
-                               'webwxgetvideo': 'videos', 'webwxgetvoice': 'voices', '_showQRCodeImg': 'qrcodes'}
+        self.saveSubFolders = {_showQRCodeImg': 'qrcodes'}
         self.appid = 'wx782c26e4c19acffb'
         self.lang = 'zh_CN'
         self.lastCheckTs = time.time()
@@ -380,7 +379,6 @@ class WebWeixin(object):
             return False
 
         ContactList = dic['ContactList']
-        #self.GroupList = ContactList
 
         for i in range(len(ContactList) - 1, -1, -1):
             Contact = ContactList[i]
@@ -519,33 +517,6 @@ class WebWeixin(object):
         fn = 'img_' + id + '.jpg'
         return self._saveFile(fn, data, 'webwxgeticon')
 
-    def webwxgetheadimg(self, id):
-        url = self.base_uri + \
-            '/webwxgetheadimg?username=%s&skey=%s' % (id, self.skey)
-        data = self._get(url)
-        if data == '':
-            return ''
-        fn = 'img_' + id + '.jpg'
-        return self._saveFile(fn, data, 'webwxgetheadimg')
-
-    def webwxgetmsgimg(self, msgid):
-        url = self.base_uri + \
-            '/webwxgetmsgimg?MsgID=%s&skey=%s' % (msgid, self.skey)
-        data = self._get(url)
-        if data == '':
-            return ''
-        fn = 'img_' + msgid + '.jpg'
-        return self._saveFile(fn, data, 'webwxgetmsgimg')
-
-    def webwxgetvoice(self, msgid):
-        url = self.base_uri + \
-            '/webwxgetvoice?msgid=%s&skey=%s' % (msgid, self.skey)
-        data = self._get(url)
-        if data == '':
-            return ''
-        fn = 'voice_' + msgid + '.mp3'
-        return self._saveFile(fn, data, 'webwxgetvoice')
-
     def getGroupName(self, id):
         name = '未知群'
         for member in self.GroupList:
@@ -598,8 +569,9 @@ class WebWeixin(object):
     def getUSerIDByRemarkName(self, name):
         idlist = []
         print("getUserIDByRemarkName or NickName", name)
-        for member in self.ContactList:
+        logger.info("getUserIDByRemarkName or NickName: %s", name)
 
+        for member in self.ContactList:
             if name == member['RemarkName'] or name == member['NickName']:
                 ret = member['UserName']
                 print("FIND", ret)
@@ -610,6 +582,7 @@ class WebWeixin(object):
             if name == member['RemarkName'] or name == member['NickName']:
                 ret = member['UserName']
                 print("FIND", ret)
+                logger.info("Find %s userid, id: %s", name, ret)
                 idlist.append(ret)
         return idlist
 
@@ -683,7 +656,7 @@ class WebWeixin(object):
                 raw_msg = {
                     'raw_msg': msg, 'message': '[*] Access to contact information Successfully'}
                 self._showMsg(raw_msg)
-            elif msgType == 49:  # link
+            elif msgType == 49:
                 appMsgType = defaultdict(lambda: "")
                 appMsgType.update({5: '链接', 3: '音乐', 7: '微博'})
                 logger.info('=========================')
@@ -716,8 +689,7 @@ class WebWeixin(object):
         while True:
             self.lastCheckTs = time.time()
             [retcode, selector] = self.synccheck()
-
-            logger.info('retcode: %s, selector: %s' % (retcode, selector))
+            
             if retcode == '1100':
                 logger.info('[*] You logout wechat in phone, goodbye')
                 break
@@ -737,6 +709,8 @@ class WebWeixin(object):
                         self.handleMsg(r)
                 elif selector == '0':
                     time.sleep(1)
+            else:
+                logger.info('retcode: %s, selector: %s' % (retcode, selector))
 
             if (time.time() - self.lastCheckTs) <= 20:
                 time.sleep(time.time() - self.lastCheckTs)
@@ -760,11 +734,14 @@ class WebWeixin(object):
                     print("[*] Send text message id: ", id)
                     if self.webwxsendtextmsg(word, id):
                         print('[*] Send text message successfully')
+                        logger.info('[*] Send text message successfully')
                     else:
                         print('[*] Send text message failed')
+                        logger.info('[*] Send text message failed')
 
         else:
             print('[*] user is not exist')
+            logger.info('[*] user is not exist')
 
     @catchKeyboardInterrupt
     def start(self):
@@ -772,11 +749,13 @@ class WebWeixin(object):
         while True:
             self._run('[*] Get uuid ... ', self.getUUID)
             self._echo('[*] Get QR code ... successfully \n')
+            logger.info('[*] Get QR code ... successfully')
             self.genQRCode()
             print('[*] Please scan QR code by phone ... ')
             if not self.waitForLogin():
                 continue
                 print('[*] Please click OK on your phone to sign in ... ')
+                logger.info(('[*] Please click OK on your phone to sign in ... '))
             if not self.waitForLogin(0):
                 continue
             break
@@ -804,6 +783,7 @@ class WebWeixin(object):
 
         if (self.uin != '1497306215') and (self.User['NickName'] != 'John') and (self.User['NickName'] != 'Johnny白恒'):
             print("[*] No permission... ")
+            logger.info("[*] No permission... ")
             return
 
         if sys.platform.startswith('win'):
@@ -826,19 +806,14 @@ class WebWeixin(object):
                 [name, file] = text[3:].split(':')
                 self.sendMsg(name, file, True)
 
-    def _safe_open(self, path):
-        if self.autoOpen:
-            if platform.system() == "Linux":
-                os.system("xdg-open %s &" % path)
-            else:
-                os.system('open %s &' % path)
-
     def _run(self, str, func, *args):
         self._echo(str)
         if func(*args):
             print('Successful')
+            logger.info(str + 'Successful')
         else:
             print('Failed\n[*] Quit')
+            logger.info(str + 'Failed\n[*] Quit)
             exit()
 
     def _echo(self, str):
