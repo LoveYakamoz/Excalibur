@@ -56,7 +56,6 @@ def SaveContact(ContactList, GroupList):
 
         fp.write(
             "==============================================================================\n")
-
         for group in GroupList:
             fp.write('NickName: %s, RemarkName: %s, City: %s, Signature: %s, UserName: %s \n' % (
                 group['NickName'], group['RemarkName'], group['City'], group['Signature'], group['UserName']))
