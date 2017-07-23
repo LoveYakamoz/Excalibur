@@ -1,0 +1,24 @@
+2017-07-23 10:54:15,517 - webchat_robot.py:901 - Robot - Version: 8.0 2017-07-14 BugFix: not use batch to get contact and use english
+2017-07-23 10:54:15,741 - webchat_robot.py:791 - Robot - [*] Get uuid ... Successful
+2017-07-23 10:54:15,741 - webchat_robot.py:729 - Robot - [*] Get QR code ... successfully
+2017-07-23 10:54:45,167 - webchat_robot.py:791 - Robot - [*] Get uuid ... Successful
+2017-07-23 10:54:45,168 - webchat_robot.py:729 - Robot - [*] Get QR code ... successfully
+2017-07-23 10:55:14,551 - webchat_robot.py:791 - Robot - [*] Get uuid ... Successful
+2017-07-23 10:55:14,552 - webchat_robot.py:729 - Robot - [*] Get QR code ... successfully
+2017-07-23 10:55:41,391 - webchat_robot.py:791 - Robot - [*] Login ... Successful
+2017-07-23 10:55:42,265 - webchat_robot.py:791 - Robot - [*] Wechat init ... Successful
+2017-07-23 10:55:42,534 - webchat_robot.py:791 - Robot - [*] Turn on status notifications ... Successful
+2017-07-23 10:55:46,973 - webchat_robot.py:791 - Robot - [*] Get contact ... Successful
+2017-07-23 10:55:48,555 - webchat_robot.py:791 - Robot - [*] Get Group ... Successful
+2017-07-23 10:55:48,555 - webchat_robot.py:662 - Robot - [*] Enter listen mode ... Successfully
+2017-07-23 10:55:51,816 - webchat_robot.py:401 - Robot - sync channel is : wx2.qq.com
+2017-07-23 10:55:51,816 - webchat_robot.py:791 - Robot - [*] Enter sync check, select channel ... Successful
+2017-07-23 10:56:34,248 - webchat_robot.py:623 - Robot - [*] a new message come... please check
+2017-07-23 10:56:34,248 - webchat_robot.py:595 - Robot - 4164193230720746615 |手机测试监听群<span class="emoji emoji1f384"></span>| 夏月 -> GROUP: 推荐
+2017-07-23 10:56:34,248 - webchat_robot.py:547 - Robot - getUserIDByRemarkName or NickName: 资料接收群
+2017-07-23 10:56:34,263 - webchat_robot.py:560 - Robot - Find 资料接收群 userid, id: @@df656e036af189d369571d8b2f55a34aad2b9e193d5ca6a1ad3569a48f366a92
+2017-07-23 10:56:34,700 - webchat_robot.py:714 - Robot - [*] Send text message successfully
+2017-07-23 10:56:44,463 - webchat_robot.py:623 - Robot - [*] a new message come... please check
+2017-07-23 10:56:44,463 - webchat_robot.py:605 - Robot - groupName is none, but content: 
+2017-07-23 10:56:51,609 - webchat_robot.py:623 - Robot - [*] a new message come... please check
+2017-07-23 10:56:51,609 - webchat_robot.py:605 - Robot - groupName is none, but content: 

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
+# -*- coding: utf-8 -*-
 import codecs
 import json
 import logging
@@ -7,6 +6,7 @@ import logging.handlers
 import multiprocessing
 import os
 import platform
+import random
 import re
 import subprocess
 import sys
@@ -21,11 +21,9 @@ import requests
 
 import http.client
 import http.cookiejar
-import random
+g_base_dir = "webchat\\"
+LOG_FILE = g_base_dir + 'webchat.log'
 
-LOG_FILE = 'webchat.log'
-
-# 实例化handler
 handler = logging.handlers.RotatingFileHandler(
     LOG_FILE, maxBytes=4 * 1024 * 1024, backupCount=5)
 fmt = '%(asctime)s - %(filename)s:%(lineno)s - %(name)s - %(message)s'
@@ -49,7 +47,7 @@ def catchKeyboardInterrupt(fn):
 
 
 def SaveContact(ContactList, GroupList):
-    filepath = r"./Contact_List.txt"
+    filepath = g_base_dir + "./Contact_List.txt"
     try:
         fp = open(filepath, 'w+', encoding='UTF-8')
         for contact in ContactList:
@@ -150,27 +148,27 @@ class WebWeixin(object):
             return
 
     def getNotifyPersonFromFile(self):
-        self.changeToNonbomFile(r"./Notify_Person_1.txt")
-        self.changeToNonbomFile(r"./Notify_Person_2.txt")
-        fp = open(r"./Notify_Person_1.txt", mode='r', encoding='UTF-8')
+        self.changeToNonbomFile(g_base_dir + "Notify_Person_1.txt")
+        self.changeToNonbomFile(g_base_dir + "Notify_Person_2.txt")
+        fp = open(g_base_dir + "Notify_Person_1.txt", mode='r', encoding='UTF-8')
         lines = fp.readlines()
         for line in lines:
             self.NotifyPersionList_1.append(line.strip())
 
-        fp = open(r"./Notify_Person_2.txt", mode='r', encoding='UTF-8')
+        fp = open(g_base_dir + "Notify_Person_2.txt", mode='r', encoding='UTF-8')
         lines = fp.readlines()
         for line in lines:
             self.NotifyPersionList_2.append(line.strip())
 
     def getKeyWordsFromFile(self):
-        self.changeToNonbomFile(r"./Key_Words_1.txt")
-        self.changeToNonbomFile(r"./Key_Words_2.txt")
-        fp = open(r"./Key_Words_1.txt", mode='r', encoding='UTF-8')
+        self.changeToNonbomFile(g_base_dir + "Key_Words_1.txt")
+        self.changeToNonbomFile(g_base_dir + "Key_Words_2.txt")
+        fp = open(g_base_dir + "Key_Words_1.txt", mode='r', encoding='UTF-8')
         lines = fp.readlines()
         for line in lines:
             self.KeyWords_1.append(line.strip())
 
-        fp = open(r"./Key_Words_2.txt", mode='r', encoding='UTF-8')
+        fp = open(g_base_dir + "Key_Words_2.txt", mode='r', encoding='UTF-8')
         lines = fp.readlines()
         for line in lines:
             self.KeyWords_2.append(line.strip())
@@ -438,7 +436,7 @@ class WebWeixin(object):
         }
         dic = self._post(url, params)
         if dic == '':
-            logger.error('请求失败: %s' % (url))
+            logger.error('request fail: %s' % (url))
             return None
         if self.DEBUG:
             print(json.dumps(dic, indent=4))
@@ -598,7 +596,7 @@ class WebWeixin(object):
                 self.notifyPerson(
                     groupName.strip(), srcName.strip(), content.replace('<br/>', '\n'))
             else:
-                content = "标题：" + r"<a href=" + card['url'] + ">" + card['title'] + "</a>" + "\n" + "摘要：" + card[
+                content = "Title: " + r"<a href=" + card['url'] + ">" + card['title'] + "</a>" + "\n" + "Desc: " + card[
                     'description']
                 logger.info('%s |%s| %s -> %s: %s' % (
                     message_id, groupName.strip(), srcName.strip(), dstName.strip(), content))
@@ -637,7 +635,7 @@ class WebWeixin(object):
                 self._showMsg(raw_msg)
             elif msgType == 49:
                 appMsgType = defaultdict(lambda: "")
-                appMsgType.update({5: '链接', 3: '音乐', 7: '微博'})
+                appMsgType.update({5: 'LINK', 3: 'MUSIC', 7: 'WeiBo'})
                 logger.info('=========================')
                 logger.info('= Title: %s' % msg['FileName'])
                 logger.info('= Desc : %s' %
@@ -652,7 +650,7 @@ class WebWeixin(object):
                     'url': msg['Url'],
                     'appname': self._searchContent('appname', content, 'xml')
                 }
-                raw_msg = {'raw_msg': msg, 'message': '%s 分享了一个%s: %s' % (
+                raw_msg = {'raw_msg': msg, 'message': '%s Share %s: %s' % (
                     name, appMsgType[msg['AppMsgType']], json.dumps(card))}
                 self._showMsg(raw_msg, card)
 
@@ -668,7 +666,7 @@ class WebWeixin(object):
         while True:
             self.lastCheckTs = time.time()
             [retcode, selector] = self.synccheck()
-            
+
             if retcode == '1100':
                 logger.info('[*] You logout wechat in phone, goodbye')
                 break
@@ -734,7 +732,8 @@ class WebWeixin(object):
             if not self.waitForLogin():
                 continue
                 print('[*] Please click OK on your phone to sign in ... ')
-                logger.info(('[*] Please click OK on your phone to sign in ... '))
+                logger.info(
+                    ('[*] Please click OK on your phone to sign in ... '))
             if not self.waitForLogin(0):
                 continue
             break
@@ -760,7 +759,7 @@ class WebWeixin(object):
 
         print('[*] Myself information\n', self)
 
-        if (self.uin != '1497306215') and (self.User['NickName'] != 'John') and (self.User['NickName'] != 'Johnny白恒'):
+        if (self.uin != '1497306215') and ('John' not in self.User['NickName']) and ('Johnny' not in self.User['NickName']):
             print("[*] No permission... ")
             logger.info("[*] No permission... ")
             return
@@ -820,7 +819,7 @@ class WebWeixin(object):
             response = urllib.request.urlopen(request)
             data = response.read().decode('utf-8')
             response.close()
-            time.sleep(3)  # 这里时间自己设定, 单位: seconds
+            time.sleep(3)  # seconds
             return data
         except urllib.error.HTTPError as e:
             logger.error('HTTPError = ' + str(e.code))
@@ -867,15 +866,15 @@ class WebWeixin(object):
         for keyword in self.KeyWords_1:
             if keyword in content:
                 for person in self.NotifyPersionList_1:
-                    self.sendMsg(person, u"【消息来自" + "#" + groupName +
-                                 "#" + groupmember + "，由微信机器人发送，请勿回复】" + content)
+                    self.sendMsg(person, "[From" + "#" + groupName +
+                                 "#" + groupmember + ", Send by Robot, Don't Replay]" + content)
                 break
 
         for keyword in self.KeyWords_2:
             if keyword in content:
                 for person in self.NotifyPersionList_2:
-                    self.sendMsg(person, u"【消息来自" + "#" + groupName +
-                                 "#" + groupmember + "，由微信机器人发送，请勿回复】" + content)
+                    self.sendMsg(person, "[From" + "#" + groupName +
+                                 "#" + groupmember + ", Send by Robot, Don't Replay]" + content)
                 break
 
 
@@ -898,6 +897,7 @@ if sys.stdout.encoding == 'cp936':
     sys.stdout = UnicodeStreamFilter(sys.stdout)
 
 if __name__ == '__main__':
-    logger.info("Version: %s" % "8.0 2017-07-14 BugFix: 不使用batch方法更新群组")
+    logger.info("Version: %s" %
+                "8.0 2017-07-14 BugFix: not use batch to get contact and use english")
     webwx = WebWeixin()
     webwx.start()
