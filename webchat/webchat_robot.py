@@ -56,6 +56,7 @@ def SaveContact(ContactList, GroupList):
 
         fp.write(
             "==============================================================================\n")
+
         for group in GroupList:
             fp.write('NickName: %s, RemarkName: %s, City: %s, Signature: %s, UserName: %s \n' % (
                 group['NickName'], group['RemarkName'], group['City'], group['Signature'], group['UserName']))
@@ -149,12 +150,14 @@ class WebWeixin(object):
     def getNotifyPersonFromFile(self):
         self.changeToNonbomFile(g_base_dir + "Notify_Person_1.txt")
         self.changeToNonbomFile(g_base_dir + "Notify_Person_2.txt")
-        fp = open(g_base_dir + "Notify_Person_1.txt", mode='r', encoding='UTF-8')
+        fp = open(g_base_dir + "Notify_Person_1.txt",
+                  mode='r', encoding='UTF-8')
         lines = fp.readlines()
         for line in lines:
             self.NotifyPersionList_1.append(line.strip())
 
-        fp = open(g_base_dir + "Notify_Person_2.txt", mode='r', encoding='UTF-8')
+        fp = open(g_base_dir + "Notify_Person_2.txt",
+                  mode='r', encoding='UTF-8')
         lines = fp.readlines()
         for line in lines:
             self.NotifyPersionList_2.append(line.strip())
@@ -492,11 +495,11 @@ class WebWeixin(object):
         return self._saveFile(fn, data, 'webwxgeticon')
 
     def getGroupName(self, id):
-        name = 'δ֪Ⱥ'
+        name = '未知群'
         for member in self.GroupList:
             if member['UserName'] == id:
                 name = member['NickName']
-        if name == 'δ֪Ⱥ':
+        if name == '未知群':
             # not find in current groups
             GroupList = self.getNameById(id)
             for group in GroupList:
@@ -509,7 +512,7 @@ class WebWeixin(object):
         return name
 
     def getUserRemarkName(self, id):
-        name = 'δ֪Ⱥ' if id[:2] == '@@' else 'stranger'
+        name = '未知群' if id[:2] == '@@' else 'stranger'
         if id == self.User['UserName']:
             return self.User['NickName']  # self
 
@@ -536,7 +539,7 @@ class WebWeixin(object):
                     name = member['DisplayName'] if member[
                         'DisplayName'] else member['NickName']
 
-        if name == 'δ֪Ⱥ' or name == 'stranger':
+        if name == '未知群' or name == 'stranger':
             logging.debug(id)
         return name
 
