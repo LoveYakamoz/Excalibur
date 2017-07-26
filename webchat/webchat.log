@@ -22,3 +22,161 @@
 2017-07-23 10:56:44,463 - webchat_robot.py:605 - Robot - groupName is none, but content: 
 2017-07-23 10:56:51,609 - webchat_robot.py:623 - Robot - [*] a new message come... please check
 2017-07-23 10:56:51,609 - webchat_robot.py:605 - Robot - groupName is none, but content: 
+2017-07-26 22:33:10,576 - webchat_robot.py:948 - Robot - Version: 8.0 2017-07-14 BugFix: not use batch to get contact and use english
+2017-07-26 22:33:10,807 - webchat_robot.py:837 - Robot - [*] Get uuid ... Successful
+2017-07-26 22:33:10,807 - webchat_robot.py:775 - Robot - [*] Get QR code ... successfully
+2017-07-26 22:33:29,024 - webchat_robot.py:837 - Robot - [*] Login ... Successful
+2017-07-26 22:33:29,708 - webchat_robot.py:837 - Robot - [*] Wechat init ... Successful
+2017-07-26 22:33:29,986 - webchat_robot.py:837 - Robot - [*] Turn on status notifications ... Successful
+2017-07-26 22:33:34,671 - webchat_robot.py:837 - Robot - [*] Get contact ... Successful
+2017-07-26 22:33:36,451 - webchat_robot.py:837 - Robot - [*] Get Group ... Successful
+2017-07-26 22:33:36,451 - webchat_robot.py:708 - Robot - [*] Enter listen mode ... Successfully
+2017-07-26 22:33:39,706 - webchat_robot.py:446 - Robot - sync channel is : wx2.qq.com
+2017-07-26 22:33:39,706 - webchat_robot.py:837 - Robot - [*] Enter sync check, select channel ... Successful
+2017-07-26 22:33:50,612 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:33:50,612 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:34:49,950 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:34:50,708 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:35:15,690 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:35:15,690 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:36:50,114 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:37:16,822 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:37:55,856 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:38:18,477 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:38:18,477 - webchat_robot.py:651 - Robot - groupName is none, but content: 你把上一条带电话的信息发送到，测试群，就是我让你输入  推荐  的那个群
+2017-07-26 22:38:18,477 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:38:18,477 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:39:15,395 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:39:15,395 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:39:23,033 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:39:23,033 - webchat_robot.py:651 - Robot - groupName is none, but content: 睡觉了吗
+2017-07-26 22:39:43,500 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:39:43,500 - webchat_robot.py:640 - Robot - 7214576609939543994 |两岸三地不加班的老司机| 张明玉 -> GROUP: 刚跑步回来
+2017-07-26 22:39:59,814 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:39:59,814 - webchat_robot.py:640 - Robot - 8357227414035507088 |两岸三地不加班的老司机| 张明玉 -> GROUP: 世纪大道12号口
+2017-07-26 22:40:23,538 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:40:23,538 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:40:27,115 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:40:57,351 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:40:57,351 - webchat_robot.py:651 - Robot - groupName is none, but content: 明玉，你把上面这个信息复制一下，再发送在这个群里
+2017-07-26 22:41:22,434 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:41:22,450 - webchat_robot.py:592 - Robot - getUserIDByRemarkName or NickName: 测试信息接收群
+2017-07-26 22:41:22,450 - webchat_robot.py:605 - Robot - Find 测试信息接收群 userid, id: @@68ca792f3f7c1d2d301ca0caded0f5547bbe324a1ac3ad5572200f9c922e7ae1
+2017-07-26 22:41:22,851 - webchat_robot.py:760 - Robot - [*] Send text message successfully
+2017-07-26 22:41:33,654 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:41:33,654 - webchat_robot.py:640 - Robot - 4376989602346975407 |两岸三地不加班的老司机| 张明玉 -> GROUP: 啥东西
+2017-07-26 22:41:33,670 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:41:33,670 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:41:40,722 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:41:40,722 - webchat_robot.py:640 - Robot - 3463763148301274205 |两岸三地不加班的老司机| 张明玉 -> GROUP: 没看出来
+2017-07-26 22:41:47,767 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:41:59,825 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:41:59,825 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:42:11,795 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:42:11,795 - webchat_robot.py:651 - Robot - groupName is none, but content: 没啥事
+2017-07-26 22:42:11,795 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:42:11,795 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:42:48,036 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:42:48,036 - webchat_robot.py:640 - Robot - 7849818901899945497 |两岸三地不加班的老司机| 张明玉 -> GROUP: 那就12号口见，没问题吧
+2017-07-26 22:43:01,520 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:43:01,520 - webchat_robot.py:640 - Robot - 7549643724867130325 |两岸三地不加班的老司机| 张明玉 -> GROUP: 我尽量11:40左右赶到
+2017-07-26 22:43:21,573 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:43:21,573 - webchat_robot.py:640 - Robot - 9171670357802796618 |两岸三地不加班的老司机| 张明玉 -> GROUP: 沛，你是开车还是地铁？
+2017-07-26 22:43:48,792 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:43:48,807 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:44:43,512 - webchat_robot.py:948 - Robot - Version: 8.0 2017-07-14 BugFix: not use batch to get contact and use english
+2017-07-26 22:44:43,761 - webchat_robot.py:837 - Robot - [*] Get uuid ... Successful
+2017-07-26 22:44:43,761 - webchat_robot.py:775 - Robot - [*] Get QR code ... successfully
+2017-07-26 22:45:08,834 - webchat_robot.py:837 - Robot - [*] Login ... Successful
+2017-07-26 22:45:09,555 - webchat_robot.py:837 - Robot - [*] Wechat init ... Successful
+2017-07-26 22:45:09,819 - webchat_robot.py:837 - Robot - [*] Turn on status notifications ... Successful
+2017-07-26 22:45:14,454 - webchat_robot.py:837 - Robot - [*] Get contact ... Successful
+2017-07-26 22:45:15,952 - webchat_robot.py:837 - Robot - [*] Get Group ... Successful
+2017-07-26 22:45:15,957 - webchat_robot.py:708 - Robot - [*] Enter listen mode ... Successfully
+2017-07-26 22:45:19,199 - webchat_robot.py:446 - Robot - sync channel is : wx2.qq.com
+2017-07-26 22:45:19,199 - webchat_robot.py:837 - Robot - [*] Enter sync check, select channel ... Successful
+2017-07-26 22:45:22,795 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:45:22,795 - webchat_robot.py:651 - Robot - groupName is none, but content: 开车吧，没有地铁直达
+2017-07-26 22:45:22,795 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:45:30,388 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:45:30,388 - webchat_robot.py:651 - Robot - groupName is none, but content: 你再把哪条信息发送一下
+2017-07-26 22:45:48,734 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:45:48,734 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:46:06,665 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:46:06,665 - webchat_robot.py:640 - Robot - 838858812535477454 |两岸三地不加班的老司机| 张明玉 -> GROUP: 没电话就12号口碰头
+2017-07-26 22:46:22,530 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:46:22,530 - webchat_robot.py:640 - Robot - 295827963484439453 |两岸三地不加班的老司机| 张明玉 -> GROUP: 到地铁站就可以搜“花生地铁”免费的
+2017-07-26 22:46:49,289 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:46:49,305 - webchat_robot.py:640 - Robot - 4981463747372023417 |两岸三地不加班的老司机| 张明玉 -> GROUP: 不过要保证可以收到短信验证码才可以
+2017-07-26 22:47:07,339 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:47:07,354 - webchat_robot.py:592 - Robot - getUserIDByRemarkName or NickName: 测试信息接收群
+2017-07-26 22:47:07,354 - webchat_robot.py:605 - Robot - Find 测试信息接收群 userid, id: @@1d3b80e623d864b5ed694f91365750f753b24387ff3032a5314d466d2ad0fc33
+2017-07-26 22:47:07,783 - webchat_robot.py:760 - Robot - [*] Send text message successfully
+2017-07-26 22:47:35,908 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:47:35,908 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:47:56,502 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:47:56,507 - webchat_robot.py:640 - Robot - 1515002861897944885 |两岸三地不加班的老司机| 张明玉 -> GROUP: 96广场下面应该有停车场的
+2017-07-26 22:48:04,295 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:48:04,295 - webchat_robot.py:640 - Robot - 1493520005538525106 |两岸三地不加班的老司机| 张明玉 -> GROUP: 我们碰头后再找地方吃饭
+2017-07-26 22:52:51,598 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:52:51,598 - webchat_robot.py:640 - Robot - 2194553373273729999 |资料接收群| Johnny白恒 -> GROUP: [From#【安信医药】靠谱微信群NO1#崔文亮安信医药新财富首席号满, Send by Robot, Don't Replay]【安信医药崔文亮团队】乐普医疗高级副总经理增持公司股份事件点评
+事件：公司高级副总经理郭同军先生于2017年7月26日通过集中竞价方式增持公司股份9万股，成交均价19.98元，本次增持后郭同军先生合计持有公司股份110.20万股，占公司总股本0.0619%，12个月内不会减持。
+
+点评：
+[闪电]今日公司股价下跌3.53%，我们判断与基本面无关。公司高管郭同军先生市价增持公司股份，有望显著提振市场信心。自去年起，郭同军先生已经四次增持公司股份合计110.2万股，均价18.16元。
+
+[闪电]我们预计，公司上半年器械、药品、医疗服务等各版块增速均符合预期，全年增速将大概率在35%以上，当前股价对应2017年估值为38倍估值不低，但公司持续高增长态势明确，年底估值切换后对应2018年估值28倍，届时PEG将低于1，适合中长线投资者买入持有与公司共成长。
+
+[闪电]公司在一季报中做出指引：乐观维持制剂业务净利润全年60%以上的预期。去年制剂端净利润约为3亿元左右，在整体净利润中占比超过40%，今年若仍然维持60%以上高增速，将贡献27%以上的业绩增长。器械端来看，主要利润仍来自于支架业务，我们认为，随着分级诊疗的推进以及基层居民健康意识的不断提升，基层PCI手术增量将显著高于一二线城市，换言之，PCI整体增速将主要由基层市场贡献，随着公司加速布局基层合作导管室，有望在基层支架市场占据主导地位，支架业务增速高于行业增速将是大概率事件。
+
+[闪电]整体而言，在药品维持高增速、支架拓展基层市场、服务端业绩逐渐向好的背景下，未来三年的内生业绩增长无需过度担忧。此外，公司可降解支架大概率将于明年下半年上市，作为能够解决金属架在血管中永久留存问题的重磅产品，有望迅速打开市场，对标雅培的Absorb来看，可降解架的产品净值将远超传统支架，支架业务的增速瓶颈有望实现突破，为公司业绩高增速“空中加油”。
+
+[闪电]公司在心血管领域已经具备全产业链的供应能力，构建了强大的护城河，并通过抢滩基层市场建立起一套完整的商业模式，有望逐步发展成为大格局的行业整合者。当前时点正值公司增速换挡的关键时期，估值上理应给予一定溢价。
+
+风险提示：药品全年销售不达预期；可降解支架审批进度不达预期
+
+我们6月22日发布了46页乐普医疗重磅深度报告《重磅药品及全降解支架有望相继驱动公司持续高增长，搭建心血管及慢性病全产业链闭环成长空间巨大》 http://t.cn/RKcjVt4 欢迎各位领导与我们交流！
+联系人：崔文亮18664588300/徐嘉辰18001135880
+2017-07-26 22:52:51,629 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:52:51,629 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:53:47,494 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:53:47,494 - webchat_robot.py:651 - Robot - groupName is none, but content: 你可以先找好饭店，如果星爷不好见面，就直接在饭店见面
+2017-07-26 22:54:04,541 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:54:04,541 - webchat_robot.py:651 - Robot - groupName is none, but content: 饭店一般有WIFI
+2017-07-26 22:56:21,228 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:56:21,230 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:56:52,626 - webchat_robot.py:948 - Robot - Version: 8.0 2017-07-14 BugFix: not use batch to get contact and use english
+2017-07-26 22:56:52,926 - webchat_robot.py:837 - Robot - [*] Get uuid ... Successful
+2017-07-26 22:56:52,927 - webchat_robot.py:775 - Robot - [*] Get QR code ... successfully
+2017-07-26 22:57:19,410 - webchat_robot.py:948 - Robot - Version: 8.0 2017-07-14 BugFix: not use batch to get contact and use english
+2017-07-26 22:57:19,638 - webchat_robot.py:837 - Robot - [*] Get uuid ... Successful
+2017-07-26 22:57:19,638 - webchat_robot.py:775 - Robot - [*] Get QR code ... successfully
+2017-07-26 22:57:46,174 - webchat_robot.py:948 - Robot - Version: 8.0 2017-07-14 BugFix: not use batch to get contact and use english
+2017-07-26 22:57:46,416 - webchat_robot.py:837 - Robot - [*] Get uuid ... Successful
+2017-07-26 22:57:46,417 - webchat_robot.py:775 - Robot - [*] Get QR code ... successfully
+2017-07-26 22:58:18,378 - webchat_robot.py:948 - Robot - Version: 8.0 2017-07-14 BugFix: not use batch to get contact and use english
+2017-07-26 22:58:18,604 - webchat_robot.py:837 - Robot - [*] Get uuid ... Successful
+2017-07-26 22:58:18,604 - webchat_robot.py:775 - Robot - [*] Get QR code ... successfully
+2017-07-26 22:58:36,429 - webchat_robot.py:837 - Robot - [*] Login ... Successful
+2017-07-26 22:58:37,166 - webchat_robot.py:837 - Robot - [*] Wechat init ... Successful
+2017-07-26 22:58:37,430 - webchat_robot.py:837 - Robot - [*] Turn on status notifications ... Successful
+2017-07-26 22:58:41,995 - webchat_robot.py:837 - Robot - [*] Get contact ... Successful
+2017-07-26 22:58:43,515 - webchat_robot.py:837 - Robot - [*] Get Group ... Successful
+2017-07-26 22:58:43,531 - webchat_robot.py:708 - Robot - [*] Enter listen mode ... Successfully
+2017-07-26 22:58:46,751 - webchat_robot.py:446 - Robot - sync channel is : wx2.qq.com
+2017-07-26 22:58:46,752 - webchat_robot.py:837 - Robot - [*] Enter sync check, select channel ... Successful
+2017-07-26 22:58:50,275 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:58:50,275 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 22:58:57,358 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 22:58:57,358 - webchat_robot.py:651 - Robot - groupName is none, but content: 明玉再发一下
+2017-07-26 23:00:05,904 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 23:00:05,919 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 23:00:05,919 - webchat_robot.py:592 - Robot - getUserIDByRemarkName or NickName: 测试信息接收群
+2017-07-26 23:00:05,919 - webchat_robot.py:605 - Robot - Find 测试信息接收群 userid, id: @@dd832ed33898706e514386dac7e101d0898479b3e1379d7df8e07d844a65b3f1
+2017-07-26 23:00:06,272 - webchat_robot.py:760 - Robot - [*] Send text message successfully
+2017-07-26 23:00:16,661 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 23:00:37,454 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 23:00:37,454 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 23:00:58,297 - webchat_robot.py:669 - Robot - [*] a new message come... please check
+2017-07-26 23:00:58,298 - webchat_robot.py:651 - Robot - groupName is none, but content: 
+2017-07-26 23:06:52,920 - webchat_robot.py:721 - Robot - [*] You have login web wechat other place, goodbye
