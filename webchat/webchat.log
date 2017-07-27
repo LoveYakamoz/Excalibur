@@ -180,3 +180,38 @@
 2017-07-26 23:00:58,297 - webchat_robot.py:669 - Robot - [*] a new message come... please check
 2017-07-26 23:00:58,298 - webchat_robot.py:651 - Robot - groupName is none, but content: 
 2017-07-26 23:06:52,920 - webchat_robot.py:721 - Robot - [*] You have login web wechat other place, goodbye
+2017-07-27 22:13:17,176 - webchat_robot.py:951 - Robot - Version: 8.5 2017-07-27 BugFix: for login failed
+2017-07-27 22:13:17,469 - webchat_robot.py:840 - Robot - [*] Get uuid ... Successful
+2017-07-27 22:13:17,469 - webchat_robot.py:778 - Robot - [*] Get QR code ... successfully
+2017-07-27 22:13:40,868 - webchat_robot.py:840 - Robot - [*] Login ... Successful
+2017-07-27 22:13:41,769 - webchat_robot.py:840 - Robot - [*] Wechat init ... Successful
+2017-07-27 22:13:42,074 - webchat_robot.py:840 - Robot - [*] Turn on status notifications ... Successful
+2017-07-27 22:13:47,160 - webchat_robot.py:840 - Robot - [*] Get contact ... Successful
+2017-07-27 22:13:49,203 - webchat_robot.py:840 - Robot - [*] Get Group ... Successful
+2017-07-27 22:13:49,219 - webchat_robot.py:711 - Robot - [*] Enter listen mode ... Successfully
+2017-07-27 22:13:52,489 - webchat_robot.py:449 - Robot - sync channel is : wx2.qq.com
+2017-07-27 22:13:52,489 - webchat_robot.py:840 - Robot - [*] Enter sync check, select channel ... Successful
+2017-07-27 22:13:56,068 - webchat_robot.py:672 - Robot - [*] a new message come... please check
+2017-07-27 22:13:56,068 - webchat_robot.py:708 - Robot - [*] message type: 47, maybe emotion, picture, link or money
+2017-07-27 22:14:35,179 - webchat_robot.py:951 - Robot - Version: 8.5 2017-07-27 BugFix: for login failed
+2017-07-27 22:14:36,922 - webchat_robot.py:840 - Robot - [*] Get uuid ... Successful
+2017-07-27 22:14:36,923 - webchat_robot.py:778 - Robot - [*] Get QR code ... successfully
+2017-07-27 22:14:48,744 - webchat_robot.py:281 - Robot - login code : 201
+2017-07-27 22:15:04,547 - webchat_robot.py:281 - Robot - login code : 200
+2017-07-27 22:15:09,886 - webchat_robot.py:840 - Robot - [*] Login ... Successful
+2017-07-27 22:15:10,892 - webchat_robot.py:840 - Robot - [*] Wechat init ... Successful
+2017-07-27 22:15:11,283 - webchat_robot.py:840 - Robot - [*] Turn on status notifications ... Successful
+2017-07-27 22:15:16,245 - webchat_robot.py:840 - Robot - [*] Get contact ... Successful
+2017-07-27 22:15:18,008 - webchat_robot.py:840 - Robot - [*] Get Group ... Successful
+2017-07-27 22:15:18,008 - webchat_robot.py:711 - Robot - [*] Enter listen mode ... Successfully
+2017-07-27 22:15:21,337 - webchat_robot.py:449 - Robot - sync channel is : wx2.qq.com
+2017-07-27 22:15:21,337 - webchat_robot.py:840 - Robot - [*] Enter sync check, select channel ... Successful
+2017-07-27 22:18:29,865 - webchat_robot.py:672 - Robot - [*] a new message come... please check
+2017-07-27 22:18:29,865 - webchat_robot.py:654 - Robot - groupName is none, but content: 
+2017-07-27 22:19:05,760 - webchat_robot.py:672 - Robot - [*] a new message come... please check
+2017-07-27 22:19:05,760 - webchat_robot.py:654 - Robot - groupName is none, but content: 我在微信开发讨论群看到，今天好几个人微信被封了
+2017-07-27 22:19:43,039 - webchat_robot.py:672 - Robot - [*] a new message come... please check
+2017-07-27 22:19:43,039 - webchat_robot.py:654 - Robot - groupName is none, but content: 
+2017-07-27 22:19:56,543 - webchat_robot.py:672 - Robot - [*] a new message come... please check
+2017-07-27 22:19:56,543 - webchat_robot.py:654 - Robot - groupName is none, but content: 你手机可以登录吗
+2017-07-27 22:20:39,276 - webchat_robot.py:724 - Robot - [*] You have login web wechat other place, goodbye

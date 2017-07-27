@@ -274,10 +274,11 @@ class WebWeixin(object):
             tip, self.uuid, int(time.time()))
         data = self._get(url)
         if data == '':
+            logger.error("data is null when login...")
             return False
         pm = re.search(r"window.code=(\d+);", data)
         code = pm.group(1)
-
+        logger.info("login code : %s", code)
         if code == '201':
             return True
         elif code == '200':
@@ -288,7 +289,9 @@ class WebWeixin(object):
             return True
         elif code == '408':
             self._echo('[login timeout] \n')
+            logger.error("login timeout")
         else:
+            logger.error("login abnormal")
             self._echo('[login abnormal] \n')
         return False
 
@@ -775,11 +778,11 @@ class WebWeixin(object):
             logger.info('[*] Get QR code ... successfully')
             self.genQRCode()
             print('[*] Please scan QR code by phone ... ')
-            if not self.waitForLogin():
-                continue
+            if not self.waitForLogin():                
                 print('[*] Please click OK on your phone to sign in ... ')
                 logger.info(
                     ('[*] Please click OK on your phone to sign in ... '))
+                continue
             if not self.waitForLogin(0):
                 continue
             break
@@ -945,6 +948,6 @@ if sys.stdout.encoding == 'cp936':
 
 if __name__ == '__main__':
     logger.info("Version: %s" %
-                "8.0 2017-07-14 BugFix: not use batch to get contact and use english")
+                "8.5 2017-07-27 BugFix: for login failed")
     webwx = WebWeixin()
     webwx.start()
