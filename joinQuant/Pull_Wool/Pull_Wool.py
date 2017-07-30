@@ -30,138 +30,153 @@
     6、卖出持仓中不在g.mairu股票池的股票，卖出比例通过调用maichubili卖出
 
 '''
-
 import talib
 import jqdata
+import pandas as pd
 
-def is_junxianduotou(context, stock):
+
+def is_junxianduotou(context, stock, delta=0):
     '''
     判断个股是否多头排列
     '''
-    grid = get_price(stock, count = 30, frequency='daily', fields=['close'], skip_paused=True, df=True, fq='pre')
-    ma5 = grid[-4:].mean()
-    ma10 = grid[-9:].mean()
-    ma20 = grid[-19:].mean()
-    if grid.close > ma5 and ma5 > ma10 and ma10 > ma20:
+    ma5 = 0
+    ma10 = 0
+    ma20 = 0
+    
+    df = get_price(stock, count=30, end_date = str(context.current_dt), frequency='daily', fields=['close'])
+    current_close = df['close'][0+delta]
+
+    for i in range(5):
+        ma5 += df['close'][-i + delta]
+    ma5 = ma5 * 1.0 / 5
+
+    for i in range(10):
+        ma10 += df['close'][-i + delta]
+    ma10 = ma10 * 1.0 / 10
+
+    for i in range(20):
+        ma20 += df['close'][-i + delta]
+    ma20 = ma20 * 1.0 / 20
+
+    if current_close > ma5 and ma5 > ma10 and ma10 > ma20:
+        log.debug("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f",
+                 stock, current_close, ma5, ma10, ma20)
         return True
     else:
         return False
-    
-def get_chicangduotou(context, data):
+
+
+def get_chicanghouxuan(context):
     '''
     将多头股票，且满足不停牌，当前价格在跌停与涨停中间， 加入持仓候选队列中
     '''
     current_data = get_current_data()
 
     for stock in g.gupiaochi:
-        if is_junxianduotou(context, stock) == True
-            and current_data[stock].low_limit < current_data[stock].close < current_data[stock].high_limit
-            and not current_data[stock].paused:
-            logger.info("%s 为多头股票，加入到候选列表中", stock)
+        if (is_junxianduotou(context, stock) is True
+            # and current_data[stock].low_limit < current_data[stock].close < current_data[stock].high_limit
+                and not current_data[stock].paused):
+            log.info("%s 为多头股票，加入到候选列表中", stock)
             g.chicanghouxuan.append(stock)
 
-def get_buy_list(context, data):
+def get_buy_list(context):
     '''
     准备买入的股票池
     '''
-    get_chicangduotou()
-
-    for stk in g.chicanghouxuan:
-        g.buy_list.append(stk)
+    # 1. 按照最大买入约束，候选队列股票 ---》 买入队列
+    for stock in g.chicanghouxuan:
+        g.buy_list.append(stock)
         if len(g.buy_list) >= g.max_chicang_count:  # 达到计划持仓股票支数
-            logger.warn('已经达到最大持仓股票数，不再增加股票')
+            log.warn('已经达到最大持仓股票数，不再增加股票')
             break
 
-    log.info('选入股票:%s' % (g.buy_list))
-    g.mairushuliang = len(g.buy_list
+    log.info('选入股票:%s', (g.buy_list))
+
 
 def initialize(context):
     '''
     初始化模块，设定参数之类，初始化持仓股票队列
     '''
     # 1. 初始化参数
-    set_benchmark('000300.XSHG') # 设定沪深300作为基准
-    set_option('use_real_price', True)  # 使用真实价格    
+    set_benchmark('000300.XSHG')  # 设定沪深300作为基准
+    set_option('use_real_price', True)  # 使用真实价格
     set_slippage(PriceRelatedSlippage(0.01))  # 设定滑点
     # 手续费是：交易成本（买0.03%，卖0.13%   0.001+0.0003
     set_order_cost(OrderCost(open_tax=0, close_tax=0.001, open_commission=0.0003,
                              close_commission=0.0003, close_today_commission=0, min_commission=5), type='stock')
-    log.set_level('order', 'info')  # log级别设定，只显示info级别以上日志
-
-    # 持仓股，持仓股中仍多头排列，今日变成多头排列
-    g.chicang = []
+    log.set_level('order', 'error')
+    log.set_level('strategy', 'info')
     g.chicanghouxuan = []
-    g.duotouhouxuan = []
     g.buy_list = []
+
     g.max_chicang_count = 10
-    g.mairushuliang = 0
 
     g.gupiaochi = get_index_stocks('399300.XSHE')
+    # 2. 得到候选股票队列
+    get_chicanghouxuan(context)
 
-
-    # 2. 获得当前多头股票，进入候选队列
-    get_chicangduotou(context, data)
-    
     # 3. 根据最大持仓股票数约束，将候选股票加入到买入队列
-    get_mairu(context, data)
+    get_buy_list(context)
 
 
-def get_duotouhouxuan(context, data):
-    '''
-    个股变多头，股票进入多投候选中
-    '''
-    for stock in g.gupiaochi:
-        if is_junxianbianduotou(context, stock) == True
-            and curr_data[stock].low_limit < data[stock].close < curr_data[stock].high_limit
-            and not current_data[stock].paused:
-            g.duotouhouxuan.append(stock)
-
-
-
-def is_junxianbianduotou(context, stock):
+def is_changeduotou(context, stock):
     '''
     判断个股是否今日变多头排列
     '''
+    todayduotou = is_junxianduotou(context, stock)
+    yestodayduotou = is_junxianduotou(context, stock, - 1)
 
-    grid = get_price(stock, 30, unit='1d',
-                     fields=['close'], skip_paused=True,
-                     df=True, fq='pre')
-    todayma5 = grid[-4:].mean()
-    todayma10 = grid[-9:].mean()
-    todayma20 = grid[-19:].mean()
-
-    yestodayma5 = grid[-5:-1].mean()
-    yestodayma10 = grid[-10:-1].mean()
-    yestodayma20 = grid[-20:-1].mean()
-
-    todayduotou = grid.close > todayma5 and todayma5 > todayma10 and todayma10 > todayma20
-    yestodayduotou = grid[-1] > yestodayma5 and yestodayma5 > yestodayma10 and yestodayma10 > yestodayma20
-
-    if todayduotou and not(yestodayduotou):
+    if todayduotou is True and yestodayduotou is False:
+        log.info("stock: %s change to Duotou", stock)
         return True
     else:
         return False
-    
 
-def get_maichubili(context, stock):
+
+def get_new_Duotou(context):
+    '''
+    个股变多头，股票进入多投候选中
+    '''
+    current_data = get_current_data()
+    for stock in g.gupiaochi:
+        if is_changeduotou(context, stock) is True and not current_data[stock].paused:
+        #and curr_data[stock].low_limit < data[stock].close < curr_data[stock].high_limit 
+       
+            log.info("stock: %s add to candidate list", stock)
+            g.chicanghouxuan.append(stock)
+
+def get_sell_scale(context, stock):
     '''
     判断持仓个股卖出的比例
     '''
-    grid = get_price(stock, 30, unit='1d', fields=['close'], skip_paused=True, df=True, fq='pre')
-    todayma5 = grid[-4:].mean()
-    todayma10 = grid[-9:].mean()
-    todayma20 = grid[-19:].mean()
+    ma5 = 0
+    ma10 = 0
+    ma20 = 0
+    
+    df = get_price(stock, count=30, end_date = str(context.current_dt), frequency='daily', fields=['close'])
+    current_close = df['close'][0]
 
-    if grid <= todayma20:
+    for i in range(5):
+        ma5 += df['close'][-i]
+    ma5 = ma5 * 1.0 / 5
+
+    for i in range(10):
+        ma10 += df['close'][-i]
+    ma10 = ma10 * 1.0 / 10
+
+    for i in range(20):
+        ma20 += df['close'][-i]
+    ma20 = ma20 * 1.0 / 20
+
+    if current_close <= ma20:
         return 1.0
-    elif grid <= todayma10:
+    elif current_close <= ma10:
         return 0.75
-    elif grid <= todayma5:
+    elif current_close <= ma5:
         return 0.5
     else:
         return 0
-
-
+            
 def adjust_position(context, buy_stocks):
     '''
     买入mairu列表中的股票，买入金额按现有资金的50%
@@ -170,9 +185,10 @@ def adjust_position(context, buy_stocks):
     for stock in g.mairu:
         order_target_value(stock, gegumairujiner)
 
-    maichubili = get_maichubili(context, stock)
+    sell_scale = get_sell_scale(context, stock)
     for stock in context.portfolio.positions.keys():
-        order_target_value(stock, maichubili)
+        order_target_value(stock, sell_scale)
+
 def handle_data(context, data):
     '''
     每个交易日的14点30分进行调仓
@@ -180,9 +196,17 @@ def handle_data(context, data):
     hour = context.current_dt.hour
     minute = context.current_dt.minute
     if hour == 14 and minute == 30:
-        get_duotouhouxuan(context, data)
-        adjust_position(context, data)
+        get_new_Duotou(context)
+        get_buy_list(context)
+        #adjust_position(context, data)
 
+
+def after_trading_end(context):
+    '''
+    每天交易后， 将候选列表及买入列表清空
+    '''
+    g.chicanghouxuan = []
+    g.buy_list = []
 
 
 def no_paused_no_ST(stock_list):
@@ -196,6 +220,7 @@ def no_paused_no_ST(stock_list):
             and 'ST' not in current_data[stock].name
             and '*' not in current_data[stock].name
             and '退' not in current_data[stock].name]
+
 
 def sort_by_market_cap(stock_list):
     '''
@@ -214,3 +239,4 @@ def sort_by_market_cap(stock_list):
 
     # 返回降序
     return tmpList
+
