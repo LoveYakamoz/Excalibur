@@ -313,6 +313,7 @@ class WebWeixin(object):
                 self.pass_ticket = node.childNodes[0].data
 
         if '' in (self.skey, self.sid, self.uin, self.pass_ticket):
+            logger.error(data)
             return False
 
         self.BaseRequest = {
@@ -948,6 +949,6 @@ if sys.stdout.encoding == 'cp936':
 
 if __name__ == '__main__':
     logger.info("Version: %s" %
-                "8.5 2017-07-27 BugFix: for login failed")
+                "8.5 2017-07-27 BugFix: print log for login failed")
     webwx = WebWeixin()
     webwx.start()

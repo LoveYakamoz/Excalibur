@@ -68,7 +68,7 @@ Stop_profit_stocks	../joinQuant\Day_Trader\Day_Trader.py	/^class Stop_profit_sto
 T_0.py	../joinQuant\T_0\T_0.py	1;"	kind:file	line:1
 Time_condition	../joinQuant\Day_Trader\Day_Trader.py	/^class Time_condition(Adjust_condition):$/;"	kind:class	line:641
 UP	../joinQuant\T_0\T_0.py	/^    UP   = 0  # 上穿$/;"	kind:variable	line:50
-UnicodeStreamFilter	../webchat\webchat_robot.py	/^class UnicodeStreamFilter:$/;"	kind:class	line:928
+UnicodeStreamFilter	../webchat\webchat_robot.py	/^class UnicodeStreamFilter:$/;"	kind:class	line:931
 WORKING	../joinQuant\T_0\T_0.py	/^    WORKING = 1  # 处于买\/卖中$/;"	kind:variable	line:46
 WebWeixin	../webchat\webchat_robot.py	/^class WebWeixin(object):$/;"	kind:class	line:111
 __buy	../joinQuant\Day_Trader\Day_Trader.py	/^    def __buy(self, client, context):$/;"	kind:member	line:1881
@@ -110,7 +110,7 @@ __init__	../joinQuant\Day_Trader\Day_Trader.py	/^    def __init__(self, params):
 __init__	../joinQuant\Day_Trader\Day_Trader.py	/^    def __init__(self,params):$/;"	kind:member	line:2027
 __init__	../joinQuant\T_0\T_0.py	/^    def __init__ (self, stock, close, min_vol, max_vol, lowest, highest, operator_value, status, position, sell_order_id, buy_order_id):$/;"	kind:member	line:59
 __init__	../webchat\webchat_robot.py	/^    def __init__(self):$/;"	kind:member	line:127
-__init__	../webchat\webchat_robot.py	/^    def __init__(self, target):$/;"	kind:member	line:929
+__init__	../webchat\webchat_robot.py	/^    def __init__(self, target):$/;"	kind:member	line:932
 __sell	../joinQuant\Day_Trader\Day_Trader.py	/^    def __sell(self, client, context):$/;"	kind:member	line:1865
 __str__	../joinQuant\Day_Trader\Day_Trader.py	/^    def __str__(self):$/;"	kind:member	line:1015
 __str__	../joinQuant\Day_Trader\Day_Trader.py	/^    def __str__(self):$/;"	kind:member	line:1037
@@ -148,20 +148,20 @@ __str__	../joinQuant\Day_Trader\Day_Trader.py	/^    def __str__(self):$/;"	kind:
 __str__	../joinQuant\Day_Trader\Day_Trader.py	/^    def __str__(self):$/;"	kind:member	line:992
 __str__	../webchat\webchat_robot.py	/^    def __str__(self):$/;"	kind:member	line:112
 __sync_position	../joinQuant\Day_Trader\Day_Trader.py	/^    def __sync_position(self, context):$/;"	kind:member	line:1845
-_echo	../webchat\webchat_robot.py	/^    def _echo(self, str):$/;"	kind:member	line:843
+_echo	../webchat\webchat_robot.py	/^    def _echo(self, str):$/;"	kind:member	line:846
 _emoji_debugger	../webchat\test.py	/^    def _emoji_debugger(content):$/;"	kind:function	line:16
 _emoji_debugger	../webchat\webchat_robot.py	/^    def _emoji_debugger(content):$/;"	kind:function	line:51
 _emoji_formatter	../webchat\test.py	/^    def _emoji_formatter(m):$/;"	kind:function	line:26
 _emoji_formatter	../webchat\webchat_robot.py	/^    def _emoji_formatter(m):$/;"	kind:function	line:61
-_get	../webchat\webchat_robot.py	/^    def _get(self, url: object, api: object = None) -> object:$/;"	kind:member	line:857
-_post	../webchat\webchat_robot.py	/^    def _post(self, url: object, params: object, jsonfmt: object = True) -> object:$/;"	kind:member	line:881
-_run	../webchat\webchat_robot.py	/^    def _run(self, str, func, *args):$/;"	kind:member	line:833
-_saveFile	../webchat\webchat_robot.py	/^    def _saveFile(self, filename, data, api=None):$/;"	kind:member	line:518
-_searchContent	../webchat\webchat_robot.py	/^    def _searchContent(self, key, content, fmat='attr'):$/;"	kind:member	line:653
-_showMsg	../webchat\webchat_robot.py	/^    def _showMsg(self, message, card=''):$/;"	kind:member	line:609
+_get	../webchat\webchat_robot.py	/^    def _get(self, url: object, api: object = None) -> object:$/;"	kind:member	line:860
+_post	../webchat\webchat_robot.py	/^    def _post(self, url: object, params: object, jsonfmt: object = True) -> object:$/;"	kind:member	line:884
+_run	../webchat\webchat_robot.py	/^    def _run(self, str, func, *args):$/;"	kind:member	line:836
+_saveFile	../webchat\webchat_robot.py	/^    def _saveFile(self, filename, data, api=None):$/;"	kind:member	line:521
+_searchContent	../webchat\webchat_robot.py	/^    def _searchContent(self, key, content, fmat='attr'):$/;"	kind:member	line:656
+_showMsg	../webchat\webchat_robot.py	/^    def _showMsg(self, message, card=''):$/;"	kind:member	line:612
 _showQRCodeImg	../webchat\webchat_robot.py	/^    def _showQRCodeImg(self, str):$/;"	kind:member	line:252
-_thread	../webchat\webchat_robot.py	/^            import _thread$/;"	kind:namespace	line:814
-_transcoding	../webchat\webchat_robot.py	/^    def _transcoding(self, data):$/;"	kind:member	line:847
+_thread	../webchat\webchat_robot.py	/^            import _thread$/;"	kind:namespace	line:817
+_transcoding	../webchat\webchat_robot.py	/^    def _transcoding(self, data):$/;"	kind:member	line:850
 adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def adjust(self, context, data, buy_stocks):$/;"	kind:member	line:1176
 adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def adjust(self, context, data, buy_stocks):$/;"	kind:member	line:1201
 adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def adjust(self, context, data, buy_stocks):$/;"	kind:member	line:637
@@ -243,19 +243,19 @@ filter	../joinQuant\Day_Trader\Day_Trader.py	/^    def filter(self, context, dat
 filter	../joinQuant\Day_Trader\Day_Trader.py	/^    def filter(self, context, data, stock_list):$/;"	kind:member	line:966
 filter	../joinQuant\Day_Trader\Day_Trader.py	/^    def filter(self, context, data, stock_list):$/;"	kind:member	line:976
 filter	../joinQuant\Day_Trader\Day_Trader.py	/^    def filter(self, context, data, stock_list):$/;"	kind:member	line:987
-flush	../webchat\webchat_robot.py	/^    def flush(self):$/;"	kind:member	line:939
+flush	../webchat\webchat_robot.py	/^    def flush(self):$/;"	kind:member	line:942
 fmt	../webchat\webchat_robot.py	/^fmt = '%(asctime)s - %(filename)s:%(lineno)s - %(name)s - %(message)s'$/;"	kind:variable	line:35
 formatter	../webchat\webchat_robot.py	/^formatter = logging.Formatter(fmt)$/;"	kind:variable	line:37
 g_base_dir	../webchat\webchat_robot.py	/^g_base_dir = "webchat\\\\"$/;"	kind:variable	line:30
 genQRCode	../webchat\webchat_robot.py	/^    def genQRCode(self):$/;"	kind:member	line:244
-getGroupName	../webchat\webchat_robot.py	/^    def getGroupName(self, id):$/;"	kind:member	line:540
+getGroupName	../webchat\webchat_robot.py	/^    def getGroupName(self, id):$/;"	kind:member	line:543
 getKeyWordsFromFile	../webchat\webchat_robot.py	/^    def getKeyWordsFromFile(self):$/;"	kind:member	line:208
 getListenGroupFromFile	../webchat\webchat_robot.py	/^    def getListenGroupFromFile(self):$/;"	kind:member	line:221
-getNameById	../webchat\webchat_robot.py	/^    def getNameById(self, id):$/;"	kind:member	line:410
+getNameById	../webchat\webchat_robot.py	/^    def getNameById(self, id):$/;"	kind:member	line:413
 getNotifyPersonFromFile	../webchat\webchat_robot.py	/^    def getNotifyPersonFromFile(self):$/;"	kind:member	line:193
-getUSerIDByRemarkName	../webchat\webchat_robot.py	/^    def getUSerIDByRemarkName(self, name):$/;"	kind:member	line:589
+getUSerIDByRemarkName	../webchat\webchat_robot.py	/^    def getUSerIDByRemarkName(self, name):$/;"	kind:member	line:592
 getUUID	../webchat\webchat_robot.py	/^    def getUUID(self):$/;"	kind:member	line:225
-getUserRemarkName	../webchat\webchat_robot.py	/^    def getUserRemarkName(self, id):$/;"	kind:member	line:557
+getUserRemarkName	../webchat\webchat_robot.py	/^    def getUserRemarkName(self, id):$/;"	kind:member	line:560
 get_close_price	../joinQuant\Day_Trader\Day_Trader.py	/^def get_close_price(security, n, unit='1d'):$/;"	kind:function	line:2134
 get_delta_minute	../joinQuant\T_0\T_0.py	/^def get_delta_minute(datetime1, datetime2):$/;"	kind:function	line:414
 get_growth_rate	../joinQuant\Day_Trader\Day_Trader.py	/^def get_growth_rate(security, n=20):$/;"	kind:function	line:2118
@@ -265,8 +265,8 @@ get_obj_by_class_type	../joinQuant\Day_Trader\Day_Trader.py	/^def get_obj_by_cla
 get_rules_str	../joinQuant\Day_Trader\Day_Trader.py	/^    def get_rules_str(rules):$/;"	kind:function	line:428
 get_stocks_by_client	../joinQuant\T_0\T_0.py	/^def get_stocks_by_client(context):$/;"	kind:function	line:115
 get_stocks_by_vol	../joinQuant\T_0\T_0.py	/^def get_stocks_by_vol(context):$/;"	kind:function	line:86
-get_valid_sync_channel	../webchat\webchat_robot.py	/^    def get_valid_sync_channel(self):$/;"	kind:member	line:425
-handleMsg	../webchat\webchat_robot.py	/^    def handleMsg(self, r):$/;"	kind:member	line:667
+get_valid_sync_channel	../webchat\webchat_robot.py	/^    def get_valid_sync_channel(self):$/;"	kind:member	line:428
+handleMsg	../webchat\webchat_robot.py	/^    def handleMsg(self, r):$/;"	kind:member	line:670
 handle_data	../joinQuant\Day_Trader\Day_Trader.py	/^    def handle_data(self, context, data):$/;"	kind:member	line:1242
 handle_data	../joinQuant\Day_Trader\Day_Trader.py	/^    def handle_data(self, context, data):$/;"	kind:member	line:1335
 handle_data	../joinQuant\Day_Trader\Day_Trader.py	/^    def handle_data(self, context, data):$/;"	kind:member	line:1413
@@ -300,7 +300,7 @@ initialize	../joinQuant\T_0\T_0.py	/^def initialize(context):$/;"	kind:function	
 is_3_black_crows	../joinQuant\Day_Trader\Day_Trader.py	/^def is_3_black_crows(stock):$/;"	kind:function	line:2082
 isnan	../joinQuant\T_0\T_0.py	/^from math import isnan$/;"	kind:namespace	line:5
 json	../webchat\webchat_robot.py	/^import json$/;"	kind:namespace	line:3
-listenMsgMode	../webchat\webchat_robot.py	/^    def listenMsgMode(self):$/;"	kind:member	line:707
+listenMsgMode	../webchat\webchat_robot.py	/^    def listenMsgMode(self):$/;"	kind:member	line:710
 log_debug	../joinQuant\Day_Trader\Day_Trader.py	/^    def log_debug(self, msg):$/;"	kind:member	line:602
 log_error	../joinQuant\Day_Trader\Day_Trader.py	/^    def log_error(self, msg):$/;"	kind:member	line:605
 log_info	../joinQuant\Day_Trader\Day_Trader.py	/^    def log_info(self, msg):$/;"	kind:member	line:596
@@ -309,14 +309,14 @@ log_warn	../joinQuant\Day_Trader\Day_Trader.py	/^    def log_warn(self, msg):$/;
 logger	../webchat\webchat_robot.py	/^logger = logging.getLogger('Robot')$/;"	kind:variable	line:40
 logging	../webchat\webchat_robot.py	/^import logging$/;"	kind:namespace	line:4
 logging	../webchat\webchat_robot.py	/^import logging.handlers$/;"	kind:namespace	line:5
-login	../webchat\webchat_robot.py	/^    def login(self):$/;"	kind:member	line:295
+login	../webchat\webchat_robot.py	/^    def login(self):$/;"	kind:member	line:298
 memo	../joinQuant\Day_Trader\Day_Trader.py	/^    memo = ''  # 对象简要说明$/;"	kind:variable	line:525
 minidom	../webchat\webchat_robot.py	/^import xml.dom.minidom$/;"	kind:namespace	line:17
 msg_formatter	../webchat\test.py	/^def msg_formatter(content):$/;"	kind:function	line:41
 msg_formatter	../webchat\webchat_robot.py	/^def msg_formatter(content):$/;"	kind:function	line:76
 multiprocessing	../webchat\webchat_robot.py	/^import multiprocessing$/;"	kind:namespace	line:6
 name	../joinQuant\Day_Trader\Day_Trader.py	/^    name = ''$/;"	kind:variable	line:526
-notifyPerson	../webchat\webchat_robot.py	/^    def notifyPerson(self, groupName, groupmember, content):$/;"	kind:member	line:911
+notifyPerson	../webchat\webchat_robot.py	/^    def notifyPerson(self, groupName, groupmember, content):$/;"	kind:member	line:914
 np	../joinQuant\T_0\T_0.py	/^import numpy as np$/;"	kind:namespace	line:2
 on_clear_position	../joinQuant\Day_Trader\Day_Trader.py	/^    on_clear_position = None  # 清仓调用外部函数$/;"	kind:variable	line:523
 on_close_position	../joinQuant\Day_Trader\Day_Trader.py	/^    on_close_position = None  # 卖股调用外部函数$/;"	kind:variable	line:522
@@ -347,20 +347,20 @@ reset_position	../joinQuant\T_0\T_0.py	/^def reset_position(context):$/;"	kind:f
 select_strategy	../joinQuant\Day_Trader\Day_Trader.py	/^def select_strategy(context):$/;"	kind:function	line:42
 sell_buy	../joinQuant\T_0\T_0.py	/^def sell_buy(context, stock, close_price, index):$/;"	kind:function	line:186
 sell_stock	../joinQuant\T_0\T_0.py	/^def sell_stock(context, stock, amount, limit_price, index):$/;"	kind:function	line:179
-sendMsg	../webchat\webchat_robot.py	/^    def sendMsg(self, name, word, isfile=False):$/;"	kind:member	line:741
+sendMsg	../webchat\webchat_robot.py	/^    def sendMsg(self, name, word, isfile=False):$/;"	kind:member	line:744
 shipane_sdk	../joinQuant\Day_Trader\Day_Trader.py	/^    import shipane_sdk$/;"	kind:namespace	line:37
-start	../webchat\webchat_robot.py	/^    def start(self):$/;"	kind:member	line:770
+start	../webchat\webchat_robot.py	/^    def start(self):$/;"	kind:member	line:773
 statis_most_loss_percent	../joinQuant\Day_Trader\Day_Trader.py	/^    def statis_most_loss_percent(self):$/;"	kind:member	line:1798
 statis_most_win_percent	../joinQuant\Day_Trader\Day_Trader.py	/^    def statis_most_win_percent(self):$/;"	kind:member	line:1784
 statis_total_profit	../joinQuant\Day_Trader\Day_Trader.py	/^    def statis_total_profit(self, context):$/;"	kind:member	line:1812
 subprocess	../webchat\webchat_robot.py	/^import subprocess$/;"	kind:namespace	line:11
-synccheck	../webchat\webchat_robot.py	/^    def synccheck(self):$/;"	kind:member	line:451
+synccheck	../webchat\webchat_robot.py	/^    def synccheck(self):$/;"	kind:member	line:454
 sys	../webchat\webchat_robot.py	/^import sys$/;"	kind:namespace	line:12
 ta	../joinQuant\T_0\T_0.py	/^import talib as ta$/;"	kind:namespace	line:4
 test.py	../webchat\test.py	1;"	kind:file	line:1
 time	../webchat\webchat_robot.py	/^import time$/;"	kind:namespace	line:13
-traceback	../webchat\webchat_robot.py	/^            import traceback$/;"	kind:namespace	line:877
-traceback	../webchat\webchat_robot.py	/^            import traceback$/;"	kind:namespace	line:906
+traceback	../webchat\webchat_robot.py	/^            import traceback$/;"	kind:namespace	line:880
+traceback	../webchat\webchat_robot.py	/^            import traceback$/;"	kind:namespace	line:909
 update_233_highest	../joinQuant\T_0\T_0.py	/^def update_233_highest(context):$/;"	kind:function	line:352
 update_89_lowest	../joinQuant\T_0\T_0.py	/^def update_89_lowest(context):$/;"	kind:function	line:342
 update_params	../joinQuant\Day_Trader\Day_Trader.py	/^    def update_params(self, context, params):$/;"	kind:member	line:1001
@@ -395,14 +395,14 @@ urllib	../webchat\webchat_robot.py	/^import urllib.request$/;"	kind:namespace	li
 waitForLogin	../webchat\webchat_robot.py	/^    def waitForLogin(self, tip=1):$/;"	kind:member	line:271
 watch	../joinQuant\Day_Trader\Day_Trader.py	/^    def watch(self, stock, sold_amount, avg_cost, cur_price):$/;"	kind:member	line:1725
 webchat_robot.py	../webchat\webchat_robot.py	1;"	kind:file	line:1
-webwx	../webchat\webchat_robot.py	/^    webwx = WebWeixin()$/;"	kind:variable	line:949
-webwxbatchgetcontact	../webchat\webchat_robot.py	/^    def webwxbatchgetcontact(self):$/;"	kind:member	line:388
-webwxgetcontact	../webchat\webchat_robot.py	/^    def webwxgetcontact(self):$/;"	kind:member	line:356
-webwxgeticon	../webchat\webchat_robot.py	/^    def webwxgeticon(self, id):$/;"	kind:member	line:531
-webwxinit	../webchat\webchat_robot.py	/^    def webwxinit(self):$/;"	kind:member	line:323
-webwxsendtextmsg	../webchat\webchat_robot.py	/^    def webwxsendtextmsg(self, word, to='filehelper'):$/;"	kind:member	line:496
-webwxstatusnotify	../webchat\webchat_robot.py	/^    def webwxstatusnotify(self):$/;"	kind:member	line:340
-webwxsync	../webchat\webchat_robot.py	/^    def webwxsync(self):$/;"	kind:member	line:473
+webwx	../webchat\webchat_robot.py	/^    webwx = WebWeixin()$/;"	kind:variable	line:952
+webwxbatchgetcontact	../webchat\webchat_robot.py	/^    def webwxbatchgetcontact(self):$/;"	kind:member	line:391
+webwxgetcontact	../webchat\webchat_robot.py	/^    def webwxgetcontact(self):$/;"	kind:member	line:359
+webwxgeticon	../webchat\webchat_robot.py	/^    def webwxgeticon(self, id):$/;"	kind:member	line:534
+webwxinit	../webchat\webchat_robot.py	/^    def webwxinit(self):$/;"	kind:member	line:326
+webwxsendtextmsg	../webchat\webchat_robot.py	/^    def webwxsendtextmsg(self, word, to='filehelper'):$/;"	kind:member	line:499
+webwxstatusnotify	../webchat\webchat_robot.py	/^    def webwxstatusnotify(self):$/;"	kind:member	line:343
+webwxsync	../webchat\webchat_robot.py	/^    def webwxsync(self):$/;"	kind:member	line:476
 when_buy_stock	../joinQuant\Day_Trader\Day_Trader.py	/^    def when_buy_stock(self, stock, order):$/;"	kind:member	line:1308
 when_buy_stock	../joinQuant\Day_Trader\Day_Trader.py	/^    def when_buy_stock(self, stock, order):$/;"	kind:member	line:1386
 when_buy_stock	../joinQuant\Day_Trader\Day_Trader.py	/^    def when_buy_stock(self, stock, order):$/;"	kind:member	line:555
@@ -417,5 +417,5 @@ when_sell_stock	../joinQuant\Day_Trader\Day_Trader.py	/^    def when_sell_stock(
 when_sell_stock	../joinQuant\Day_Trader\Day_Trader.py	/^    def when_sell_stock(self, position, order, is_normal):$/;"	kind:member	line:764
 when_sell_stock	../joinQuant\Day_Trader\Day_Trader.py	/^    def when_sell_stock(self,position,order,is_normal):$/;"	kind:member	line:2038
 wrapper	../webchat\webchat_robot.py	/^    def wrapper(*args):$/;"	kind:function	line:83
-write	../webchat\webchat_robot.py	/^    def write(self, s):$/;"	kind:member	line:935
+write	../webchat\webchat_robot.py	/^    def write(self, s):$/;"	kind:member	line:938
 xml	../webchat\webchat_robot.py	/^import xml.dom.minidom$/;"	kind:namespace	line:17
