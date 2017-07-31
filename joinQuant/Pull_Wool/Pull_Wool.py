@@ -186,17 +186,34 @@ def get_sell_scale(context, stock):
         return 0
             
 def buy_stock(context):
+    '''
+    根据购买列表，买入股票 
+    '''
     pass
 
 
-def sell_stock(context):
+def sell_stock(context, non_duotou_list):
+    '''
+    将非多头股票分为以下三类，并卖出
+        1、股价跌破5日均线，卖出可卖部分的50%；
+        2、跌破10日均线，卖出可卖部分75%；
+        3、跌破20日均线，全部卖出。
+    '''
+    for stock in non_duotou_list:
+        scale = get_sell_scale(context, stock)
+        # TODO: 执行卖出
     pass
 
 def get_non_Duotou(context):
     '''
     从持仓股票中，获得非多头股票列表
     '''
-    pass
+    non_duotou_list = []
+    # TODO: 获取持仓股票列表
+    for stock in xxxx:
+        if is_junxianduotou(context, stock) == False:
+            non_duotou_list.append(stock)
+    return non_duotou_list
 
 def handle_data(context, data):
     '''
@@ -211,13 +228,13 @@ def handle_data(context, data):
         non_duotou_list = get_non_Duotou(context)
         if (len(non_duotou_list) > 0):
             # 2. 卖出持仓中的非多头股票
-            sell_stock()
+            sell_stock(context, non_duotou_list)
             # 3. 获得新的多头股票列表
             get_new_Duotou(context)
             # 4. 获得新的购买股票列表
             get_buy_list(context)
             # 5. 购买新的股票
-            buy(context)
+            buy_stock(context)
 
 
 
