@@ -83,7 +83,7 @@ def get_buy_list(context):
     '''
     准备买入的股票池
     '''
-    # 1. 按照最大买入约束，候选队列股票 ---》 买入队列
+    # 1. 按照最大买入约束，候选队列股票 ---> 买入队列
     for stock in g.chicanghouxuan:
         g.buy_list.append(stock)
         if len(g.buy_list) >= g.max_chicang_count:  # 达到计划持仓股票支数
@@ -92,6 +92,12 @@ def get_buy_list(context):
 
     log.info('选入股票:%s', (g.buy_list))
 
+def init_stock_position(context):
+    '''
+    根据买入列表，进行初始化仓位
+    '''
+
+    pass
 
 def initialize(context):
     '''
@@ -118,25 +124,27 @@ def initialize(context):
     # 3. 根据最大持仓股票数约束，将候选股票加入到买入队列
     get_buy_list(context)
 
-
-def is_changeduotou(context, stock):
-    '''
-    判断个股是否今日变多头排列
-    '''
-    todayduotou = is_junxianduotou(context, stock)
-    yestodayduotou = is_junxianduotou(context, stock, - 1)
-
-    if todayduotou is True and yestodayduotou is False:
-        log.info("stock: %s change to Duotou", stock)
-        return True
-    else:
-        return False
+    # 4. 根据买入列表，初始化仓位
+    init_stock_position(context)
 
 
 def get_new_Duotou(context):
     '''
     个股变多头，股票进入多投候选中
     '''
+    def is_changeduotou(context, stock):
+        '''
+        判断个股是否今日变多头排列
+        '''
+        todayduotou = is_junxianduotou(context, stock)
+        yestodayduotou = is_junxianduotou(context, stock, - 1)
+
+        if todayduotou is True and yestodayduotou is False:
+            log.info("stock: %s change to Duotou", stock)
+            return True
+        else:
+            return False
+
     current_data = get_current_data()
     for stock in g.gupiaochi:
         if is_changeduotou(context, stock) is True and not current_data[stock].paused:
@@ -177,17 +185,18 @@ def get_sell_scale(context, stock):
     else:
         return 0
             
-def adjust_position(context, buy_stocks):
-    '''
-    买入mairu列表中的股票，买入金额按现有资金的50%
-    '''
-    gegumairujiner = context.portfolio.total_value * 0.5 / g.mairushuliang
-    for stock in g.mairu:
-        order_target_value(stock, gegumairujiner)
+def buy_stock(context):
+    pass
 
-    sell_scale = get_sell_scale(context, stock)
-    for stock in context.portfolio.positions.keys():
-        order_target_value(stock, sell_scale)
+
+def sell_stock(context):
+    pass
+
+def get_non_Duotou(context):
+    '''
+    从持仓股票中，获得非多头股票列表
+    '''
+    pass
 
 def handle_data(context, data):
     '''
@@ -195,10 +204,21 @@ def handle_data(context, data):
     '''
     hour = context.current_dt.hour
     minute = context.current_dt.minute
+    
     if hour == 14 and minute == 30:
-        get_new_Duotou(context)
-        get_buy_list(context)
-        #adjust_position(context, data)
+        non_duotou_list = []
+        # 1. 得到持仓中的非多头股票列表
+        non_duotou_list = get_non_Duotou(context)
+        if (len(non_duotou_list) > 0):
+            # 2. 卖出持仓中的非多头股票
+            sell_stock()
+            # 3. 获得新的多头股票列表
+            get_new_Duotou(context)
+            # 4. 获得新的购买股票列表
+            get_buy_list(context)
+            # 5. 购买新的股票
+            buy(context)
+
 
 
 def after_trading_end(context):
@@ -240,3 +260,14 @@ def sort_by_market_cap(stock_list):
     # 返回降序
     return tmpList
 
+def adjust_position(context, buy_stocks):
+    '''
+    买入mairu列表中的股票，买入金额按现有资金的50%
+    '''
+    gegumairujiner = context.portfolio.total_value * 0.5 / g.mairushuliang
+    for stock in g.mairu:
+        order_target_value(stock, gegumairujiner)
+
+    sell_scale = get_sell_scale(context, stock)
+    for stock in context.portfolio.positions.keys():
+        order_target_value(stock, sell_scale)
