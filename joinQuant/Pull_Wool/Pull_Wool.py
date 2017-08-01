@@ -25,11 +25,11 @@
     3、跌破20日均线，全部卖出。
 五、每天先买后卖
     1、启动时间
-    2、列出持仓股中均线多头的股票，放入全局变量g.junxianduotou 
+    2、列出持仓股中均线多头的股票，放入全局变量g.junxianbianduotou 
     3、列出股票池中均线变多头的股票，放入全局变量g.junxianbianduotou
-    4、g.mairu = g.junxianduotou + g.junxianbianduotou 最多不超过10个股票
+    4、g.buy_list = g.junxianbianduotou 最多不超过10个股票 （候选从2，3步骤得到，但按市值排序时，如何搞？）
     5、买入股票
-    6、卖出持仓中不在g.mairu股票池的股票，卖出比例通过调用maichubili卖出
+    6、卖出持仓中不在g.buy_list 股票池的股票，卖出比例通过调用sell_scale卖出
 
 '''
 import talib
