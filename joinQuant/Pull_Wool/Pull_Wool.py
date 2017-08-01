@@ -15,7 +15,9 @@
 
 三、买入原则:
     1、每天买入可用资金的50%，如果可用资金少于总市值10%，则全部买入；
-    2、买入持仓股中均线依旧保持多头排列的个股，如果持仓个股中均线多头少于10个，则添加当天均线变成多头的个股（按流通市值排列）。如果两者数量超过10只，则当日均线变成多头的个股按流通市值排序，总计不超过10只个股；如果两者数量仍少于10只，那么就按实际可买数量平均分配资金；
+    2、买入持仓股中均线依旧保持多头排列的个股，如果持仓个股中均线多头少于10个，则添加当天均线变成多头的个股（按流通市值排列）。
+      如果两者数量超过10只，则当日均线变成多头的个股按流通市值排序，
+      总计不超过10只个股；如果两者数量仍少于10只，那么就按实际可买数量平均分配资金；
 
 四、卖出原则：
     1、股价跌破5日均线，卖出可卖部分的50%；
@@ -127,7 +129,8 @@ def initialize(context):
     # 4. 根据买入列表，初始化仓位
     init_stock_position(context)
 
-
+def before_trading_start():
+    pass
 def get_new_Duotou(context):
     '''
     个股变多头，股票进入多投候选中
@@ -189,7 +192,19 @@ def buy_stock(context):
     '''
     根据购买列表，买入股票 
     '''
-    pass
+    if len(g.buy_list) == 0:
+        log.error("买入列表为空")
+        return
+
+    # TODO: 获取当前可用资金
+    current_total_money = xxx
+    money_per_stock = current_total_money / len(g.buy_list)
+    for stock in g.buy_list:
+        buy_order = order_value(stock, money_per_stock)
+        if buy_order is not None:
+            log.info("股票: %s, 买入%d元成功", stock, money_per_stock)
+        else:
+            log.error("股票: %s, 买入%d元失败", stock, money_per_stock)
 
 
 def sell_stock(context, non_duotou_list):
@@ -201,18 +216,26 @@ def sell_stock(context, non_duotou_list):
     '''
     for stock in non_duotou_list:
         scale = get_sell_scale(context, stock)
-        # TODO: 执行卖出
+        cur_position = context.portfolio.positions[stock].total_amount
+        amount = -1 * cur_position * scale 
+        sell_order = order(stock, amount)
+        if sell_order is not None:
+            log.info("股票: %s, 以%f比例挂单卖出%d成功", stock, scale, amount)
+        else:
+            log.error("股票: %s, 以%f比例挂单卖出%d失败", stock, scale, amount)
     pass
 
 def get_non_Duotou(context):
     '''
-    从持仓股票中，获得非多头股票列表
+    从持仓股票中，获得非多头股票列表，并把多头股票加入到修选队列
     '''
     non_duotou_list = []
     # TODO: 获取持仓股票列表
     for stock in xxxx:
         if is_junxianduotou(context, stock) == False:
             non_duotou_list.append(stock)
+        else:
+            g.chicanghouxuan.append(stock)
     return non_duotou_list
 
 def handle_data(context, data):
@@ -227,14 +250,15 @@ def handle_data(context, data):
         # 1. 得到持仓中的非多头股票列表
         non_duotou_list = get_non_Duotou(context)
         if (len(non_duotou_list) > 0):
-            # 2. 卖出持仓中的非多头股票
-            sell_stock(context, non_duotou_list)
-            # 3. 获得新的多头股票列表
+            # 2. 获得新的多头股票列表
             get_new_Duotou(context)
-            # 4. 获得新的购买股票列表
+            # 3. 获得新的购买股票列表
             get_buy_list(context)
-            # 5. 购买新的股票
+            # 4. 购买新的股票
             buy_stock(context)
+
+            # 5. 卖出持仓中的非多头股票
+            sell_stock(context, non_duotou_list)
 
 
 
