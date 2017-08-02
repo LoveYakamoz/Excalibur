@@ -80,7 +80,6 @@ def before_trading_start(context):
         get_candidate(context)
     g.first_init = False
 
-
 def handle_data(context, data):
     '''
     每个交易日的14点30分进行调仓
@@ -136,7 +135,7 @@ def is_junxianduotou(context, stock, delta=0):
     ma20 = ma20 * 1.0 / g.ma_scale[2]
 
     if current_close > ma5 and ma5 > ma10 and ma10 > ma20:
-        log.debug("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f",
+        log.info("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f",
                   stock, current_close, ma5, ma10, ma20)
         return True
     else:
