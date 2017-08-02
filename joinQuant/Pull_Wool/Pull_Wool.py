@@ -75,12 +75,10 @@ def initialize(context):
 
 def before_trading_start(context):
     if g.first_init is True:
-    pass
-
-
-else:
-    get_candidate(context)
-g.first_init = False
+        pass
+    else:
+        get_candidate(context)
+    g.first_init = False
 
 
 def handle_data(context, data):
