@@ -37,6 +37,82 @@ import jqdata
 import pandas as pd
 
 
+def initialize(context):
+    '''
+    初始化模块，设定参数之类，初始化持仓股票队列
+    '''
+    # 0. 待调整的参数
+    g.max_chicang_count = 10
+    g.min_value_scale = 0.1
+    g.sell_scale = [0.5, 0.75, 1]
+    g.ma_scale = [5, 10, 20]
+
+    # 1. 初始化参数
+    set_benchmark('000300.XSHG')  # 设定沪深300作为基准
+    set_option('use_real_price', True)  # 使用真实价格
+    set_slippage(PriceRelatedSlippage(0.01))  # 设定滑点
+    # 手续费是：交易成本（买0.03%，卖0.13%   0.001+0.0003
+    set_order_cost(OrderCost(open_tax=0, close_tax=0.001, open_commission=0.0003,
+                             close_commission=0.0003, close_today_commission=0, min_commission=5), type='stock')
+    log.set_level('order', 'error')
+    log.set_level('strategy', 'info')
+
+    g.stock_pool = get_init_stock_list()
+    g.stock_pool = sort_by_market_cap(context, g.stock_pool)
+
+    # 2. 得到候选股票队列
+    g.candidate = []
+    get_candidate(context)
+
+    # 3. 根据最大持仓股票数约束，将候选股票加入到买入队列
+    g.buy_list = []
+    get_buy_list(context)
+
+    # 4. 根据买入列表，初始化仓位
+    init_stock_position(context)
+    g.first_init = True
+
+
+def before_trading_start(context):
+    if g.first_init is True:
+    pass
+
+
+else:
+    get_candidate(context)
+g.first_init = False
+
+
+def handle_data(context, data):
+    '''
+    每个交易日的14点30分进行调仓
+    '''
+    hour = context.current_dt.hour
+    minute = context.current_dt.minute
+
+    if hour == 14 and minute == 30:
+        non_duotou_list = []
+        # 1. 将持仓中股票分为多头与非多头股票列表
+        non_duotou_list = get_divided_Duotou(context)
+        if (len(non_duotou_list) > 0):
+            # 2. 获得新的多头股票列表
+            get_new_Duotou(context)
+            # 3. 获得新的购买股票列表
+            get_buy_list(context)
+            # 4. 购买新的股票
+            buy_stock(context)
+            # 5. 卖出持仓中的非多头股票
+            sell_stock(context, non_duotou_list)
+
+
+def after_trading_end(context):
+    '''
+    每天交易后， 将候选列表及买入列表清空
+    '''
+    g.candidate = []
+    g.buy_list = []
+
+
 def is_junxianduotou(context, stock, delta=0):
     '''
     判断个股是否多头排列
@@ -110,50 +186,6 @@ def get_init_stock_list():
     行业龙头股和绩优股（暂时用沪深300来替代）
     '''
     return get_index_stocks('399300.XSHE')
-
-
-def initialize(context):
-    '''
-    初始化模块，设定参数之类，初始化持仓股票队列
-    '''
-    # 0. 待调整的参数
-    g.max_chicang_count = 10
-    g.min_value_scale = 0.1
-    g.sell_scale = [0.5, 0.75, 1]
-    g.ma_scale = [5, 10, 20]
-
-    # 1. 初始化参数
-    set_benchmark('000300.XSHG')  # 设定沪深300作为基准
-    set_option('use_real_price', True)  # 使用真实价格
-    set_slippage(PriceRelatedSlippage(0.01))  # 设定滑点
-    # 手续费是：交易成本（买0.03%，卖0.13%   0.001+0.0003
-    set_order_cost(OrderCost(open_tax=0, close_tax=0.001, open_commission=0.0003,
-                             close_commission=0.0003, close_today_commission=0, min_commission=5), type='stock')
-    log.set_level('order', 'error')
-    log.set_level('strategy', 'info')
-
-    g.stock_pool = get_init_stock_list()
-    g.stock_pool = sort_by_market_cap(context, g.stock_pool)
-
-    # 2. 得到候选股票队列
-    g.candidate = []
-    get_candidate(context)
-
-    # 3. 根据最大持仓股票数约束，将候选股票加入到买入队列
-    g.buy_list = []
-    get_buy_list(context)
-
-    # 4. 根据买入列表，初始化仓位
-    init_stock_position(context)
-    g.first_init = True
-
-
-def before_trading_start(context):
-    if g.first_init is True:
-        pass
-    else:
-        get_candidate(context)
-    g.first_init = False
 
 
 def get_new_Duotou(context):
@@ -271,36 +303,6 @@ def get_divided_Duotou(context):
             if g.candidate.count(stock) == 0:
                 g.candidate.append(stock)
     return non_duotou_list
-
-
-def handle_data(context, data):
-    '''
-    每个交易日的14点30分进行调仓
-    '''
-    hour = context.current_dt.hour
-    minute = context.current_dt.minute
-
-    if hour == 14 and minute == 30:
-        non_duotou_list = []
-        # 1. 将持仓中股票分为多头与非多头股票列表
-        non_duotou_list = get_divided_Duotou(context)
-        if (len(non_duotou_list) > 0):
-            # 2. 获得新的多头股票列表
-            get_new_Duotou(context)
-            # 3. 获得新的购买股票列表
-            get_buy_list(context)
-            # 4. 购买新的股票
-            buy_stock(context)
-            # 5. 卖出持仓中的非多头股票
-            sell_stock(context, non_duotou_list)
-
-
-def after_trading_end(context):
-    '''
-    每天交易后， 将候选列表及买入列表清空
-    '''
-    g.candidate = []
-    g.buy_list = []
 
 
 def no_paused_no_ST(stock_list):
