@@ -293,7 +293,7 @@ def get_divided_Duotou(context):
     '''
     non_duotou_list = []
 
-    for stock in context.portfolio.positions:
+    for stock in context.portfolio.positions.keys():
         if is_junxianduotou(context, stock) == False:
             non_duotou_list.append(stock)
         else:
