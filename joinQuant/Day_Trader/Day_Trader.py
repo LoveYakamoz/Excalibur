@@ -976,7 +976,7 @@ class Filter_limitup(Filter_stock_list):
     def filter(self, context, data, stock_list):
         threshold = 1.00
         return [stock for stock in stock_list if stock in context.portfolio.positions.keys(
-            ) or data[stock].close < data[stock].high_limit * threshold]
+            ) and data[stock].close < data[stock].high_limit * threshold]
 
     def __str__(self):
         return '过滤涨停股票'
@@ -987,7 +987,7 @@ class Filter_limitdown(Filter_stock_list):
     def filter(self, context, data, stock_list):
         threshold = 1.00
         return [stock for stock in stock_list if stock in context.portfolio.positions.keys(
-            ) or data[stock].close > data[stock].low_limit * threshold]
+            ) and data[stock].close > data[stock].low_limit * threshold]
 
     def __str__(self):
         return '过滤跌停股票'
