@@ -216,7 +216,7 @@ def get_new_Duotou(context):
         yestodayduotou = is_junxianduotou(context, stock, - 1)
 
         if todayduotou is True and yestodayduotou is False:
-            log.info("stock: %s change to Duotou", stock)
+            log.debug("stock: %s change to Duotou", stock)
             return True
         else:
             return False
