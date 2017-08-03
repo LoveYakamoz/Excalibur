@@ -150,7 +150,7 @@ def is_junxianduotou(context, stock, delta=0):
     for i in range(g.ma_scale[2]):
         ma20 += df['close'][-i + delta]
     ma20 = ma20 * 1.0 / g.ma_scale[2]
-    log.info("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f", stock, current_close, ma5, ma10, ma20)
+    log.debug("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f", stock, current_close, ma5, ma10, ma20)
     if current_close > ma5 and ma5 > ma10 and ma10 > ma20:
         return True
     else:
@@ -262,7 +262,7 @@ def get_sell_scale(context, stock):
     elif current_close <= ma5:
         return g.sell_scale[0]
     else:
-        log.info("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f", stock, current_close, ma5, ma10, ma20)
+        log.warn("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f", stock, current_close, ma5, ma10, ma20)
         return 0
 
 
@@ -297,9 +297,15 @@ def sell_stock(context, non_duotou_list):
     '''
     for stock in non_duotou_list:
         scale = get_sell_scale(context, stock)
+        if scale == 0:
+            log.warn("虽然不是多头，但是当前价格未跌破各均线，所以不用卖出") 
+            continue
+
         cur_position = context.portfolio.positions[stock].total_amount
         amount = -1 * cur_position * scale
+        
         sell_order = order(stock, amount)
+        
         if sell_order is not None:
             log.info("股票: %s, 以%f比例挂单卖出%d成功", stock, scale, amount)
         else:
