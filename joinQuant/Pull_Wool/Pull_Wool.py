@@ -72,6 +72,7 @@ def initialize(context):
     init_stock_position(context)
     g.first_init = True
 
+    log.info("---------------->Init OK")
 
 def before_trading_start(context):
     if g.first_init is True:
@@ -79,6 +80,8 @@ def before_trading_start(context):
     else:
         get_candidate(context)
     g.first_init = False
+    
+    log.info("---------------->Before trading process OK")
 
 def handle_data(context, data):
     '''
@@ -91,7 +94,8 @@ def handle_data(context, data):
         non_duotou_list = []
         # 1. 将持仓中股票分为多头与非多头股票列表
         non_duotou_list = get_divided_Duotou(context)
-        if (len(non_duotou_list) > 0):
+        
+        if (len(non_duotou_list) > 0 and len(context.portfolio.positions) > 0) or (len(context.portfolio.positions) == 0):
             # 2. 获得新的多头股票列表
             get_new_Duotou(context)
             # 3. 获得新的购买股票列表
@@ -108,6 +112,19 @@ def after_trading_end(context):
     '''
     g.candidate = []
     g.buy_list = []
+
+    log.info("===========================Stat=============================")
+    log.info("当前总收益: %f, 本金: %f, 盈利: %f, 盈亏比率: %f", 
+            context.portfolio.total_value,
+            context.portfolio.starting_cash,
+            context.portfolio.total_value - context.portfolio.starting_cash,
+            context.portfolio.total_value / context.portfolio.starting_cash * 100
+            )
+    log.info("当前可用资金: %f", context.portfolio.available_cash)
+    log.info("当前持仓股票%d个", len(context.portfolio.positions.keys()))
+    log.info("当前持仓股票分别为：", context.portfolio.positions.keys())
+    log.info("============================================================")
+        
 
 
 def is_junxianduotou(context, stock, delta=0):
@@ -133,10 +150,8 @@ def is_junxianduotou(context, stock, delta=0):
     for i in range(g.ma_scale[2]):
         ma20 += df['close'][-i + delta]
     ma20 = ma20 * 1.0 / g.ma_scale[2]
-
+    log.info("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f", stock, current_close, ma5, ma10, ma20)
     if current_close > ma5 and ma5 > ma10 and ma10 > ma20:
-        log.info("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f",
-                  stock, current_close, ma5, ma10, ma20)
         return True
     else:
         return False
@@ -153,7 +168,7 @@ def get_candidate(context):
             # and current_data[stock].low_limit < current_data[stock].close < current_data[stock].high_limit
                 and not current_data[stock].paused
                 and g.candidate.count(stock) == 0):
-            log.info("%s 为多头股票，加入到候选列表中", stock)
+            log.debug("%s 为多头股票，加入到候选列表中", stock)
             g.candidate.append(stock)
 
 
@@ -161,14 +176,18 @@ def get_buy_list(context):
     '''
     准备买入的股票池
     '''
+    # 0. 获得当前持仓数量
+    current_stock_count = len(context.portfolio.positions)
+    log.info("当前持仓数量为%d个", current_stock_count)
+    
     # 1. 按照最大买入约束，候选队列股票 ---> 买入队列
-    for stock in g.candidate:
-        g.buy_list.append(stock)
-        if len(g.buy_list) >= g.max_chicang_count:  # 达到计划持仓股票支数
+    for stock in g.candidate:        
+        if len(g.buy_list) >= g.max_chicang_count - current_stock_count:  # 达到计划持仓股票支数
             log.warn('已经达到最大持仓股票数，不再增加股票')
             break
-
-    log.info('选入股票:%s', (g.buy_list))
+        else:
+            g.buy_list.append(stock)
+    log.info('选入股票:', (g.buy_list))
 
 
 def init_stock_position(context):
@@ -207,7 +226,7 @@ def get_new_Duotou(context):
         if is_changeduotou(context, stock) is True and not current_data[stock].paused:
             # and curr_data[stock].low_limit < data[stock].close < curr_data[stock].high_limit
 
-            log.info("stock: %s add to candidate list", stock)
+            log.debug("stock: %s add to candidate list", stock)
             if g.candidate.count(stock) == 0:
                 g.candidate.append(stock)
 
@@ -243,6 +262,7 @@ def get_sell_scale(context, stock):
     elif current_close <= ma5:
         return g.sell_scale[0]
     else:
+        log.info("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f", stock, current_close, ma5, ma10, ma20)
         return 0
 
 
@@ -251,7 +271,7 @@ def buy_stock(context):
     根据购买列表，买入股票 
     '''
     if len(g.buy_list) == 0:
-        log.error("买入列表为空")
+        log.warn("买入列表为空")
         return
 
     available_cash = context.portfolio.available_cash
@@ -317,7 +337,7 @@ def no_paused_no_ST(stock_list):
 
 def sort_by_market_cap(context, stock_list):
     '''
-    按流通市值降序排列
+    按流通市值升序排列
     '''
     tmpList = []
 
