@@ -74,14 +74,16 @@ def initialize(context):
 
     log.info("---------------->Init OK")
 
+
 def before_trading_start(context):
     if g.first_init is True:
         pass
     else:
         get_candidate(context)
     g.first_init = False
-    
+
     log.info("---------------->Before trading process OK")
+
 
 def handle_data(context, data):
     '''
@@ -94,7 +96,7 @@ def handle_data(context, data):
         non_duotou_list = []
         # 1. 将持仓中股票分为多头与非多头股票列表
         non_duotou_list = get_divided_Duotou(context)
-        
+
         if (len(non_duotou_list) > 0 and len(context.portfolio.positions) > 0) or (len(context.portfolio.positions) == 0):
             # 2. 获得新的多头股票列表
             get_new_Duotou(context)
@@ -114,17 +116,16 @@ def after_trading_end(context):
     g.buy_list = []
 
     log.info("===========================Stat=============================")
-    log.info("当前总收益: %f, 本金: %f, 盈利: %f, 盈亏比率: %f", 
-            context.portfolio.total_value,
-            context.portfolio.starting_cash,
-            context.portfolio.total_value - context.portfolio.starting_cash,
-            context.portfolio.total_value / context.portfolio.starting_cash * 100
-            )
+    log.info("当前总收益: %f, 本金: %f, 盈利: %f, 盈亏比率: %f",
+             context.portfolio.total_value,
+             context.portfolio.starting_cash,
+             context.portfolio.total_value - context.portfolio.starting_cash,
+             context.portfolio.total_value / context.portfolio.starting_cash * 100
+             )
     log.info("当前可用资金: %f", context.portfolio.available_cash)
     log.info("当前持仓股票%d个", len(context.portfolio.positions.keys()))
     log.info("当前持仓股票分别为：", context.portfolio.positions.keys())
     log.info("============================================================")
-        
 
 
 def is_junxianduotou(context, stock, delta=0):
@@ -150,7 +151,8 @@ def is_junxianduotou(context, stock, delta=0):
     for i in range(g.ma_scale[2]):
         ma20 += df['close'][-i + delta]
     ma20 = ma20 * 1.0 / g.ma_scale[2]
-    log.debug("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f", stock, current_close, ma5, ma10, ma20)
+    log.debug("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f",
+              stock, current_close, ma5, ma10, ma20)
     if current_close > ma5 and ma5 > ma10 and ma10 > ma20:
         return True
     else:
@@ -179,9 +181,9 @@ def get_buy_list(context):
     # 0. 获得当前持仓数量
     current_stock_count = len(context.portfolio.positions)
     log.info("当前持仓数量为%d个", current_stock_count)
-    
+
     # 1. 按照最大买入约束，候选队列股票 ---> 买入队列
-    for stock in g.candidate:        
+    for stock in g.candidate:
         if len(g.buy_list) >= g.max_chicang_count - current_stock_count:  # 达到计划持仓股票支数
             log.warn('已经达到最大持仓股票数，不再增加股票')
             break
@@ -262,7 +264,8 @@ def get_sell_scale(context, stock):
     elif current_close <= ma5:
         return g.sell_scale[0]
     else:
-        log.warn("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f", stock, current_close, ma5, ma10, ma20)
+        log.warn("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f",
+                 stock, current_close, ma5, ma10, ma20)
         return 0
 
 
@@ -298,14 +301,14 @@ def sell_stock(context, non_duotou_list):
     for stock in non_duotou_list:
         scale = get_sell_scale(context, stock)
         if scale == 0:
-            log.warn("虽然不是多头，但是当前价格未跌破各均线，所以不用卖出") 
+            log.warn("%s 虽然不是多头，但是当前价格未跌破各均线，所以不用卖出", stock)
             continue
 
         cur_position = context.portfolio.positions[stock].total_amount
         amount = -1 * cur_position * scale
-        
+
         sell_order = order(stock, amount)
-        
+
         if sell_order is not None:
             log.info("股票: %s, 以%f比例挂单卖出%d成功", stock, scale, amount)
         else:
