@@ -136,7 +136,7 @@ def is_junxianduotou(context, stock, delta=0):
     ma10 = 0
     ma20 = 0
 
-    df = get_price(stock, count=30, end_date=str(
+    df = get_price(stock, count=g.ma_scale[2] + 10, end_date=str(
         context.current_dt), frequency='daily', fields=['close'])
     current_close = df['close'][0 + delta]
 
@@ -158,17 +158,29 @@ def is_junxianduotou(context, stock, delta=0):
     else:
         return False
 
+def is_not_limitup_limitdown_pause(stock,):
+    '''
+    判断当前是否涨跌停或停牌
+    '''
+
+    df = get_price(stock, count=1, end_date=str(
+        context.current_dt), frequency='1m', fields=['close'])
+    current_close = df['close'][0]
+    
+    current_data = get_current_data()
+
+    if (current_data[stock].low_limit < current_close < current_data[stock].high_limit) and (not current_data[stock].paused):
+        return True
+    else:
+        return False
 
 def get_candidate(context):
     '''
     将多头股票，且满足不停牌，当前价格在跌停与涨停中间， 加入持仓候选队列中
     '''
-    current_data = get_current_data()
-
     for stock in g.stock_pool:
         if (is_junxianduotou(context, stock) is True
-            # and current_data[stock].low_limit < current_data[stock].close < current_data[stock].high_limit
-                and not current_data[stock].paused
+                and is_not_limitup_limitdown(stock)
                 and g.candidate.count(stock) == 0):
             log.debug("%s 为多头股票，加入到候选列表中", stock)
             g.candidate.append(stock)
@@ -202,6 +214,9 @@ def init_stock_position(context):
 def get_init_stock_list():
     '''
     行业龙头股和绩优股（暂时用沪深300来替代）
+    如果使用股票列表，直接定义一个列表，返回即可。
+    如：
+    return ['xxxx.XSHE', 'yyyy.XSHE', 'zzzz.XSHE']
     '''
     return get_index_stocks('399300.XSHE')
 
@@ -225,9 +240,7 @@ def get_new_Duotou(context):
 
     current_data = get_current_data()
     for stock in g.stock_pool:
-        if is_changeduotou(context, stock) is True and not current_data[stock].paused:
-            # and curr_data[stock].low_limit < data[stock].close < curr_data[stock].high_limit
-
+        if is_changeduotou(context, stock) is True and and is_not_limitup_limitdown(stock):
             log.debug("stock: %s add to candidate list", stock)
             if g.candidate.count(stock) == 0:
                 g.candidate.append(stock)
@@ -241,7 +254,7 @@ def get_sell_scale(context, stock):
     ma10 = 0
     ma20 = 0
 
-    df = get_price(stock, count=30, end_date=str(
+    df = get_price(stock, count=g.ma_scale[2] + 10, end_date=str(
         context.current_dt), frequency='daily', fields=['close'])
     current_close = df['close'][0]
 
