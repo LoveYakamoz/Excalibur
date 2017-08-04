@@ -11,23 +11,27 @@
         6、静态市盈率低于20倍；
         7、扣非净利润占净利润80%以上；
         8、每个行业最多2个股票（含行业龙头股，多余两个选流通市值比较小的）
+
 二、买入标准：均线多头排列（5日，10日，20日）
+    均线间隔存放在 g.ma_scale 全局变量中
 
 三、买入原则:
     1、每天买入可用资金的50%，如果可用资金少于总市值10%，则全部买入；
-    2、买入持仓股中均线依旧保持多头排列的个股，如果持仓个股中均线多头少于10个，则添加当天均线变成多头的个股（按流通市值排列）。
-      如果两者数量超过10只，则当日均线变成多头的个股按流通市值排序，
-      总计不超过10只个股；如果两者数量仍少于10只，那么就按实际可买数量平均分配资金；
+    2、买入持仓股中均线依旧保持多头排列的个股，如果持仓个股中均线多头少于g.max_positions_count个，
+       则添加当天均线变成多头的个股（按流通市值排列）。
+      如果两者数量超过g.max_positions_count只，则当日均线变成多头的个股按流通市值排序，
+      总计不超过g.max_positions_count只个股；如果两者数量仍少于10只，那么就按实际可买数量平均分配资金；
 
 四、卖出原则：
     1、股价跌破5日均线，卖出可卖部分的50%；
     2、跌破10日均线，卖出可卖部分75%；
     3、跌破20日均线，全部卖出。
+    以上卖出比例存放在g.sell_scale全局变量
 五、每天先买后卖
     1、启动时间
-    2、列出持仓股中均线多头的股票，放入全局变量g.junxianbianduotou 
-    3、列出股票池中均线变多头的股票，放入全局变量g.junxianbianduotou
-    4、g.buy_list = g.junxianbianduotou 最多不超过10个股票 （候选从2，3步骤得到，但按市值排序时，如何搞？）
+    2、列出持仓股中均线多头的股票，放入全局变量g.candidate 队列
+    3、列出股票池中均线变多头的股票，放入全局变量g.candidate 队列
+    4、将 g.candidate  最多不超过g.max_positions_count个股票，放入到g.buy_list队列
     5、买入股票
     6、卖出持仓中不在g.buy_list 股票池的股票，卖出比例通过调用sell_scale卖出
 
@@ -42,12 +46,14 @@ def initialize(context):
     初始化模块，设定参数之类，初始化持仓股票队列
     '''
     # 0. 待调整的参数
-    g.max_chicang_count = 10
-    g.min_value_scale = 0.1
-    g.sell_scale = [0.5, 0.75, 1]
-    g.ma_scale = [5, 10, 20]
-
-    # 1. 初始化参数
+    ###################################################
+    g.max_positions_count = 10                     ###
+    g.min_value_scale = 0.1                        ###
+    g.sell_scale = [0.5, 0.75, 1]                  ###
+    g.ma_scale = [5, 10, 20]                       ###
+    ##################################################
+    
+    # 1. 设置参数
     set_benchmark('000300.XSHG')  # 设定沪深300作为基准
     set_option('use_real_price', True)  # 使用真实价格
     set_slippage(PriceRelatedSlippage(0.01))  # 设定滑点
@@ -79,7 +85,8 @@ def before_trading_start(context):
     if g.first_init is True:
         pass
     else:
-        get_candidate(context)
+        pass
+        #get_candidate(context)
     g.first_init = False
 
     log.info("---------------->Before trading process OK")
@@ -158,7 +165,7 @@ def is_junxianduotou(context, stock, delta=0):
     else:
         return False
 
-def is_not_limitup_limitdown_pause(stock,):
+def is_not_limitup_limitdown_pause(context, stock):
     '''
     判断当前是否涨跌停或停牌
     '''
@@ -180,7 +187,7 @@ def get_candidate(context):
     '''
     for stock in g.stock_pool:
         if (is_junxianduotou(context, stock) is True
-                and is_not_limitup_limitdown(stock)
+                and is_not_limitup_limitdown_pause(context, stock)
                 and g.candidate.count(stock) == 0):
             log.debug("%s 为多头股票，加入到候选列表中", stock)
             g.candidate.append(stock)
@@ -196,7 +203,7 @@ def get_buy_list(context):
 
     # 1. 按照最大买入约束，候选队列股票 ---> 买入队列
     for stock in g.candidate:
-        if len(g.buy_list) >= g.max_chicang_count - current_stock_count:  # 达到计划持仓股票支数
+        if len(g.buy_list) >= g.max_positions_count - current_stock_count:  # 达到计划持仓股票支数
             log.warn('已经达到最大持仓股票数，不再增加股票')
             break
         else:
@@ -240,7 +247,7 @@ def get_new_Duotou(context):
 
     current_data = get_current_data()
     for stock in g.stock_pool:
-        if is_changeduotou(context, stock) is True and and is_not_limitup_limitdown(stock):
+        if is_changeduotou(context, stock) is True and is_not_limitup_limitdown_pause(context, stock):
             log.debug("stock: %s add to candidate list", stock)
             if g.candidate.count(stock) == 0:
                 g.candidate.append(stock)
