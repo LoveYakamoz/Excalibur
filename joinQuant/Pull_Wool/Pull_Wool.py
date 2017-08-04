@@ -145,18 +145,18 @@ def is_junxianduotou(context, stock, delta=0):
 
     df = get_price(stock, count=g.ma_scale[2] + 10, end_date=str(
         context.current_dt), frequency='daily', fields=['close'])
-    current_close = df['close'][0 + delta]
+    current_close = df['close'][-1 + delta]
 
     for i in range(g.ma_scale[0]):
-        ma5 += df['close'][-i + delta]
+        ma5 += df['close'][-i-1 + delta]
     ma5 = ma5 * 1.0 / g.ma_scale[0]
 
     for i in range(g.ma_scale[1]):
-        ma10 += df['close'][-i + delta]
+        ma10 += df['close'][-i-1 + delta]
     ma10 = ma10 * 1.0 / g.ma_scale[1]
 
     for i in range(g.ma_scale[2]):
-        ma20 += df['close'][-i + delta]
+        ma20 += df['close'][-i-1 + delta]
     ma20 = ma20 * 1.0 / g.ma_scale[2]
     log.debug("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f",
               stock, current_close, ma5, ma10, ma20)
@@ -263,18 +263,18 @@ def get_sell_scale(context, stock):
 
     df = get_price(stock, count=g.ma_scale[2] + 10, end_date=str(
         context.current_dt), frequency='daily', fields=['close'])
-    current_close = df['close'][0]
+    current_close = df['close'][-1]
 
     for i in range(g.ma_scale[0]):
-        ma5 += df['close'][-i]
+        ma5 += df['close'][-i-1]
     ma5 = ma5 * 1.0 / g.ma_scale[0]
 
     for i in range(g.ma_scale[1]):
-        ma10 += df['close'][-i]
+        ma10 += df['close'][-i-1]
     ma10 = ma10 * 1.0 / g.ma_scale[1]
 
     for i in range(g.ma_scale[2]):
-        ma20 += df['close'][-i]
+        ma20 += df['close'][-i-1]
     ma20 = ma20 * 1.0 / g.ma_scale[2]
 
     if current_close <= ma20:
@@ -284,8 +284,6 @@ def get_sell_scale(context, stock):
     elif current_close <= ma5:
         return g.sell_scale[0]
     else:
-        log.warn("stock: %s, current: %f, ma5: %f, ma10: %f, ma20: %f",
-                 stock, current_close, ma5, ma10, ma20)
         return 0
 
 
