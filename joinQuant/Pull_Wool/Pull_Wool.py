@@ -247,7 +247,11 @@ def get_new_Duotou(context):
 
     current_data = get_current_data()
     for stock in g.stock_pool:
+<<<<<<< HEAD
         if is_changeduotou(context, stock) is True and is_not_limitup_limitdown_pause(context, stock):
+=======
+        if is_changeduotou(context, stock) is True and is_not_limitup_limitdown(stock):
+>>>>>>> f6a79c00fca0ee3a9204f167ac7a8577c3f47bd5
             log.debug("stock: %s add to candidate list", stock)
             if g.candidate.count(stock) == 0:
                 g.candidate.append(stock)
