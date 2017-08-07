@@ -54,6 +54,7 @@ def initialize(context):
     ##################################################
     
     # 1. 设置参数
+    g.version = "Version 2.0: 在初始选投时，也需要选择非多头转变的；对于持续多头的，也需要继续买入"
     set_benchmark('000300.XSHG')  # 设定沪深300作为基准
     set_option('use_real_price', True)  # 使用真实价格
     set_slippage(PriceRelatedSlippage(0.01))  # 设定滑点
@@ -78,7 +79,7 @@ def initialize(context):
     init_stock_position(context)
     g.first_init = True
 
-    log.info("---------------->Init OK")
+    log.info("---------------->Init OK, Version: %s", g.version)
 
 
 def before_trading_start(context):
