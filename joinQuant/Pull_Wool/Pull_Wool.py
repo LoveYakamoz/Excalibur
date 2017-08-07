@@ -54,7 +54,7 @@ def initialize(context):
     ##################################################
     
     # 1. 设置参数
-    g.version = "Version 2.0: 在初始选投时，也需要选择非多头转变的；对于持续多头的，也需要继续买入"
+    g.version = "Version 3.0: 对于持续多头的，需要继续买入"
     set_benchmark('000300.XSHG')  # 设定沪深300作为基准
     set_option('use_real_price', True)  # 使用真实价格
     set_slippage(PriceRelatedSlippage(0.01))  # 设定滑点
@@ -208,13 +208,23 @@ def get_buy_list(context):
     current_stock_count = len(context.portfolio.positions)
     log.info("当前持仓数量为%d个", current_stock_count)
 
+    buy_new_stock = g.max_positions_count - current_stock_count
+
     # 1. 按照最大买入约束，候选队列股票 ---> 买入队列
+    
     for stock in g.candidate:
-        if len(g.buy_list) >= g.max_positions_count - current_stock_count:  # 达到计划持仓股票支数
+        if stock in context.portfolio.positions.keys():
+            g.buy_list.append(stock)
+        else:
+            if buy_new_stock > 0:
+                g.buy_list.append(stock)
+                log.info('新增持仓%s股票', stock)
+                buy_new_stock -= 1
+
+        if len(g.buy_list) >= g.max_positions_count:  # 达到计划持仓股票支数
             log.warn('已经达到最大持仓股票数，不再增加股票')
             break
-        else:
-            g.buy_list.append(stock)
+
     log.info('选入股票:', (g.buy_list))
 
 
@@ -351,8 +361,7 @@ def get_divided_Duotou(context):
         if is_junxianduotou(context, stock) == False:
             non_duotou_list.append(stock)
         else:
-            if g.candidate.count(stock) == 0:
-                g.candidate.append(stock)
+            g.candidate.append(stock)
     return non_duotou_list
 
 
