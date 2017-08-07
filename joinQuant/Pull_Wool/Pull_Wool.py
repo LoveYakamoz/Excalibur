@@ -82,6 +82,8 @@ def initialize(context):
 
 
 def before_trading_start(context):
+    g.candidate = []
+    g.buy_list = []
     if g.first_init is True:
         pass
     else:
@@ -113,7 +115,10 @@ def handle_data(context, data):
             buy_stock(context)
             # 5. 卖出持仓中的非多头股票
             sell_stock(context, non_duotou_list)
-
+        elif (len(non_duotou_list) == 0 and len(context.portfolio.positions) > 0):
+            for stock in context.portfolio.positions.keys():
+                g.buy_list.append(stock)
+            buy_stock(context)
 
 def after_trading_end(context):
     '''
@@ -187,6 +192,7 @@ def get_candidate(context):
     '''
     for stock in g.stock_pool:
         if (is_junxianduotou(context, stock) is True
+                and is_junxianduotou(context, stock, -1) is False
                 and is_not_limitup_limitdown_pause(context, stock)
                 and g.candidate.count(stock) == 0):
             log.debug("%s 为多头股票，加入到候选列表中", stock)

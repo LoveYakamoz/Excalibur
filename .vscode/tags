@@ -194,7 +194,7 @@ before_trading_start	../joinQuant\Day_Trader\Day_Trader.py	/^def before_trading_
 before_trading_start	../joinQuant\Pull_Wool\Pull_Wool.py	/^def before_trading_start(context):$/;"	kind:function	line:84
 before_trading_start	../joinQuant\T_0\T_0.py	/^def before_trading_start(context):$/;"	kind:function	line:151
 buy_sell	../joinQuant\T_0\T_0.py	/^def buy_sell(context, stock, close_price, index):$/;"	kind:function	line:254
-buy_stock	../joinQuant\Pull_Wool\Pull_Wool.py	/^def buy_stock(context):$/;"	kind:function	line:292
+buy_stock	../joinQuant\Pull_Wool\Pull_Wool.py	/^def buy_stock(context):$/;"	kind:function	line:290
 buy_stock	../joinQuant\T_0\T_0.py	/^def buy_stock(context, stock, amount, limit_price, index):$/;"	kind:function	line:172
 can_adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def can_adjust(self):$/;"	kind:member	line:1447
 can_adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def can_adjust(self):$/;"	kind:member	line:1486
@@ -264,7 +264,7 @@ get_buy_list	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_buy_list(context):$/;
 get_candidate	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_candidate(context):$/;"	kind:function	line:184
 get_close_price	../joinQuant\Day_Trader\Day_Trader.py	/^def get_close_price(security, n, unit='1d'):$/;"	kind:function	line:2134
 get_delta_minute	../joinQuant\T_0\T_0.py	/^def get_delta_minute(datetime1, datetime2):$/;"	kind:function	line:414
-get_divided_Duotou	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_divided_Duotou(context):$/;"	kind:function	line:339
+get_divided_Duotou	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_divided_Duotou(context):$/;"	kind:function	line:337
 get_growth_rate	../joinQuant\Day_Trader\Day_Trader.py	/^def get_growth_rate(security, n=20):$/;"	kind:function	line:2118
 get_init_stock_list	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_init_stock_list():$/;"	kind:function	line:221
 get_minute_count	../joinQuant\T_0\T_0.py	/^def get_minute_count(current_dt):$/;"	kind:function	line:326
@@ -333,7 +333,7 @@ msg_formatter	../webchat\test.py	/^def msg_formatter(content):$/;"	kind:function
 msg_formatter	../webchat\webchat_robot.py	/^def msg_formatter(content):$/;"	kind:function	line:76
 multiprocessing	../webchat\webchat_robot.py	/^import multiprocessing$/;"	kind:namespace	line:6
 name	../joinQuant\Day_Trader\Day_Trader.py	/^    name = ''$/;"	kind:variable	line:526
-no_paused_no_ST	../joinQuant\Pull_Wool\Pull_Wool.py	/^def no_paused_no_ST(stock_list):$/;"	kind:function	line:354
+no_paused_no_ST	../joinQuant\Pull_Wool\Pull_Wool.py	/^def no_paused_no_ST(stock_list):$/;"	kind:function	line:352
 notifyPerson	../webchat\webchat_robot.py	/^    def notifyPerson(self, groupName, groupmember, content):$/;"	kind:member	line:915
 np	../joinQuant\T_0\T_0.py	/^import numpy as np$/;"	kind:namespace	line:2
 on_clear_position	../joinQuant\Day_Trader\Day_Trader.py	/^    on_clear_position = None  # 清仓调用外部函数$/;"	kind:variable	line:523
@@ -365,11 +365,11 @@ reset	../joinQuant\Day_Trader\Day_Trader.py	/^    def reset(self):$/;"	kind:memb
 reset_position	../joinQuant\T_0\T_0.py	/^def reset_position(context):$/;"	kind:function	line:370
 select_strategy	../joinQuant\Day_Trader\Day_Trader.py	/^def select_strategy(context):$/;"	kind:function	line:42
 sell_buy	../joinQuant\T_0\T_0.py	/^def sell_buy(context, stock, close_price, index):$/;"	kind:function	line:186
-sell_stock	../joinQuant\Pull_Wool\Pull_Wool.py	/^def sell_stock(context, non_duotou_list):$/;"	kind:function	line:314
+sell_stock	../joinQuant\Pull_Wool\Pull_Wool.py	/^def sell_stock(context, non_duotou_list):$/;"	kind:function	line:312
 sell_stock	../joinQuant\T_0\T_0.py	/^def sell_stock(context, stock, amount, limit_price, index):$/;"	kind:function	line:179
 sendMsg	../webchat\webchat_robot.py	/^    def sendMsg(self, name, word, isfile=False):$/;"	kind:member	line:745
 shipane_sdk	../joinQuant\Day_Trader\Day_Trader.py	/^    import shipane_sdk$/;"	kind:namespace	line:37
-sort_by_market_cap	../joinQuant\Pull_Wool\Pull_Wool.py	/^def sort_by_market_cap(context, stock_list):$/;"	kind:function	line:367
+sort_by_market_cap	../joinQuant\Pull_Wool\Pull_Wool.py	/^def sort_by_market_cap(context, stock_list):$/;"	kind:function	line:365
 start	../webchat\webchat_robot.py	/^    def start(self):$/;"	kind:member	line:774
 statis_most_loss_percent	../joinQuant\Day_Trader\Day_Trader.py	/^    def statis_most_loss_percent(self):$/;"	kind:member	line:1798
 statis_most_win_percent	../joinQuant\Day_Trader\Day_Trader.py	/^    def statis_most_win_percent(self):$/;"	kind:member	line:1784
