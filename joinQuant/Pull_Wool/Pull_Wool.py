@@ -14,6 +14,7 @@
 
 二、买入标准：均线多头排列（5日，10日，20日）
     均线间隔存放在 g.ma_scale 全局变量中
+    rsiValue>80，不再买入
 
 三、买入原则:
     1、每天买入可用资金的50%，如果可用资金少于总市值10%，则全部买入；
@@ -23,9 +24,10 @@
       总计不超过g.max_positions_count只个股；如果两者数量仍少于10只，那么就按实际可买数量平均分配资金；
 
 四、卖出原则：
-    1、股价跌破5日均线，卖出可卖部分的50%；
-    2、跌破10日均线，卖出可卖部分75%；
-    3、跌破20日均线，全部卖出。
+    1、rsiValue>80，卖出持仓的30%
+    2、股价跌破5日均线，卖出可卖部分的50%；
+    3、跌破10日均线，卖出可卖部分75%；
+    4、跌破20日均线，全部卖出。
     以上卖出比例存放在g.sell_scale全局变量
 五、每天先买后卖
     1、启动时间
@@ -39,7 +41,7 @@
 import talib
 import jqdata
 import pandas as pd
-
+import talib as tl
 
 def initialize(context):
     '''
@@ -51,6 +53,8 @@ def initialize(context):
     g.min_value_scale = 0.1                        ###
     g.sell_scale = [0.5, 0.75, 1]                  ###
     g.ma_scale = [5, 10, 20]                       ###
+    g.max_rsi_value = 80                           ###
+    g.rsi_day_count = 5                            ###
     ##################################################
     
     # 1. 设置参数
@@ -397,3 +401,29 @@ def sort_by_market_cap(context, stock_list):
         tmpList.append(df['code'][i])
 
     return tmpList
+
+
+
+rsiValue = RSI_CN(close, 5) 
+# 同花顺和通达信等软件中的SMA
+def SMA_CN(close, timeperiod) :
+    close = np.nan_to_num(close)
+    return reduce(lambda x, y: ((timeperiod - 1) * x + y) / timeperiod, close)
+
+
+# 同花顺和通达信等软件中的RSI
+def RSI_CN(close, timeperiod) :
+    diff = map(lambda x, y : x - y, close[1:], close[:-1])
+    diffGt0 = map(lambda x : 0 if x < 0 else x, diff)
+    diffABS = map(lambda x : abs(x), diff)
+    diff = np.array(diff)
+    diffGt0 = np.array(diffGt0)
+    diffABS = np.array(diffABS)
+    diff = np.append(diff[0], diff)
+    diffGt0 = np.append(diffGt0[0], diffGt0)
+    diffABS = np.append(diffABS[0], diffABS)
+    rsi = map(lambda x : SMA_CN(diffGt0[:x], timeperiod) / SMA_CN(diffABS[:x], timeperiod) * 100
+            , range(1, len(diffGt0) + 1) )
+    
+    return np.array(rsi)
+    
