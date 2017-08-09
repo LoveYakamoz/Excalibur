@@ -44,7 +44,7 @@ cd Quantitative_Trading
 
 
 快速开始
--------
+----
 * 注册一个管理员身份用户(已有`admin/admin`)，配置一个项目。
     * [git配置范例](https://walle-web.io/docs/git-configuration.html)
     * [svn配置范例](https://walle-web.io/docs/svn-configuration.html)
@@ -53,7 +53,7 @@ cd Quantitative_Trading
 * 开发者发起上线
 
 To Do List
-----------
+----
 
 - Travis CI 集成
 - 邮件提醒：可配置提醒事件
@@ -74,10 +74,10 @@ To Do List
 
 
 交流讨论
-----------
+----
 - [submit issue](https://github.com/LoveYakamoz/Quantitative_Trading/issues/new)
 - email: yangpei3720@gmail.com
 
 勾搭下
---------
+----
 <img src="https://raw.githubusercontent.com/meolu/walle-web/feature-weixin/docs/weixin.wushuiyong.jpg" width="244" height="314" alt="Yakamoz微信" align=left />
