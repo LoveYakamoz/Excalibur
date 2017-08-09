@@ -14,135 +14,66 @@ Quantitative_Trading
 A web deployment tool, Easy for configuration, Fully functional, Smooth interface, Out of the box.
 support git/svn Version control system, no matter what language you are, php/java/ruby/python, just as jenkins. you can deploy the code or output to multiple servers easily by walle.
 
-Now, there are more than hundreds of companies hosted walle for deployment, star walle if you like : )
+目前，超过百家企业生产环境部署使用，欢迎star、fork、试用 ：）
 
-* Support git/svn Version control system.
-* User signup by admin/develop identity.
-* Developer submit a task, deploy task.
-* Admin audit task.
-* Multiple project.
-* Multiple Task Parallel.
-* Quick rollback.
-* Group relation of project.
-* Task of pre-deploy（e.g: test ENV var）.
-* Task of post-deploy（e.g: mvn/ant, composer install for vendor）.
-* Task of pre-release（e.g: stop service）.
-* Task of post-release（e.g: restart service）.
-* Check up file md5.
-* Multi-process multi-server file transfer (Ansible).
+* 支持git、svn版本管理
+* 用户分身份注册、登录
+* 开发者发起上线任务申请、部署
+* 管理者审核上线任务
+* 支持多项目部署
+* 支持多项目多任务并行
+* 快速回滚
+* 项目的用户权限管理
+* 部署前准备任务pre-deploy（前置检查）
+* 代码检出后处理任务post-deploy（如vendor）
 
 
-Requirements
-------------
+依赖
+---
 
 * Bash(git、ssh)
 * LNMP/LAMP(php5.4+)
 * Composer
-* Ansible(Optional)
+* Ansible(可选)
 
-That's all. It's base package of PHP environment!
-
-
-Installation
-------------
+安装
+----
 ```
 git clone https://github.com/LoveYakamoz/Quantitative_Trading.git
 cd Quantitative_Trading
 
-Quick Start
--------------
 
-* Signup a admin user(`admin/admin` exists), then configure a project, add member to the project, detect it.
-    * [git demo](https://github.com/meolu/walle-web/blob/master/docs/config-git-en.md)
-    * [svn demo](https://github.com/meolu/walle-web/blob/master/docs/config-svn-en.md)
-* Signup a develop user(`demo/demo` exists), submit a deployment.
-* Project admin audit the deployment.
-* Developer deploy the deployment.
-
-
-Custom
---------
-you would like to adjust some params to make walle suited for your company.
-
-* Set suffix of email while signing in
-    ```php
-    vi config/params.php
-
-    'mail-suffix'   => [  // specify the suffix of email, multiple suffixes are allow.
-        'huamanshu.com',  // e.g: allow xyz@huamanshu.com only
-    ]
-    ```
-
-* Configure email smtp
-    ```php
-    vi config/local.php
-
-    'transport' => [
-            'host'       => 'smtp.huamanshu.com',
-            'username'   => 'service@huamanshu.com',
-            'password'   => 'K84erUuxg1bHqrfD',
-            'port'       => 25,
-            'encryption' => 'tls',
-        ],
-        'messageConfig' => [
-            'charset' => 'UTF-8',
-            'from'    => ['service@huamanshu.com' => '花满树出品'],  // the same with username of mail module in config/web.php
-        ],
-    ```
-
-* Configure the path for log
-    ```php
-    vi config/params.php
-
-    'log.dir'   => '/tmp/walle/',
-    ```
-
-* Configure language
-    ```php
-    vi config/web.php +73
-
-    'language'   => 'en',  # zh => 中文,  en => English
-    ```
-
+快速开始
+-------
+* 注册一个管理员身份用户(已有`admin/admin`)，配置一个项目。
+    * [git配置范例](https://walle-web.io/docs/git-configuration.html)
+    * [svn配置范例](https://walle-web.io/docs/svn-configuration.html)
+* 开发者注册用户(已有`demo/demo`)，提交上线单
+* 管理员审核上线单
+* 开发者发起上线
 
 To Do List
 ----------
 
-- Travis CI integration
-- Mail events：specify kinds of events
-- Gray released：specify servers
-- Websocket instead of poll
-- A manager of static source
-- Configure variables
-- Support Docker
-- Open api
-- Command line
-
-Update
------------------
-```
-./yii walle/upgrade    # upgrade walle
-```
+- Travis CI 集成
+- 邮件提醒：可配置提醒事件
+- 灰度发布：指定机器发布
+- 引入websocket
+- 静态资源管理器
+- 自定义公司logo
+- 自定义变量
+- 支持国际化：增加英文语言
+- 支持Docker
+- 开放接口
 
 
-Architecture
-------------
-#### git/svn, user, host, servers
-
-
-#### deployment flow
-
-Screenshots
------------
-
-#### project config
 
 
 ## CHANGELOG
-[CHANGELOG](https://github.com/LoveYakamoz/Quantitative_Trading/releases)
+版本记录: [CHANGELOG](https://github.com/LoveYakamoz/Quantitative_Trading/releases)
 
 
-Discussing
+交流讨论
 ----------
 - [submit issue](https://github.com/LoveYakamoz/Quantitative_Trading/issues/new)
 - email: yangpei3720@gmail.com
