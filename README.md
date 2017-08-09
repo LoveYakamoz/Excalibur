@@ -42,6 +42,7 @@ support git/svn Version control system, no matter what language you are, php/jav
 git clone https://github.com/LoveYakamoz/Quantitative_Trading.git
 cd Quantitative_Trading
 
+```
 
 快速开始
 ----
@@ -69,8 +70,8 @@ To Do List
 
 
 
-## CHANGELOG
-版本记录: [CHANGELOG](https://github.com/LoveYakamoz/Quantitative_Trading/releases)
+版本记录
+[CHANGELOG](https://github.com/LoveYakamoz/Quantitative_Trading/releases)
 
 
 交流讨论
