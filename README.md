@@ -71,6 +71,7 @@ To Do List
 
 
 版本记录
+----
 [CHANGELOG](https://github.com/LoveYakamoz/Quantitative_Trading/releases)
 
 
