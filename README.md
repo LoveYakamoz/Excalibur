@@ -2,6 +2,7 @@
 Description:
 1. a webchat robot: It can extract some group infomation with special key words and send these infomations to special groups
 3. joinQuant: 在聚宽平台学习使用的策略 
+
 ![](https://raw.github.com/meolu/walle-web/master/docs/logo.jpg)
 
 Quantitative_Trading
@@ -12,8 +13,6 @@ Quantitative_Trading
 
 A web deployment tool, Easy for configuration, Fully functional, Smooth interface, Out of the box.
 support git/svn Version control system, no matter what language you are, php/java/ruby/python, just as jenkins. you can deploy the code or output to multiple servers easily by walle.
-
-[Home Page](https://www.walle-web.io) | [官方主页](https://www.walle-web.io) | [中文说明](https://github.com/meolu/walle-web/blob/master/docs/README-zh.md) | [文档手册](https://www.walle-web.io/docs/).
 
 Now, there are more than hundreds of companies hosted walle for deployment, star walle if you like : )
 
@@ -47,13 +46,8 @@ That's all. It's base package of PHP environment!
 Installation
 ------------
 ```
-git clone git@github.com:meolu/walle-web.git
-cd walle-web
-vi config/web.php # set up module db mysql connection info
-composer install  # error cause by bower-asset, install：composer global require "fxp/composer-asset-plugin:*"
-./yii walle/setup # init walle
-```
-Or [The Most Detailed Installation Guide](https://github.com/meolu/walle-web/blob/master/docs/install-en.md), any questions refer to [FAQ](https://github.com/meolu/walle-web/blob/master/docs/faq-en.md)
+git clone https://github.com/LoveYakamoz/Quantitative_Trading.git
+cd Quantitative_Trading
 
 Quick Start
 -------------
@@ -134,19 +128,14 @@ Update
 Architecture
 ------------
 #### git/svn, user, host, servers
-![](https://raw.github.com/meolu/docs/master/walle-web.io/docs/en/static/walle-flow-relation-en.png)
+
 
 #### deployment flow
-![](https://raw.github.com/meolu/docs/master/walle-web.io/docs/en/static/walle-flow-en.png)
 
 Screenshots
 -----------
 
 #### project config
-![](https://raw.github.com/meolu/docs/master/walle-web.io/docs/en/static/walle-config-edit-en.jpg)
-
-
-
 
 
 ## CHANGELOG
@@ -160,4 +149,4 @@ Discussing
 
 勾搭下
 --------
-<img src="https://raw.githubusercontent.com/meolu/walle-web/feature-weixin/docs/weixin.wushuiyong.jpg" width="244" height="314" alt="吴水永微信" align=left />
+<img src="https://raw.githubusercontent.com/meolu/walle-web/feature-weixin/docs/weixin.wushuiyong.jpg" width="244" height="314" alt="Yakamoz微信" align=left />
