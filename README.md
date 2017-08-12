@@ -1,8 +1,3 @@
-2017/4/26: init project
-Description:
-1. a webchat robot: It can extract some group infomation with special key words and send these infomations to special groups
-3. joinQuant: 在聚宽平台学习使用的策略 
-
 ![](https://raw.github.com/meolu/walle-web/master/docs/logo.jpg)
 
 Quantitative_Trading
@@ -11,21 +6,14 @@ Quantitative_Trading
 [![Packagist](https://img.shields.io/packagist/v/meolu/walle-web.svg)](https://packagist.org/packages/meolu/walle-web)
 [![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](http://www.yiiframework.com/)
 
-A web deployment tool, Easy for configuration, Fully functional, Smooth interface, Out of the box.
-support git/svn Version control system, no matter what language you are, php/java/ruby/python, just as jenkins. you can deploy the code or output to multiple servers easily by walle.
+a webchat robot: It can extract some group infomation with special key words and send these infomations to special groups
 
-目前，超过百家企业生产环境部署使用，欢迎star、fork、试用 ：）
+joinQuant: 在聚宽平台学习使用的策略，当前主要包含以下内容： 
 
-* 支持git、svn版本管理
-* 用户分身份注册、登录
-* 开发者发起上线任务申请、部署
-* 管理者审核上线任务
-* 支持多项目部署
-* 支持多项目多任务并行
-* 快速回滚
-* 项目的用户权限管理
-* 部署前准备任务pre-deploy（前置检查）
-* 代码检出后处理任务post-deploy（如vendor）
+* 日内交易策略
+* 均线多头策略
+* 小市值策略
+* 主观交易系统
 
 
 依赖
@@ -64,9 +52,6 @@ To Do List
 - 自定义公司logo
 - 自定义变量
 - 支持国际化：增加英文语言
-- 支持Docker
-- 开放接口
-
 
 
 
