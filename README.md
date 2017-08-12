@@ -1,8 +1,8 @@
-<img src="https://github.com/LoveYakamoz/Excalibur/blob/master/image/Excalibur.bmp" width="532" height="112" />  B
+<img src="https://github.com/LoveYakamoz/Excalibur/blob/master/image/Excalibur.bmp" width="532" height="112" />
 
 “断钢”之意，亚瑟王（King Arthur）的佩剑，某种意义上也是王权的象征，传说为湖中仙女（The Lady of Lake）所赠。
 据该时期的图绘之类推测，此剑应为双刃的单手剑，长度大概在80-110cm。在这之前亚瑟王使用的是从石头中拔出以证明其身份的石中剑。 断钢剑是伴随着亚瑟王这位传说中的英雄而出现的圣剑，它与这个传说本身的主题一样，代表了支配与破坏，从而被称为英雄治理的象征，是王中之王的武器、剑中之剑。
-“Excalibur”，在古塞尔特语中为“断钢”之意，又被翻译成为“断刚剑”、“王者之剑”、“斩铁剑”、“湖中剑”。 
+“Excalibur”在古塞尔特语中为“断钢”之意，又被翻译成为“断刚剑”、“王者之剑”、“斩铁剑”、“湖中剑”。 
 
 <img src="https://github.com/LoveYakamoz/Excalibur/blob/master/image/Excalibur.jpg" width="256" height="300" />
 
