@@ -6,9 +6,13 @@ Quantitative_Trading
 [![Packagist](https://img.shields.io/packagist/v/meolu/walle-web.svg)](https://packagist.org/packages/meolu/walle-web)
 [![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](http://www.yiiframework.com/)
 
-a webchat robot: It can extract some group infomation with special key words and send these infomations to special groups
+微信机器人：实现微信群组信息的自动化过滤
 
-joinQuant: 在聚宽平台学习使用的策略，当前主要包含以下内容： 
+    * 支持自定义关键字词
+    * 支持发送到指定群组
+    * 支持定义两组不同关键字词
+
+聚宽策略: 在聚宽平台学习使用的策略，当前主要包含以下内容： 
 
 * 日内交易策略
 * 均线多头策略
