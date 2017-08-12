@@ -38,6 +38,7 @@ INTERVAL	../gmQuant\example\test_timer.py	/^INTERVAL = 1000$/;"	kind:variable	li
 Index28_condition	../joinQuant\Day_Trader\Day_Trader.py	/^class Index28_condition(Adjust_condition):$/;"	kind:class	line:784
 Index_selection	../joinQuant\Day_Trader\Day_Trader.py	/^class Index_selection(Adjust_condition):$/;"	kind:class	line:670
 LOG_FILE	../webchat\webchat_robot.py	/^LOG_FILE = g_base_dir + 'webchat.log'$/;"	kind:variable	line:31
+MyStrategy	../gmQuant\example\test.py	/^class MyStrategy(StrategyBase):$/;"	kind:class	line:4
 MyStrategy	../gmQuant\example\test_backtest.py	/^class MyStrategy(StrategyBase):$/;"	kind:class	line:7
 MyStrategy	../gmQuant\example\test_backtest_cw_config_ini.py	/^class MyStrategy(StrategyBase):$/;"	kind:class	line:6
 MyStrategy	../gmQuant\example\test_strategy.py	/^class MyStrategy(StrategyBase):$/;"	kind:class	line:6
@@ -74,6 +75,7 @@ Stop_loss_by_last5day_net_worth	../joinQuant\Day_Trader\Day_Trader.py	/^class St
 Stop_loss_by_price	../joinQuant\Day_Trader\Day_Trader.py	/^class Stop_loss_by_price(Adjust_condition):$/;"	kind:class	line:1400
 Stop_loss_stocks	../joinQuant\Day_Trader\Day_Trader.py	/^class Stop_loss_stocks(Rule):$/;"	kind:class	line:1229
 Stop_profit_stocks	../joinQuant\Day_Trader\Day_Trader.py	/^class Stop_profit_stocks(Rule):$/;"	kind:class	line:1324
+StrategyBase	../gmQuant\example\test.py	/^from gmsdk.api import StrategyBase$/;"	kind:namespace	line:1
 StrategyBase	../gmQuant\example\test_backtest.py	/^from gmsdk.api import StrategyBase$/;"	kind:namespace	line:3
 StrategyBase	../gmQuant\example\test_backtest_cw_config_ini.py	/^from gmsdk.api import StrategyBase$/;"	kind:namespace	line:3
 StrategyBase	../gmQuant\example\test_strategy.py	/^from gmsdk.api import StrategyBase$/;"	kind:namespace	line:3
@@ -97,6 +99,7 @@ __get_shipan_cash	../joinQuant\Day_Trader\Day_Trader.py	/^    def __get_shipan_c
 __get_shipan_p	../joinQuant\Day_Trader\Day_Trader.py	/^    def __get_shipan_p(self, client):$/;"	kind:member	line:1952
 __get_stop_loss_threshold	../joinQuant\Day_Trader\Day_Trader.py	/^    def __get_stop_loss_threshold(self, security, n=3):$/;"	kind:member	line:1281
 __get_stop_profit_threshold	../joinQuant\Day_Trader\Day_Trader.py	/^    def __get_stop_profit_threshold(self, security, n=3):$/;"	kind:member	line:1369
+__init__	../gmQuant\example\test.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:5
 __init__	../gmQuant\example\test_backtest.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:8
 __init__	../gmQuant\example\test_backtest_cw_config_ini.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:7
 __init__	../gmQuant\example\test_strategy.py	/^    def __init__(self, *args, **kwargs):$/;"	kind:member	line:7
@@ -384,6 +387,7 @@ on_login	../gmQuant\example\test_td_live.py	/^def on_login():$/;"	kind:function	
 on_login	../gmQuant\example\test_timer.py	/^    def on_login(self):$/;"	kind:member	line:14
 on_open_position	../joinQuant\Day_Trader\Day_Trader.py	/^    on_open_position = None  # 买股调用外部函数$/;"	kind:variable	line:521
 on_order_status	../gmQuant\example\test_td_live.py	/^def on_order_status(o):$/;"	kind:function	line:13
+on_tick	../gmQuant\example\test.py	/^    def on_tick(self, tick):$/;"	kind:member	line:8
 on_tick	../gmQuant\example\test_md_live.py	/^def on_tick(tick):$/;"	kind:function	line:10
 on_tick	../gmQuant\example\test_md_playback.py	/^def on_tick(tick):$/;"	kind:function	line:4
 on_timer	../gmQuant\example\test_timer.py	/^    def on_timer(self, interval):$/;"	kind:member	line:17
@@ -432,6 +436,7 @@ requests	../joinQuant\Day_Trader\Day_Trader.py	/^import requests$/;"	kind:namesp
 requests	../webchat\webchat_robot.py	/^import requests$/;"	kind:namespace	line:20
 reset	../joinQuant\Day_Trader\Day_Trader.py	/^    def reset(self):$/;"	kind:member	line:1718
 reset_position	../joinQuant\T_0\T_0.py	/^def reset_position(context):$/;"	kind:function	line:370
+ret	../gmQuant\example\test.py	/^    ret = MyStrategy($/;"	kind:variable	line:14
 ret	../gmQuant\example\test_backtest.py	/^    ret = mystrategy.backtest_config($/;"	kind:variable	line:30
 ret	../gmQuant\example\test_backtest.py	/^    ret = mystrategy.run()$/;"	kind:variable	line:40
 ret	../gmQuant\example\test_backtest_cw_config_ini.py	/^    ret = MyStrategy(config_file='test_backtest.ini', config_file_encoding='utf-8').run()$/;"	kind:variable	line:20
@@ -459,6 +464,7 @@ sys	../webchat\webchat_robot.py	/^import sys$/;"	kind:namespace	line:12
 ta	../joinQuant\T_0\T_0.py	/^import talib as ta$/;"	kind:namespace	line:4
 talib	../joinQuant\Pull_Wool\Pull_Wool.py	/^import talib$/;"	kind:namespace	line:50
 td	../gmQuant\example\test_td_live.py	/^from gmsdk import td, get_strerror, to_dict$/;"	kind:namespace	line:4
+test.py	../gmQuant\example\test.py	1;"	kind:file	line:1
 test.py	../webchat\test.py	1;"	kind:file	line:1
 test_backtest.py	../gmQuant\example\test_backtest.py	1;"	kind:file	line:1
 test_backtest_cw_config_ini.py	../gmQuant\example\test_backtest_cw_config_ini.py	1;"	kind:file	line:1
