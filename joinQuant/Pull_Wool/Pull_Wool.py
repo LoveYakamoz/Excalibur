@@ -64,6 +64,7 @@ def initialize(context):
     g.ma_scale = [5, 10, 20]                       ###
     g.max_rsi_value = 80                           ###
     g.rsi_day_count = 5                            ###
+    g.rsi_sell_scale = 0.3                         ###
     ##################################################
     
     # 1. 设置参数
@@ -86,7 +87,7 @@ def initialize(context):
 
     # 3. 根据最大持仓股票数约束，将候选股票加入到买入队列
     g.buy_list = []
-    get_buy_list(context)
+    get_buy_list(context, None)
 
     # 4. 根据买入列表，初始化仓位
     init_stock_position(context)
@@ -117,18 +118,21 @@ def handle_data(context, data):
 
     if hour == 14 and minute == 30:
         non_duotou_list = []
-        # 1. 将持仓中股票分为多头与非多头股票列表
-        non_duotou_list = get_divided_Duotou(context)
+        rsi_list = []
+        # 1. 将持仓中股票分为多头，非多头及RSI股票列表
+        get_divided_Duotou(context, data, non_duotou_list, rsi_list)
 
-        if (len(non_duotou_list) > 0 and len(context.portfolio.positions) > 0) or (len(context.portfolio.positions) == 0):
+        if (len(non_duotou_list) > 0 and len(context.portfolio.positions) > 0)  or (len(rsi_list) > 0 and len(context.portfolio.positions) > 0)  or (len(context.portfolio.positions) == 0):
             # 2. 获得新的多头股票列表
             get_new_Duotou(context)
             # 3. 获得新的购买股票列表
-            get_buy_list(context)
+            get_buy_list(context, data)
             # 4. 购买新的股票
             buy_stock(context)
             # 5. 卖出持仓中的非多头股票
-            sell_stock(context, non_duotou_list)
+            sell_non_doutou_stock(context, non_duotou_list)
+            # 6. 卖出RSI的股票
+            sell_rsi_stock(context, rsi_list)
         elif (len(non_duotou_list) == 0 and len(context.portfolio.positions) > 0):
             for stock in context.portfolio.positions.keys():
                 g.buy_list.append(stock)
@@ -213,19 +217,25 @@ def get_candidate(context):
             g.candidate.append(stock)
 
 
-def get_buy_list(context):
+def get_buy_list(context, data):
     '''
     准备买入的股票池
     '''
+
     # 0. 获得当前持仓数量
+    
     current_stock_count = len(context.portfolio.positions)
     log.info("当前持仓数量为%d个", current_stock_count)
 
     buy_new_stock = g.max_positions_count - current_stock_count
-
+    
     # 1. 按照最大买入约束，候选队列股票 ---> 买入队列
     
     for stock in g.candidate:
+        if data is not None:
+            if get_rsi(context, data, stock) > g.max_rsi_value:
+                log.info('股票%s超过RSI阈值', stock)
+                continue
         if stock in context.portfolio.positions.keys():
             g.buy_list.append(stock)
         else:
@@ -339,7 +349,7 @@ def buy_stock(context):
             log.error("股票: %s, 买入%d元失败", stock, money_per_stock)
 
 
-def sell_stock(context, non_duotou_list):
+def sell_non_doutou_stock(context, non_duotou_list):
     '''
     将非多头股票分为以下三类，并卖出
         1、股价跌破5日均线，卖出可卖部分的50%；
@@ -358,24 +368,40 @@ def sell_stock(context, non_duotou_list):
         sell_order = order(stock, amount)
 
         if sell_order is not None:
-            log.info("股票: %s, 以%f比例挂单卖出%d成功", stock, scale, amount)
+            log.info("非多头股票: %s, 以%f比例挂单卖出%d成功", stock, scale, amount)
         else:
-            log.error("股票: %s, 以%f比例挂单卖出%d失败", stock, scale, amount)
-    pass
+            log.error("非多头股票: %s, 以%f比例挂单卖出%d失败", stock, scale, amount)
+    
 
+def sell_rsi_stock(context, rsi_list):
+    '''
+    rsiValue>80，卖出持仓的30%
+    '''
+    for stock in rsi_list:
+        cur_position = context.portfolio.positions[stock].total_amount
+        amount = -1 * cur_position * g.rsi_sell_scale
 
-def get_divided_Duotou(context):
+        sell_order = order(stock, amount)
+
+        if sell_order is not None:
+            log.info("RSI股票: %s, 以%f比例挂单卖出%d成功", stock, g.rsi_sell_scale, amount)
+        else:
+            log.error("RSI股票: %s, 以%f比例挂单卖出%d失败", stock,g.rsi_sell_scale, amount)
+    
+
+def get_divided_Duotou(context, data, non_duotou_list, rsi_list):
     '''
     从持仓股票中，获得非多头股票列表，并把多头股票加入到修选队列
     '''
-    non_duotou_list = []
 
     for stock in context.portfolio.positions.keys():
         if is_junxianduotou(context, stock) == False:
             non_duotou_list.append(stock)
+        elif get_rsi(context, data, stock) > g.max_rsi_value:
+            rsi_list.append(stock)
         else:
             g.candidate.append(stock)
-    return non_duotou_list
+    
 
 
 def no_paused_no_ST(stock_list):
@@ -413,12 +439,22 @@ def sort_by_market_cap(context, stock_list):
 
 
 
-rsiValue = RSI_CN(close, 5) 
+def get_rsi(context, data, stock):
+    close = []
+    hData = attribute_history(stock, g.rsi_day_count*2, unit='1d'
+                    , fields=('close', 'volume')
+                    , skip_paused=True
+                    , df=False)
+    for close_price in hData['close']:
+        close.append(close_price)
+    close.append(data[stock].close)
+    
+    return RSI_CN(close, g.rsi_day_count)[-1]
+    
 # 同花顺和通达信等软件中的SMA
 def SMA_CN(close, timeperiod) :
     close = np.nan_to_num(close)
     return reduce(lambda x, y: ((timeperiod - 1) * x + y) / timeperiod, close)
-
 
 # 同花顺和通达信等软件中的RSI
 def RSI_CN(close, timeperiod) :
