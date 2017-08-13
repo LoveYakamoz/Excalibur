@@ -68,7 +68,7 @@ def initialize(context):
     ##################################################
     
     # 1. 设置参数
-    g.version = "Version 3.0: 对于持续多头的，需要继续买入"
+    g.version = "Version 4.0: 买卖时，增加RSI的判断"
     set_benchmark('000300.XSHG')  # 设定沪深300作为基准
     set_option('use_real_price', True)  # 使用真实价格
     set_slippage(PriceRelatedSlippage(0.01))  # 设定滑点
