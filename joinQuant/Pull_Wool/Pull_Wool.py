@@ -452,7 +452,9 @@ def get_rsi(context, data, stock):
         close.append(close_price)
     close.append(data[stock].close)
     
-    return RSI_CN(close, g.rsi_day_count)[-1]
+    rsi = RSI_CN(close, g.rsi_day_count)[-1]
+
+    return rsi
     
 # 同花顺和通达信等软件中的SMA
 def SMA_CN(close, timeperiod) :
