@@ -233,9 +233,12 @@ def get_buy_list(context, data):
     
     for stock in g.candidate:
         if data is not None:
-            if get_rsi(context, data, stock) > g.max_rsi_value:
-                log.info('股票%s超过RSI阈值', stock)
+            rsi = get_rsi(context, data, stock)
+            if rsi > g.max_rsi_value:
+                log.warn('股票%s超过RSI阈值', stock)                
                 continue
+            else:
+                log.info('股票%s的RSI阈值：%f', stock, rsi)  
         if stock in context.portfolio.positions.keys():
             g.buy_list.append(stock)
         else:
