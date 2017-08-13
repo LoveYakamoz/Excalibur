@@ -432,7 +432,7 @@ def RSI_CN(close, timeperiod) :
     diffGt0 = np.append(diffGt0[0], diffGt0)
     diffABS = np.append(diffABS[0], diffABS)
     rsi = map(lambda x : SMA_CN(diffGt0[:x], timeperiod) / SMA_CN(diffABS[:x], timeperiod) * 100
-            , range(1, len(diffGt0) + 1) )
+            , range(1, len(diffGt0) + 1))
     
     return np.array(rsi)
     
