@@ -6,7 +6,7 @@
 
 “Excalibur”在古塞尔特语中为“断钢”之意，又被翻译成为“断刚剑”、“王者之剑”、“斩铁剑”、“湖中剑”。 
 
-<img src="https://github.com/LoveYakamoz/Excalibur/blob/master/image/Excalibur.jpg" width="256" height="300" />
+<img src="https://github.com/LoveYakamoz/Excalibur/blob/master/image/Excalibur.jpg" width="280" height="300" />
 
 
 [![Build Status](https://travis-ci.org/meolu/walle-web.svg?branch=master)](https://travis-ci.org/meolu/walle-web)
