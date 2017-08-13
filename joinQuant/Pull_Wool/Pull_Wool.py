@@ -445,7 +445,7 @@ def sort_by_market_cap(context, stock_list):
 def get_rsi(context, data, stock):
     close = []
     hData = attribute_history(stock, g.rsi_day_count*2, unit='1d'
-                    , fields=('close', 'volume')
+                    , fields=('close')
                     , skip_paused=True
                     , df=False)
     for close_price in hData['close']:
