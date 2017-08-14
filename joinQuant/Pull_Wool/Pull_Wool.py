@@ -68,7 +68,7 @@ def initialize(context):
     ##################################################
     
     # 1. 设置参数
-    g.version = "Version 4.0: 买卖时，增加RSI的判断"
+    g.version = "Version 5.0: 使用3倍数据计算RSI；买入时，增加ma5是否上升的判断条件"
     set_benchmark('000300.XSHG')  # 设定沪深300作为基准
     set_option('use_real_price', True)  # 使用真实价格
     set_slippage(PriceRelatedSlippage(0.01))  # 设定滑点
@@ -217,6 +217,18 @@ def get_candidate(context):
             g.candidate.append(stock)
 
 
+def is_ma5_up(context, stock):
+    df = get_price(stock, count=g.ma_scale[0] + 10, end_date=str(
+        context.current_dt), frequency='daily', fields=['close'])
+    today_ma5 = 0
+    yestoday_ma5 = 0
+
+    for i in range(g.ma_scale[0]):
+        today_ma5 += df['close'][-i-1]
+        yestoday_ma5 += df['close'][-i-2]
+
+    return today_ma5 > yestoday_ma5
+
 def get_buy_list(context, data):
     '''
     准备买入的股票池
@@ -239,6 +251,9 @@ def get_buy_list(context, data):
                 continue
             else:
                 log.info('股票%s的RSI阈值：%f', stock, rsi)  
+        if is_ma5_up(context, stock) is False:
+            log.warn('股票%s的MA5没有上升，所以不买入', stock)
+            continue
         if stock in context.portfolio.positions.keys():
             g.buy_list.append(stock)
         else:
@@ -456,13 +471,19 @@ def get_rsi(context, data, stock):
 
     return rsi
     
-# 同花顺和通达信等软件中的SMA
+
 def SMA_CN(close, timeperiod) :
+    '''
+    同花顺和通达信等软件中的SMA
+    '''
     close = np.nan_to_num(close)
     return reduce(lambda x, y: ((timeperiod - 1) * x + y) / timeperiod, close)
 
-# 同花顺和通达信等软件中的RSI
+
 def RSI_CN(close, timeperiod) :
+    '''
+    同花顺和通达信等软件中的RSI
+    '''
     diff = map(lambda x, y : x - y, close[1:], close[:-1])
     diffGt0 = map(lambda x : 0 if x < 0 else x, diff)
     diffABS = map(lambda x : abs(x), diff)
