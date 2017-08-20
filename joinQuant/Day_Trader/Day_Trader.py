@@ -1174,8 +1174,7 @@ class Sell_stocks(Adjust_position):
     def adjust(self, context, data, buy_stocks):
         # 卖出不在待买股票列表中的股票
         # 对于因停牌等原因没有卖出的股票则继续持有
-        print(context.portfolio.positions.keys())
-        print(buy_stocks)
+        
         for stock in context.portfolio.positions.keys():
             if stock not in buy_stocks:
                 self.log_info("stock [%s] in position is not buyable" % (stock))
