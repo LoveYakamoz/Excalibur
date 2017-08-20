@@ -712,8 +712,6 @@ class Index_selection(Adjust_condition):
             g.index_selected_growth = index_growth_dict_sorted[0][1]
             log.info("index_selected: %s ===> growth: %f", g.index_selected, g.index_selected_growth)
 
-            self.clear_position(context)
-
             if count == 1:
                 g.position_scale = 0.3
                 self.log_info("only one index growth over 1.01, so position scale: 0.3")
@@ -1176,6 +1174,8 @@ class Sell_stocks(Adjust_position):
     def adjust(self, context, data, buy_stocks):
         # 卖出不在待买股票列表中的股票
         # 对于因停牌等原因没有卖出的股票则继续持有
+        print(context.portfolio.positions.keys())
+        print(buy_stocks)
         for stock in context.portfolio.positions.keys():
             if stock not in buy_stocks:
                 self.log_info("stock [%s] in position is not buyable" % (stock))
