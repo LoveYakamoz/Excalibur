@@ -1,4 +1,4 @@
-<img src="https://github.com/LoveYakamoz/Excalibur/blob/master/image/Excalibur.bmp" width="532" height="112" />
+![](/image/Excalibur.bmp)
 
 “断钢”之意，亚瑟王（King Arthur）的佩剑，某种意义上也是王权的象征，传说为湖中仙女（The Lady of Lake）所赠。
 
@@ -6,8 +6,7 @@
 
 “Excalibur”在古塞尔特语中为“断钢”之意，又被翻译成为“断刚剑”、“王者之剑”、“斩铁剑”、“湖中剑”。 
 
-<img src="https://github.com/LoveYakamoz/Excalibur/blob/master/image/Excalibur.jpg" width="280" height="300" />
-
+<img src="/image/Excalibur.jpg" width="280" height="300" />
 
 [![Build Status](https://travis-ci.org/meolu/walle-web.svg?branch=master)](https://travis-ci.org/meolu/walle-web)
 [![Packagist](https://img.shields.io/packagist/v/meolu/walle-web.svg)](https://packagist.org/packages/meolu/walle-web)
