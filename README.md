@@ -73,8 +73,8 @@ To Do List
 交流讨论
 ----
 - [submit issue](https://github.com/LoveYakamoz/Quantitative_Trading/issues/new)
-- email: yangpei3720@gmail.com
+- [email](yangpei3720@gmail.com)
 
 联系方式
 ----
-<img src="https://github.com/LoveYakamoz/Excalibur/blob/master/image/weixin.jpg" width="200" height="260" alt="Yakamoz微信" align=left />
+<img src="/image/weixin.jpg" width="200" height="260" alt="Yakamoz微信" align=left />
