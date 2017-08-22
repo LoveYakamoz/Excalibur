@@ -29,6 +29,9 @@
 
 掘金策略：使用掘金SDK开发，测试，运行的策略
 
+PS: 以上策略只是自己学习之用，并不对其收益等负责，谢谢！ 
+
+
 依赖
 ---
 
@@ -73,7 +76,7 @@ To Do List
 交流讨论
 ----
 - [submit issue](https://github.com/LoveYakamoz/Quantitative_Trading/issues/new)
-- [email](yangpei3720@gmail.com)
+- email: yangpei3720@gmail.com
 
 联系方式
 ----
