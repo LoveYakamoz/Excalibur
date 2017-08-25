@@ -11,8 +11,8 @@ def on_bar(bar):
 
 md.ev_tick += on_tick
 md.ev_bar += on_bar
-ret = md.init(username='demo@myquant.cn',
-              password='123456',
+ret = md.init(username='18721037520',
+              password='242613',
               mode=4,
               subscribe_symbols='SZSE.000001.bar.daily',
               start_time='2015-05-27 00:00:00',
