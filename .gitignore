@@ -3,3 +3,4 @@ saved/
 .ropeproject/*
 *.pyc
 *.log
+gmcache/*

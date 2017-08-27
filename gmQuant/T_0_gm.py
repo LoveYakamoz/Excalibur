@@ -7,7 +7,11 @@ import numpy as np
 import pandas as pd
 import talib as ta
 from math import isnan
-
+'''
+从 http://www.lfd.uci.edu/~gohlke/pythonlibs/ 下载的这个：
+TA_Lib-0.4.9-cp35-none-win_amd64.whl
+然后我是在windows的cmd里面pip install TA_Lib-0.4.9-cp35-none-win_amd64.whl这样解决的。
+'''
 g_base_dir = "gmQuant\\"
 LOG_FILE = g_base_dir + 'gmQuant.log'
 
@@ -97,7 +101,7 @@ class T_0_Strategy(StrategyBase):
         logger.info('logged in')
 
     def on_error(self, err_code, msg):
-        #logger.error('get error: %s - %s' % (err_code, msg))
+        logger.error('get error: %s - %s' % (err_code, msg))
         pass
 
     def get_min_low(self, bars):
@@ -128,7 +132,6 @@ class T_0_Strategy(StrategyBase):
         for i in range(g_position_count):
             bars = self.get_last_n_bars(
                 g_basestock_pool[i].stock, 60, minute_count, "")
-
             g_basestock_pool[i].lowest_89 = self.get_min_low(bars)
 
     def update_233_highest(self, minute_count):
@@ -143,11 +146,21 @@ class T_0_Strategy(StrategyBase):
         obj = bar_to_dict(bar)
         strtime = obj['strtime']
 
-        logger.info("processing %s", strtime)
+        #logger.info("processing %s", strtime)
 
         hour = self.get_current_hour(strtime)
         minute = self.get_current_minute(strtime)
 
+        logger.info("%s: close: %f, low: %f, high: %f", strtime, obj['close'], obj['low'], obj['high'])
+
+        '''
+        if hour == 9 and minute == 30:
+            logger.info("before trade and init")
+            for stock in g_basestock_pool:
+                stock.close = 0
+                stock.lowest_89 = None
+                stock.highest_233 = None
+                stock.operator_value = 0
         # 14点45分钟后， 不再有新的交易
         if hour == 14 and minute >= 45:
             return
@@ -172,7 +185,7 @@ class T_0_Strategy(StrategyBase):
             else:
                 lowest_89 = g_basestock_pool[i].lowest_89
 
-            if isnan(g_basestock_pool[i].lowest_233) is True:
+            if isnan(g_basestock_pool[i].highest_233) is True:
                 logger.error("stock: %s's highest_233 is None", stock)
                 continue
             else:
@@ -207,28 +220,40 @@ class T_0_Strategy(StrategyBase):
 
             # 买入信号产生
             if g_basestock_pool[i].operator_value < g_up and operator_line[g_ma_day_count - 1] > g_up and g_basestock_pool[i].operator_value != 0.0:
-                log.info("BUY SIGNAL for %s, from %f to %f, close_price: %f, lowest_89: %f, highest_233: %f",
-                         stock, g_basestock_pool[i].operator_value, operator_line[g_ma_day_count - 1],
-                         last_n_dailybars[g_ma_day_count - 1]['close'], lowest_89, highest_233)
+                logger.info("%s: BUY SIGNAL for %s, from %f to %f, close_price: %f, lowest_89: %f, highest_233: %f",
+                         strtime, stock, g_basestock_pool[i].operator_value, operator_line[g_ma_day_count - 1],
+                         bar_to_dict(last_n_dailybars[g_ma_day_count - 1])['close'], lowest_89, highest_233)
 
             # 卖出信息产生
             elif g_basestock_pool[i].operator_value > g_down and operator_line[g_ma_day_count - 1] < g_down:
-                log.info("SELL SIGNAL for %s, from %f to %f, close_price: %f, lowest_89: %f, highest_233: %f",
-                         stock, g_basestock_pool[i].operator_value, operator_line[g_ma_day_count - 1],
-                         last_n_dailybars[g_ma_day_count - 1]['close'], lowest_89, highest_233)
+                logger.info("%s: SELL SIGNAL for %s, from %f to %f, close_price: %f, lowest_89: %f, highest_233: %f",
+                         strtime, stock, g_basestock_pool[i].operator_value, operator_line[g_ma_day_count - 1],
+                         bar_to_dict(last_n_dailybars[g_ma_day_count - 1])['close'], lowest_89, highest_233)
 
             # 记录当前操盘线值
             g_basestock_pool[i].operator_value = operator_line[g_ma_day_count - 1]
-
+        '''
 
 if __name__ == '__main__':
-    ret = T_0_Strategy(
+    '''
+    回测时，需要把掘金终端打开
+    '''
+    t_0 = T_0_Strategy(
         username='18721037520',
         password='242613',
         strategy_id='strategy_2',
         subscribe_symbols='SHSE.600446.bar.60',
-        mode=3
-    ).run()
+        mode=4,
+        td_addr='localhost:8001')
+    ret = t_0.backtest_config(
+        start_time='2017-08-23 9:00:00',
+        end_time='2017-08-25 15:00:00',
+        initial_cash=100000000,
+        transaction_ratio=1,
+        commission_ratio=0,
+        slippage_ratio=0,
+        price_type=1,
+        bench_symbol='SHSE.000300')#基准=沪深300
 
-    #ret = T_0_Strategy(config_file='T_0_strategy.ini')
-    print('exit code: %d' % ret)
+    ret = t_0.run()
+    print('exit code: %d' % ret)    
