@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 from gmsdk.api import StrategyBase
 from gmsdk.util import bar_to_dict
 
@@ -12,25 +10,26 @@ class MyStrategy(StrategyBase):
         print('logged in')
     
     def on_error(self, err_code, msg):
-        # print('get error: %s - %s' % (err_code, msg))
+        print('get error: %s - %s' % (err_code, msg))
         pass
     
     def on_bar(self, bar):
         print(bar_to_dict(bar))
-        if self.oc:
-            self.open_long(bar.exchange, bar.sec_id, 0, 100)
+        if self.oc:        
+            #self.open_long(bar.exchange, bar.sec_id, 0, 100)
+            pass            
         else:
-            self.close_long(bar.exchange, bar.sec_id, 0, 100)
+            #self.close_long(bar.exchange, bar.sec_id, 0, 100)
+            pass
         self.oc = not self.oc
-
-
+        print("self.oc: ", self.oc)
 
 if __name__ == '__main__':
     ret = MyStrategy(
-        username='demo@myquant.cn',
-        password='123456',
+        username='18721037520',
+        password='242613',
         strategy_id='strategy_2',
-        subscribe_symbols='CFFEX.IF1603.bar.60',
-        mode=2
+        subscribe_symbols='SHSE.600446.bar.60',
+        mode=3
     ).run()
-    print(('exit code: ', ret))
+    print('exit code: %d' % ret)
