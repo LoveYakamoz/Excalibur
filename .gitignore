@@ -2,3 +2,4 @@ __pycache__
 saved/
 .ropeproject/*
 *.pyc
+*.log
