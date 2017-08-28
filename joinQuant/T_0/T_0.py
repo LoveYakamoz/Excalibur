@@ -1,8 +1,28 @@
+'''
+指标公式：
+VAR1:=LLV(LOW,89);      变量1：位89日的最小值
+VAR2:=HHV(HIGH,233);   变量2：233日的最大值
+操盘线: MA((CLOSE-VAR1)/(VAR2-VAR1)*4,4); 
+操盘线2: MA((CLOSE-VAR1)/(VAR2-VAR1)*4,13);
+金叉买入：CROSS(操盘线,操盘线2);   操盘线上穿操盘线2，且操盘线2<0.3和股价>昨日收盘价*0.97;
+死叉卖出：CROSS(操盘线2,操盘线) ;  操盘线下穿操盘线2，且操盘线2>3.7和股价<昨日收盘价*1.03
+挂单：
+1.回转交易：出现金叉买入，然后出现死叉卖出；出现死叉信号卖出，然后出现金叉买入；
+2.14：00之后不开新的回转交易
+3.如果当天没有完成回转交易，则在14：45分平仓
+4.每次买入卖出为现有持仓50%的仓位
+5.一次买卖交易完成前，忽略信号
+
+其他：
+1、标的股票：沪深300
+2、标的股票要求，最近5个交易日的波动率均大于2%，波动率：（高点-低点）/上一交易日的收盘
+'''
 from jqdata import *
 import numpy as np
 import pandas as pd
 import talib as ta
 from math import isnan
+
 # 股票池来源
 class Source(Enum):
     AUTO  = 0  # 程序根据波动率及股价自动从沪深300中获取股票
@@ -80,10 +100,11 @@ class BaseStock(object):
         log.info("stock: %s, close: %f, min_vol: %f, max_vol: %f, lowest: %f, hightest: %f, operator_value: %f, position: %f, sell_roder_id: %d, buy_order_id: %d"
         , self.stock, self.close, self.min_vol, self.max_vol, self.lowest, self.highest, self.operator_value, self.position, self.sell_order_id, self.buy_order_id)
 
-'''
-    获得沪深300的股票列表, 5天波动率大于2%，单价大于10.00元, 每标的买入100万元
-'''
+
 def get_stocks_by_vol(context):
+    '''
+    获得沪深300的股票列表, 5天波动率大于2%，单价大于10.00元, 每标的买入100万元
+    '''
     select_count = 0
 
     stock_list = get_index_stocks('399300.XSHE')
@@ -109,10 +130,12 @@ def get_stocks_by_vol(context):
     if select_count < g.position_count:
         g.position_count = select_count
 
-'''
-    直接从客户得到股票列表
-'''
+
+
 def get_stocks_by_client(context):
+    '''
+    直接从客户得到股票列表
+    '''
     select_count = 0
     for stock_id in g.stock_id_list_from_client:
         stock_obj = BaseStock(stock_id, 0, 0, 0, 0, 0, 0, Status.INIT, 0, -1, -1)
@@ -168,6 +191,7 @@ def before_trading_start(context):
     g.repeat_signal_count = 0
     g.reset_order_count = 0
     g.success_count = 0
+
 # 购买股票，并记录订单号，便于查询订单状态	
 def buy_stock(context, stock, amount, limit_price, index):
     buy_order = order(stock, amount, LimitOrderStyle(limit_price))
@@ -175,6 +199,7 @@ def buy_stock(context, stock, amount, limit_price, index):
     if buy_order is not None:
         g.basestock_pool[index].buy_order_id = buy_order.order_id
         log.info("股票: %s, 以%f价格挂单，买入%d", stock, limit_price, amount)
+
 # 卖出股票，并记录订单号，便于查询订单状态		
 def sell_stock(context, stock, amount, limit_price, index):
     sell_order = order(stock, amount, LimitOrderStyle(limit_price))
@@ -182,6 +207,7 @@ def sell_stock(context, stock, amount, limit_price, index):
     if sell_order is not None:
         g.basestock_pool[index].sell_order_id = sell_order.order_id
         log.info("股票: %s, 以%f价格挂单，卖出%d", stock, limit_price, amount)
+
 # 产生先卖后买信号
 def sell_buy(context, stock, close_price, index):
     # 每次交易量为持仓量的g.adjust_scale
@@ -485,8 +511,8 @@ def handle_data(context, data):
         cancel_open_order(context)
         reset_position(context)     
         
-    # 14点45分钟后， 不再有新的交易 
-    if hour == 14 and minute >= 45:
+    # 14点00分钟后， 不再有新的交易 
+    if hour == 14 and minute >= 0:
         return
 
     # 因为要计算移动平均线，所以每天前g.ma_day_count分钟，不做交易
