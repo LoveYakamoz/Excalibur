@@ -4,16 +4,16 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
-AUTO	../joinQuant\T_0\T_0.py	/^    AUTO  = 0  # 程序根据波动率及股价自动从沪深300中获取股票$/;"	kind:variable	line:8
+AUTO	../joinQuant\T_0\T_0.py	/^    AUTO  = 0  # 程序根据波动率及股价自动从沪深300中获取股票$/;"	kind:variable	line:28
 Adjust_condition	../joinQuant\Day_Trader\Day_Trader.py	/^class Adjust_condition(Rule):$/;"	kind:class	line:611
 Adjust_position	../joinQuant\Day_Trader\Day_Trader.py	/^class Adjust_position(Rule):$/;"	kind:class	line:635
 BaseStock	../gmQuant\T_0_gm.py	/^class BaseStock(object):$/;"	kind:class	line:42
-BaseStock	../joinQuant\T_0\T_0.py	/^class BaseStock(object):$/;"	kind:class	line:57
+BaseStock	../joinQuant\T_0\T_0.py	/^class BaseStock(object):$/;"	kind:class	line:77
 BaseStock	../tushare\test_for_t_0.py	/^class BaseStock(object):$/;"	kind:class	line:21
-Break	../joinQuant\T_0\T_0.py	/^class Break(Enum):$/;"	kind:class	line:49
+Break	../joinQuant\T_0\T_0.py	/^class Break(Enum):$/;"	kind:class	line:69
 Buy_stocks	../joinQuant\Day_Trader\Day_Trader.py	/^class Buy_stocks(Adjust_position):$/;"	kind:class	line:1192
-CLIENT	../joinQuant\T_0\T_0.py	/^    CLIENT = 1 # 使用用户提供的股票$/;"	kind:variable	line:9
-DOWN	../joinQuant\T_0\T_0.py	/^    DOWN = 1  # 下穿 $/;"	kind:variable	line:51
+CLIENT	../joinQuant\T_0\T_0.py	/^    CLIENT = 1 # 使用用户提供的股票$/;"	kind:variable	line:29
+DOWN	../joinQuant\T_0\T_0.py	/^    DOWN = 1  # 下穿 $/;"	kind:variable	line:71
 Day_Trader.py	../joinQuant\Day_Trader\Day_Trader.py	1;"	kind:file	line:1
 Filter_3or5_mean_up	../joinQuant\Day_Trader\Day_Trader.py	/^class Filter_3or5_mean_up(Filter_query):$/;"	kind:class	line:1052
 Filter_blacklist	../joinQuant\Day_Trader\Day_Trader.py	/^class Filter_blacklist(Filter_stock_list):$/;"	kind:class	line:1067
@@ -35,7 +35,7 @@ HTMLParser	../webchat\test.py	/^    from HTMLParser import HTMLParser$/;"	kind:n
 HTMLParser	../webchat\test.py	/^    from html.parser import HTMLParser$/;"	kind:namespace	line:7
 HTMLParser	../webchat\webchat_robot.py	/^    from HTMLParser import HTMLParser$/;"	kind:namespace	line:26
 HTMLParser	../webchat\webchat_robot.py	/^    from html.parser import HTMLParser$/;"	kind:namespace	line:28
-INIT	../joinQuant\T_0\T_0.py	/^    INIT    = 0  # 在每天交易开始时，置为INIT$/;"	kind:variable	line:45
+INIT	../joinQuant\T_0\T_0.py	/^    INIT    = 0  # 在每天交易开始时，置为INIT$/;"	kind:variable	line:65
 INTERVAL	../gmQuant\example\test_timer.py	/^INTERVAL = 1000$/;"	kind:variable	line:7
 Index28_condition	../joinQuant\Day_Trader\Day_Trader.py	/^class Index28_condition(Adjust_condition):$/;"	kind:class	line:782
 Index_selection	../joinQuant\Day_Trader\Day_Trader.py	/^class Index_selection(Adjust_condition):$/;"	kind:class	line:670
@@ -47,8 +47,8 @@ MyStrategy	../gmQuant\example\test_backtest_cw_config_ini.py	/^class MyStrategy(
 MyStrategy	../gmQuant\example\test_strategy.py	/^class MyStrategy(StrategyBase):$/;"	kind:class	line:4
 MyStrategy	../gmQuant\example\test_strategy_cw_config_ini.py	/^class MyStrategy(StrategyBase):$/;"	kind:class	line:6
 MyStrategy	../gmQuant\example\test_timer.py	/^class MyStrategy(StrategyBase):$/;"	kind:class	line:9
-NONE	../joinQuant\T_0\T_0.py	/^    NONE    = 2  # 今天不再做任何交易$/;"	kind:variable	line:47
-NONE	../joinQuant\T_0\T_0.py	/^    NONE = 2$/;"	kind:variable	line:52
+NONE	../joinQuant\T_0\T_0.py	/^    NONE    = 2  # 今天不再做任何交易$/;"	kind:variable	line:67
+NONE	../joinQuant\T_0\T_0.py	/^    NONE = 2$/;"	kind:variable	line:72
 Period_condition	../joinQuant\Day_Trader\Day_Trader.py	/^class Period_condition(Adjust_condition):$/;"	kind:class	line:737
 Pick_score_up	../joinQuant\Day_Trader\Day_Trader.py	/^class Pick_score_up(Filter_query):$/;"	kind:class	line:864
 Pick_small_cap	../joinQuant\Day_Trader\Day_Trader.py	/^class Pick_small_cap(Filter_query):$/;"	kind:class	line:833
@@ -63,10 +63,10 @@ SaveContact	../webchat\webchat_robot.py	/^def SaveContact(ContactList, GroupList
 Sell_stocks	../joinQuant\Day_Trader\Day_Trader.py	/^class Sell_stocks(Adjust_position):$/;"	kind:class	line:1172
 Shipane_order	../joinQuant\Day_Trader\Day_Trader.py	/^class Shipane_order(Rule):$/;"	kind:class	line:2025
 Shipane_sync_p	../joinQuant\Day_Trader\Day_Trader.py	/^class Shipane_sync_p(Rule):$/;"	kind:class	line:1820
-Source	../joinQuant\T_0\T_0.py	/^class Source(Enum):$/;"	kind:class	line:7
+Source	../joinQuant\T_0\T_0.py	/^class Source(Enum):$/;"	kind:class	line:27
 Stat	../joinQuant\Day_Trader\Day_Trader.py	/^class Stat(Rule):$/;"	kind:class	line:1697
 Stat_portfolio	../joinQuant\Day_Trader\Day_Trader.py	/^class  Stat_portfolio(Adjust_condition):$/;"	kind:class	line:1545
-Status	../joinQuant\T_0\T_0.py	/^class Status(Enum):$/;"	kind:class	line:44
+Status	../joinQuant\T_0\T_0.py	/^class Status(Enum):$/;"	kind:class	line:64
 Stock_Plan	../joinQuant\FeiShi\Stock_Plan.py	/^class Stock_Plan:$/;"	kind:class	line:1
 Stock_Plan.py	../joinQuant\FeiShi\Stock_Plan.py	1;"	kind:file	line:1
 Stop_loss_by_28_index	../joinQuant\Day_Trader\Day_Trader.py	/^class Stop_loss_by_28_index(Adjust_condition):$/;"	kind:class	line:1611
@@ -89,9 +89,9 @@ T_0.py	../joinQuant\T_0\T_0.py	1;"	kind:file	line:1
 T_0_Strategy	../gmQuant\T_0_gm.py	/^class T_0_Strategy(StrategyBase):$/;"	kind:class	line:55
 T_0_gm.py	../gmQuant\T_0_gm.py	1;"	kind:file	line:1
 Time_condition	../joinQuant\Day_Trader\Day_Trader.py	/^class Time_condition(Adjust_condition):$/;"	kind:class	line:641
-UP	../joinQuant\T_0\T_0.py	/^    UP   = 0  # 上穿$/;"	kind:variable	line:50
+UP	../joinQuant\T_0\T_0.py	/^    UP   = 0  # 上穿$/;"	kind:variable	line:70
 UnicodeStreamFilter	../webchat\webchat_robot.py	/^class UnicodeStreamFilter:$/;"	kind:class	line:932
-WORKING	../joinQuant\T_0\T_0.py	/^    WORKING = 1  # 处于买\/卖中$/;"	kind:variable	line:46
+WORKING	../joinQuant\T_0\T_0.py	/^    WORKING = 1  # 处于买\/卖中$/;"	kind:variable	line:66
 WebWeixin	../webchat\webchat_robot.py	/^class WebWeixin(object):$/;"	kind:class	line:111
 __buy	../joinQuant\Day_Trader\Day_Trader.py	/^    def __buy(self, client, context):$/;"	kind:member	line:1880
 __fix_miss_match	../webchat\test.py	/^        def __fix_miss_match(m):$/;"	kind:function	line:19
@@ -138,7 +138,7 @@ __init__	../joinQuant\Day_Trader\Day_Trader.py	/^    def __init__(self, params):
 __init__	../joinQuant\Day_Trader\Day_Trader.py	/^    def __init__(self, params):$/;"	kind:member	line:939
 __init__	../joinQuant\Day_Trader\Day_Trader.py	/^    def __init__(self, params):$/;"	kind:member	line:996
 __init__	../joinQuant\Day_Trader\Day_Trader.py	/^    def __init__(self,params):$/;"	kind:member	line:2026
-__init__	../joinQuant\T_0\T_0.py	/^    def __init__ (self, stock, close, min_vol, max_vol, lowest, highest, operator_value, status, position, sell_order_id, buy_order_id):$/;"	kind:member	line:59
+__init__	../joinQuant\T_0\T_0.py	/^    def __init__ (self, stock, close, min_vol, max_vol, lowest, highest, operator_value, status, position, sell_order_id, buy_order_id):$/;"	kind:member	line:79
 __init__	../tushare\test_for_t_0.py	/^    def __init__ (self, stock, close, min_vol, max_vol, lowest, highest, operator_value, status, position, sell_order_id, buy_order_id):$/;"	kind:member	line:23
 __init__	../webchat\webchat_robot.py	/^    def __init__(self):$/;"	kind:member	line:127
 __init__	../webchat\webchat_robot.py	/^    def __init__(self, target):$/;"	kind:member	line:933
@@ -212,7 +212,7 @@ after_trading_end	../joinQuant\Day_Trader\Day_Trader.py	/^    def after_trading_
 after_trading_end	../joinQuant\Day_Trader\Day_Trader.py	/^    def after_trading_end(self,context):$/;"	kind:member	line:2033
 after_trading_end	../joinQuant\Day_Trader\Day_Trader.py	/^def after_trading_end(context):$/;"	kind:function	line:330
 after_trading_end	../joinQuant\Pull_Wool\Pull_Wool.py	/^def after_trading_end(context):$/;"	kind:function	line:141
-after_trading_end	../joinQuant\T_0\T_0.py	/^def after_trading_end(context):$/;"	kind:function	line:564
+after_trading_end	../joinQuant\T_0\T_0.py	/^def after_trading_end(context):$/;"	kind:function	line:590
 arrow	../gmQuant\example\test_md_live.py	/^import arrow$/;"	kind:namespace	line:4
 bar_to_dict	../gmQuant\T_0_gm.py	/^from gmsdk.util import bar_to_dict$/;"	kind:namespace	line:2
 bar_to_dict	../gmQuant\example\test_strategy.py	/^from gmsdk.util import bar_to_dict$/;"	kind:namespace	line:2
@@ -227,10 +227,10 @@ before_trading_start	../joinQuant\Day_Trader\Day_Trader.py	/^    def before_trad
 before_trading_start	../joinQuant\Day_Trader\Day_Trader.py	/^    def before_trading_start(self, context):$/;"	kind:member	line:823
 before_trading_start	../joinQuant\Day_Trader\Day_Trader.py	/^def before_trading_start(context):$/;"	kind:function	line:321
 before_trading_start	../joinQuant\Pull_Wool\Pull_Wool.py	/^def before_trading_start(context):$/;"	kind:function	line:99
-before_trading_start	../joinQuant\T_0\T_0.py	/^def before_trading_start(context):$/;"	kind:function	line:151
-buy_sell	../joinQuant\T_0\T_0.py	/^def buy_sell(context, stock, close_price, index):$/;"	kind:function	line:254
+before_trading_start	../joinQuant\T_0\T_0.py	/^def before_trading_start(context):$/;"	kind:function	line:174
+buy_sell	../joinQuant\T_0\T_0.py	/^def buy_sell(context, stock, close_price, index):$/;"	kind:function	line:280
 buy_stock	../joinQuant\Pull_Wool\Pull_Wool.py	/^def buy_stock(context):$/;"	kind:function	line:348
-buy_stock	../joinQuant\T_0\T_0.py	/^def buy_stock(context, stock, amount, limit_price, index):$/;"	kind:function	line:172
+buy_stock	../joinQuant\T_0\T_0.py	/^def buy_stock(context, stock, amount, limit_price, index):$/;"	kind:function	line:196
 can_adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def can_adjust(self):$/;"	kind:member	line:1446
 can_adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def can_adjust(self):$/;"	kind:member	line:1485
 can_adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def can_adjust(self):$/;"	kind:member	line:1541
@@ -241,7 +241,7 @@ can_adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def can_adjust(self):$/;"
 can_adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def can_adjust(self):$/;"	kind:member	line:690
 can_adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def can_adjust(self):$/;"	kind:member	line:749
 can_adjust	../joinQuant\Day_Trader\Day_Trader.py	/^    def can_adjust(self):$/;"	kind:member	line:797
-cancel_open_order	../joinQuant\T_0\T_0.py	/^def cancel_open_order(context):$/;"	kind:function	line:363
+cancel_open_order	../joinQuant\T_0\T_0.py	/^def cancel_open_order(context):$/;"	kind:function	line:389
 catchKeyboardInterrupt	../webchat\webchat_robot.py	/^def catchKeyboardInterrupt(fn):$/;"	kind:function	line:82
 changeToNonbomFile	../webchat\webchat_robot.py	/^    def changeToNonbomFile(self, filepath):$/;"	kind:member	line:181
 check_chang	../joinQuant\Day_Trader\Day_Trader.py	/^    def check_chang(rules, config):$/;"	kind:function	line:368
@@ -308,14 +308,14 @@ get_candidate	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_candidate(context):$
 get_close_price	../joinQuant\Day_Trader\Day_Trader.py	/^def get_close_price(security, n, unit='1d'):$/;"	kind:function	line:2133
 get_current_hour	../gmQuant\T_0_gm.py	/^    def get_current_hour(self, date_time):$/;"	kind:member	line:62
 get_current_minute	../gmQuant\T_0_gm.py	/^    def get_current_minute(self, date_time):$/;"	kind:member	line:73
-get_delta_minute	../joinQuant\T_0\T_0.py	/^def get_delta_minute(datetime1, datetime2):$/;"	kind:function	line:414
+get_delta_minute	../joinQuant\T_0\T_0.py	/^def get_delta_minute(datetime1, datetime2):$/;"	kind:function	line:440
 get_divided_Duotou	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_divided_Duotou(context, data, non_duotou_list, rsi_list):$/;"	kind:function	line:410
 get_growth_rate	../joinQuant\Day_Trader\Day_Trader.py	/^def get_growth_rate(security, n=20):$/;"	kind:function	line:2117
 get_init_stock_list	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_init_stock_list():$/;"	kind:function	line:279
 get_max_high	../gmQuant\T_0_gm.py	/^    def get_max_high(self, bars):$/;"	kind:member	line:118
 get_min_low	../gmQuant\T_0_gm.py	/^    def get_min_low(self, bars):$/;"	kind:member	line:107
 get_minute_count	../gmQuant\T_0_gm.py	/^    def get_minute_count(self, date_time):$/;"	kind:member	line:84
-get_minute_count	../joinQuant\T_0\T_0.py	/^def get_minute_count(current_dt):$/;"	kind:function	line:326
+get_minute_count	../joinQuant\T_0\T_0.py	/^def get_minute_count(current_dt):$/;"	kind:function	line:352
 get_minute_count	../tushare\test_for_t_0.py	/^def get_minute_count(current_dt):$/;"	kind:function	line:59
 get_new_Duotou	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_new_Duotou(context):$/;"	kind:function	line:289
 get_obj_by_class_type	../joinQuant\Day_Trader\Day_Trader.py	/^    def get_obj_by_class_type(self, class_type):$/;"	kind:member	line:589
@@ -323,8 +323,8 @@ get_obj_by_class_type	../joinQuant\Day_Trader\Day_Trader.py	/^def get_obj_by_cla
 get_rsi	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_rsi(context, data, stock):$/;"	kind:function	line:460
 get_rules_str	../joinQuant\Day_Trader\Day_Trader.py	/^    def get_rules_str(rules):$/;"	kind:function	line:428
 get_sell_scale	../joinQuant\Pull_Wool\Pull_Wool.py	/^def get_sell_scale(context, stock):$/;"	kind:function	line:314
-get_stocks_by_client	../joinQuant\T_0\T_0.py	/^def get_stocks_by_client(context):$/;"	kind:function	line:115
-get_stocks_by_vol	../joinQuant\T_0\T_0.py	/^def get_stocks_by_vol(context):$/;"	kind:function	line:86
+get_stocks_by_client	../joinQuant\T_0\T_0.py	/^def get_stocks_by_client(context):$/;"	kind:function	line:135
+get_stocks_by_vol	../joinQuant\T_0\T_0.py	/^def get_stocks_by_vol(context):$/;"	kind:function	line:104
 get_strerror	../gmQuant\example\test_td_live.py	/^from gmsdk import td, get_strerror, to_dict$/;"	kind:namespace	line:4
 get_valid_sync_channel	../webchat\webchat_robot.py	/^    def get_valid_sync_channel(self):$/;"	kind:member	line:429
 handleMsg	../webchat\webchat_robot.py	/^    def handleMsg(self, r):$/;"	kind:member	line:671
@@ -344,7 +344,7 @@ handle_data	../joinQuant\Day_Trader\Day_Trader.py	/^    def handle_data(self, co
 handle_data	../joinQuant\Day_Trader\Day_Trader.py	/^    def handle_data(self, context, data):$/;"	kind:member	line:800
 handle_data	../joinQuant\Day_Trader\Day_Trader.py	/^def handle_data(context, data):$/;"	kind:function	line:250
 handle_data	../joinQuant\Pull_Wool\Pull_Wool.py	/^def handle_data(context, data):$/;"	kind:function	line:112
-handle_data	../joinQuant\T_0\T_0.py	/^def handle_data(context, data):$/;"	kind:function	line:464
+handle_data	../joinQuant\T_0\T_0.py	/^def handle_data(context, data):$/;"	kind:function	line:490
 handle_data	../tushare\test_for_t_0.py	/^def handle_data(context, data):$/;"	kind:function	line:92
 handler	../gmQuant\T_0_gm.py	/^handler = logging.handlers.RotatingFileHandler($/;"	kind:variable	line:18
 handler	../webchat\webchat_robot.py	/^handler = logging.handlers.RotatingFileHandler($/;"	kind:variable	line:33
@@ -363,7 +363,7 @@ initialize	../joinQuant\Day_Trader\Day_Trader.py	/^    def initialize(self,conte
 initialize	../joinQuant\Day_Trader\Day_Trader.py	/^    def initialize(self,context):$/;"	kind:member	line:2061
 initialize	../joinQuant\Day_Trader\Day_Trader.py	/^def initialize(context):$/;"	kind:function	line:201
 initialize	../joinQuant\Pull_Wool\Pull_Wool.py	/^def initialize(context):$/;"	kind:function	line:55
-initialize	../joinQuant\T_0\T_0.py	/^def initialize(context):$/;"	kind:function	line:125
+initialize	../joinQuant\T_0\T_0.py	/^def initialize(context):$/;"	kind:function	line:148
 initialize	../tushare\test_for_t_0.py	/^def initialize():$/;"	kind:function	line:49
 is_3_black_crows	../joinQuant\Day_Trader\Day_Trader.py	/^def is_3_black_crows(stock):$/;"	kind:function	line:2081
 is_changeduotou	../joinQuant\Pull_Wool\Pull_Wool.py	/^    def is_changeduotou(context, stock):$/;"	kind:function	line:293
@@ -371,7 +371,7 @@ is_junxianduotou	../joinQuant\Pull_Wool\Pull_Wool.py	/^def is_junxianduotou(cont
 is_ma5_up	../joinQuant\Pull_Wool\Pull_Wool.py	/^def is_ma5_up(context, stock):$/;"	kind:function	line:220
 is_not_limitup_limitdown_pause	../joinQuant\Pull_Wool\Pull_Wool.py	/^def is_not_limitup_limitdown_pause(context, stock):$/;"	kind:function	line:191
 isnan	../gmQuant\T_0_gm.py	/^from math import isnan$/;"	kind:namespace	line:9
-isnan	../joinQuant\T_0\T_0.py	/^from math import isnan$/;"	kind:namespace	line:5
+isnan	../joinQuant\T_0\T_0.py	/^from math import isnan$/;"	kind:namespace	line:24
 isnan	../tushare\test_for_t_0.py	/^from math import isnan$/;"	kind:namespace	line:5
 jqdata	../joinQuant\Pull_Wool\Pull_Wool.py	/^import jqdata$/;"	kind:namespace	line:51
 json	../webchat\webchat_robot.py	/^import json$/;"	kind:namespace	line:3
@@ -402,7 +402,7 @@ name	../joinQuant\Day_Trader\Day_Trader.py	/^    name = ''$/;"	kind:variable	lin
 no_paused_no_ST	../joinQuant\Pull_Wool\Pull_Wool.py	/^def no_paused_no_ST(stock_list):$/;"	kind:function	line:425
 notifyPerson	../webchat\webchat_robot.py	/^    def notifyPerson(self, groupName, groupmember, content):$/;"	kind:member	line:915
 np	../gmQuant\T_0_gm.py	/^import numpy as np$/;"	kind:namespace	line:6
-np	../joinQuant\T_0\T_0.py	/^import numpy as np$/;"	kind:namespace	line:2
+np	../joinQuant\T_0\T_0.py	/^import numpy as np$/;"	kind:namespace	line:21
 np	../tushare\test_for_t_0.py	/^import numpy as np$/;"	kind:namespace	line:2
 on_backtest_finish	../gmQuant\example\test_backtest.py	/^    def on_backtest_finish(self, indicator):$/;"	kind:member	line:19
 on_bar	../gmQuant\T_0_gm.py	/^    def on_bar(self, bar):$/;"	kind:member	line:145
@@ -440,11 +440,11 @@ parse	../webchat\webchat_robot.py	/^import urllib.parse$/;"	kind:namespace	line:
 pd	../gmQuant\T_0_gm.py	/^import pandas as pd$/;"	kind:namespace	line:7
 pd	../joinQuant\Day_Trader\Day_Trader.py	/^import pandas as pd$/;"	kind:namespace	line:31
 pd	../joinQuant\Pull_Wool\Pull_Wool.py	/^import pandas as pd$/;"	kind:namespace	line:52
-pd	../joinQuant\T_0\T_0.py	/^import pandas as pd$/;"	kind:namespace	line:3
+pd	../joinQuant\T_0\T_0.py	/^import pandas as pd$/;"	kind:namespace	line:22
 pd	../tushare\test_for_t_0.py	/^import pandas as pd$/;"	kind:namespace	line:3
 platform	../webchat\webchat_robot.py	/^import platform$/;"	kind:namespace	line:8
-post_reverse_order	../joinQuant\T_0\T_0.py	/^def post_reverse_order(context):$/;"	kind:function	line:424
-print_stock	../joinQuant\T_0\T_0.py	/^    def print_stock(self):$/;"	kind:member	line:79
+post_reverse_order	../joinQuant\T_0\T_0.py	/^def post_reverse_order(context):$/;"	kind:function	line:450
+print_stock	../joinQuant\T_0\T_0.py	/^    def print_stock(self):$/;"	kind:member	line:99
 print_stock	../tushare\test_for_t_0.py	/^    def print_stock(self):$/;"	kind:member	line:43
 print_win_rate	../joinQuant\Day_Trader\Day_Trader.py	/^    def print_win_rate(self, current_date, print_date, context):$/;"	kind:member	line:1750
 process_initialize	../joinQuant\Day_Trader\Day_Trader.py	/^    def process_initialize(self, context):$/;"	kind:member	line:543
@@ -480,7 +480,7 @@ request	../webchat\webchat_robot.py	/^import urllib.request$/;"	kind:namespace	l
 requests	../joinQuant\Day_Trader\Day_Trader.py	/^import requests$/;"	kind:namespace	line:32
 requests	../webchat\webchat_robot.py	/^import requests$/;"	kind:namespace	line:20
 reset	../joinQuant\Day_Trader\Day_Trader.py	/^    def reset(self):$/;"	kind:member	line:1717
-reset_position	../joinQuant\T_0\T_0.py	/^def reset_position(context):$/;"	kind:function	line:370
+reset_position	../joinQuant\T_0\T_0.py	/^def reset_position(context):$/;"	kind:function	line:396
 ret	../gmQuant\T_0_gm.py	/^    ret = t_0.backtest_config($/;"	kind:variable	line:248
 ret	../gmQuant\T_0_gm.py	/^    ret = t_0.run()$/;"	kind:variable	line:258
 ret	../gmQuant\example\test.py	/^    ret = MyStrategy($/;"	kind:variable	line:14
@@ -494,10 +494,10 @@ ret	../gmQuant\example\test_strategy_cw_config_ini.py	/^    ret = MyStrategy(con
 ret	../gmQuant\example\test_td_live.py	/^ret = td.init('demo@myquant.cn', '123456', 'strategy_1')$/;"	kind:variable	line:84
 ret	../gmQuant\example\test_timer.py	/^    ret = myStrategy.run()$/;"	kind:variable	line:35
 select_strategy	../joinQuant\Day_Trader\Day_Trader.py	/^def select_strategy(context):$/;"	kind:function	line:42
-sell_buy	../joinQuant\T_0\T_0.py	/^def sell_buy(context, stock, close_price, index):$/;"	kind:function	line:186
+sell_buy	../joinQuant\T_0\T_0.py	/^def sell_buy(context, stock, close_price, index):$/;"	kind:function	line:212
 sell_non_doutou_stock	../joinQuant\Pull_Wool\Pull_Wool.py	/^def sell_non_doutou_stock(context, non_duotou_list):$/;"	kind:function	line:370
 sell_rsi_stock	../joinQuant\Pull_Wool\Pull_Wool.py	/^def sell_rsi_stock(context, rsi_list):$/;"	kind:function	line:394
-sell_stock	../joinQuant\T_0\T_0.py	/^def sell_stock(context, stock, amount, limit_price, index):$/;"	kind:function	line:179
+sell_stock	../joinQuant\T_0\T_0.py	/^def sell_stock(context, stock, amount, limit_price, index):$/;"	kind:function	line:204
 sendMsg	../webchat\webchat_robot.py	/^    def sendMsg(self, name, word, isfile=False):$/;"	kind:member	line:745
 shipane_sdk	../joinQuant\Day_Trader\Day_Trader.py	/^    import shipane_sdk$/;"	kind:namespace	line:37
 sort_by_market_cap	../joinQuant\Pull_Wool\Pull_Wool.py	/^def sort_by_market_cap(context, stock_list):$/;"	kind:function	line:438
@@ -510,7 +510,7 @@ synccheck	../webchat\webchat_robot.py	/^    def synccheck(self):$/;"	kind:member
 sys	../webchat\webchat_robot.py	/^import sys$/;"	kind:namespace	line:12
 t_0	../gmQuant\T_0_gm.py	/^    t_0 = T_0_Strategy($/;"	kind:variable	line:241
 ta	../gmQuant\T_0_gm.py	/^import talib as ta$/;"	kind:namespace	line:8
-ta	../joinQuant\T_0\T_0.py	/^import talib as ta$/;"	kind:namespace	line:4
+ta	../joinQuant\T_0\T_0.py	/^import talib as ta$/;"	kind:namespace	line:23
 ta	../tushare\test_for_t_0.py	/^import talib as ta$/;"	kind:namespace	line:4
 talib	../joinQuant\Pull_Wool\Pull_Wool.py	/^import talib$/;"	kind:namespace	line:50
 td	../gmQuant\example\test_td_live.py	/^from gmsdk import td, get_strerror, to_dict$/;"	kind:namespace	line:4
@@ -539,10 +539,10 @@ traceback	../webchat\webchat_robot.py	/^            import traceback$/;"	kind:na
 ts	../tushare\test_for_t_0.py	/^import tushare ts$/;"	kind:namespace	line:1
 tushare	../tushare\test_for_t_0.py	/^import tushare ts$/;"	kind:namespace	line:1
 update_233_highest	../gmQuant\T_0_gm.py	/^    def update_233_highest(self, minute_count):$/;"	kind:member	line:137
-update_233_highest	../joinQuant\T_0\T_0.py	/^def update_233_highest(context):$/;"	kind:function	line:352
+update_233_highest	../joinQuant\T_0\T_0.py	/^def update_233_highest(context):$/;"	kind:function	line:378
 update_233_highest	../tushare\test_for_t_0.py	/^def update_233_highest(context):$/;"	kind:function	line:84
 update_89_lowest	../gmQuant\T_0_gm.py	/^    def update_89_lowest(self, minute_count):$/;"	kind:member	line:129
-update_89_lowest	../joinQuant\T_0\T_0.py	/^def update_89_lowest(context):$/;"	kind:function	line:342
+update_89_lowest	../joinQuant\T_0\T_0.py	/^def update_89_lowest(context):$/;"	kind:function	line:368
 update_89_lowest	../tushare\test_for_t_0.py	/^def update_89_lowest(context):$/;"	kind:function	line:75
 update_params	../joinQuant\Day_Trader\Day_Trader.py	/^    def update_params(self, context, params):$/;"	kind:member	line:1022
 update_params	../joinQuant\Day_Trader\Day_Trader.py	/^    def update_params(self, context, params):$/;"	kind:member	line:1057
@@ -568,7 +568,7 @@ update_params	../joinQuant\Day_Trader\Day_Trader.py	/^    def update_params(self
 update_params	../joinQuant\Day_Trader\Day_Trader.py	/^    def update_params(self, context, params):$/;"	kind:member	line:942
 update_params	../joinQuant\Day_Trader\Day_Trader.py	/^    def update_params(self, context, params):$/;"	kind:member	line:999
 update_params	../joinQuant\Day_Trader\Day_Trader.py	/^    def update_params(self,context,params):$/;"	kind:member	line:2028
-update_socket_statue	../joinQuant\T_0\T_0.py	/^def update_socket_statue(context):$/;"	kind:function	line:382
+update_socket_statue	../joinQuant\T_0\T_0.py	/^def update_socket_statue(context):$/;"	kind:function	line:408
 urlencode	../joinQuant\Day_Trader\Day_Trader.py	/^from six.moves.urllib.parse import urlencode$/;"	kind:namespace	line:34
 urllib	../webchat\webchat_robot.py	/^import urllib.error$/;"	kind:namespace	line:14
 urllib	../webchat\webchat_robot.py	/^import urllib.parse$/;"	kind:namespace	line:15
