@@ -172,7 +172,7 @@ def initialize(context):
     # 设置基准
     set_benchmark('000300.XSHG')
     set_option('use_real_price', True)
-    
+    log.info("initialize over")
 # 在每天交易开始时，将状态置为可交易状态
 def before_trading_start(context):
     log.info("初始化买卖状态为INIT")
@@ -509,7 +509,7 @@ def handle_data(context, data):
     minute = context.current_dt.minute
     
     # 每天14点00分钟 将未完成的订单强制恢复到原有持仓量
-    if hour == 14 and minute == 00:
+    if hour == 14 and minute == 0:
         cancel_open_order(context)
         reset_position(context)     
         
@@ -519,8 +519,9 @@ def handle_data(context, data):
 
     # 因为要计算移动平均线，所以每天前g.ma_13day_count分钟，不做交易
     if get_minute_count(context.current_dt) < g.ma_13day_count:
+        #log.info("13分钟后才有交易")
         return
-        
+    
     # 更新89分钟内的最低收盘价，不足89分钟，则按到当前时间的最低收盘价
     update_89_lowest(context)
     
@@ -561,37 +562,41 @@ def handle_data(context, data):
         
         close_m = get_price(stock, count = g.ma_13day_count, end_date=str(context.current_dt), frequency='1m', fields=['close'])
        
-        close_4 = [0.0] * g.ma_4day_count
-        close_13 = [0.0] * g.ma_13day_count
+        close_4 = array([0.0, 0.0, 0.0, 0.0], dtype = float)
+        close_13 = array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype = float)
+        
         for j in range(g.ma_13day_count):
             close_13[j] = close_m.iat[j, 0]
-        close_13 =  np.array(close_13).astype(float)
-        close_4  = np.array(close_4).astype(float)
         for j in range(g.ma_13day_count):
             close_13[j] = ((close_13[j] - lowest_89) * 1.0 / (highest_233 - lowest_89)) * 4
         
-        for j in range(g.ma_4day_count):
-            close_4[j] = close_13[g.ma_13day_count - g.ma_4day_count + j]
+        close_4 = close_13[9:]
 
         if close_13 is not None:
-            operator_line_13 =  ta.MA(close_13, g.ma_13day_count)
-            operator_line_4  = ta.MA(close_4, g.ma_4day_count)
+            for item in close_13:
+                operator_line_13 += item
+            for item in close_4:
+                operator_line_4 += item
+
         else:
             log.warn("股票: %s 可能由于停牌等原因无法求解MA", stock)
             continue
         
         # 买入信号产生
-        log.info("%s, 1 from %f to %f, 2 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", g.basestock_pool[i].operator_value_4, operator_line_4[3], g.basestock_pool[i].operator_value_13, operator_line_13[12], close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
-        if (g.basestock_pool[i].operator_value_4 < g.basestock_pool[i].operator_value_13 and operator_line_4[3] > operator_line_13[12]) and (operator_line_13[12] < 0.3) and (close_m.iat[g.ma_13day_count-1, 0] > close_m.iat[g.ma_13day_count-2, 0] * 0.97):
-            log.info("BUY SIGNAL for %s, 1 from %f to %f, 2 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", g.basestock_pool[i].operator_value_4, operator_line_4[3], g.basestock_pool[i].operator_value_13, operator_line_13[12], close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
+        
+        if ((g.basestock_pool[i].operator_value_4 < g.basestock_pool[i].operator_value_13) and (operator_line_4 > operator_line_13) and (operator_line_13 < 0.3) and (close_m.iat[g.ma_13day_count-1, 0] > close_m.iat[g.ma_13day_count-2, 0] * 0.97)):
+            log.info("BUY SIGNAL for %s, 1 from %f to %f, 2 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
             buy_sell(context, stock, close_m.iat[g.ma_13day_count-1,0], i)
         # 卖出信息产生
-        elif (g.basestock_pool[i].operator_value_4 > g.basestock_pool[i].operator_value_13 and operator_line_4[3] < operator_line_13[12]) and (operator_line_13[12] > 3.7) and (close_m.iat[g.ma_13day_count-1, 0] < close_m.iat[g.ma_13day_count-2, 0] * 1.03):
-            log.info("SELL SIGNAL for %s, 1 from %f to %f, 2 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", g.basestock_pool[i].operator_value_4, operator_line_4[3], g.basestock_pool[i].operator_value_13, operator_line_13[12], close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
+        elif ((g.basestock_pool[i].operator_value_4 > g.basestock_pool[i].operator_value_13) and (operator_line_4 < operator_line_13) and (operator_line_13 > 3.7) and (close_m.iat[g.ma_13day_count-1, 0] < close_m.iat[g.ma_13day_count-2, 0] * 1.03)):
+            log.info("SELL SIGNAL for %s, 1 from %f to %f, 2 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
             sell_buy(context, stock, close_m.iat[g.ma_13day_count-1,0], i)
-            
-        g.basestock_pool[i].operator_value_4 = operator_line_4[3]
-        g.basestock_pool[i].operator_value_13 = operator_line_13[12]
+        else:
+            #log.info("%s, 1 from %f to %f, 2 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
+            pass
+        g.basestock_pool[i].operator_value_4 = operator_line_4
+        g.basestock_pool[i].operator_value_13 = operator_line_13
+        
     # 根据挂单状态，决定是否挂反向单
     post_reverse_order(context)
     
