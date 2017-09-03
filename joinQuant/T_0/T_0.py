@@ -573,11 +573,15 @@ def handle_data(context, data):
         close_4 = close_13[9:]
 
         if close_13 is not None:
+            operator_line_13 = 0
+            operator_line_4 = 0
             for item in close_13:
                 operator_line_13 += item
+
             for item in close_4:
                 operator_line_4 += item
-
+            operator_line_13 = operator_line_13 / g.ma_13day_count
+            operator_line_4 = operator_line_4 / g.ma_4day_count
         else:
             log.warn("股票: %s 可能由于停牌等原因无法求解MA", stock)
             continue
@@ -585,14 +589,14 @@ def handle_data(context, data):
         # 买入信号产生
         
         if ((g.basestock_pool[i].operator_value_4 < g.basestock_pool[i].operator_value_13) and (operator_line_4 > operator_line_13) and (operator_line_13 < 0.3) and (close_m.iat[g.ma_13day_count-1, 0] > close_m.iat[g.ma_13day_count-2, 0] * 0.97)):
-            log.info("BUY SIGNAL for %s, 1 from %f to %f, 2 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
+            log.info("BUY SIGNAL for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
             buy_sell(context, stock, close_m.iat[g.ma_13day_count-1,0], i)
         # 卖出信息产生
         elif ((g.basestock_pool[i].operator_value_4 > g.basestock_pool[i].operator_value_13) and (operator_line_4 < operator_line_13) and (operator_line_13 > 3.7) and (close_m.iat[g.ma_13day_count-1, 0] < close_m.iat[g.ma_13day_count-2, 0] * 1.03)):
-            log.info("SELL SIGNAL for %s, 1 from %f to %f, 2 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
+            log.info("SELL SIGNAL for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
             sell_buy(context, stock, close_m.iat[g.ma_13day_count-1,0], i)
         else:
-            #log.info("%s, 1 from %f to %f, 2 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
+            log.info("%s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
             pass
         g.basestock_pool[i].operator_value_4 = operator_line_4
         g.basestock_pool[i].operator_value_13 = operator_line_13
