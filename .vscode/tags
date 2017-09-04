@@ -212,7 +212,7 @@ after_trading_end	../joinQuant\Day_Trader\Day_Trader.py	/^    def after_trading_
 after_trading_end	../joinQuant\Day_Trader\Day_Trader.py	/^    def after_trading_end(self,context):$/;"	kind:member	line:2034
 after_trading_end	../joinQuant\Day_Trader\Day_Trader.py	/^def after_trading_end(context):$/;"	kind:function	line:330
 after_trading_end	../joinQuant\Pull_Wool\Pull_Wool.py	/^def after_trading_end(context):$/;"	kind:function	line:141
-after_trading_end	../joinQuant\T_0\T_0.py	/^def after_trading_end(context):$/;"	kind:function	line:601
+after_trading_end	../joinQuant\T_0\T_0.py	/^def after_trading_end(context):$/;"	kind:function	line:607
 arrow	../gmQuant\example\test_md_live.py	/^import arrow$/;"	kind:namespace	line:4
 bar_to_dict	../gmQuant\T_0_gm.py	/^from gmsdk.util import bar_to_dict$/;"	kind:namespace	line:2
 bar_to_dict	../gmQuant\example\test_strategy.py	/^from gmsdk.util import bar_to_dict$/;"	kind:namespace	line:2

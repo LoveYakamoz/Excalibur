@@ -4,4 +4,4 @@ saved/
 *.pyc
 *.log
 gmcache/*
-.vscode/
+.vscode/*
