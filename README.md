@@ -35,10 +35,8 @@ PS: 以上策略只是自己学习之用，并不对其收益等负责，谢谢�
 依赖
 ---
 
-* Bash(git、ssh)
-* LNMP/LAMP(php5.4+)
-* Composer
-* Ansible(可选)
+* 待完成
+
 
 安装
 ----
@@ -50,12 +48,7 @@ cd Quantitative_Trading
 
 快速开始
 ----
-* 注册一个管理员身份用户(已有`admin/admin`)，配置一个项目。
-    * [git配置范例](https://walle-web.io/docs/git-configuration.html)
-    * [svn配置范例](https://walle-web.io/docs/svn-configuration.html)
-* 开发者注册用户(已有`demo/demo`)，提交上线单
-* 管理员审核上线单
-* 开发者发起上线
+* 待完成
 
 To Do List
 ----

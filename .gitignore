@@ -5,3 +5,4 @@ saved/
 *.log
 gmcache/*
 .vscode/*
+.vscode/tags
