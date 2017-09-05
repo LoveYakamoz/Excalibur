@@ -1,28 +1,9 @@
-'''
-指标公式：
-VAR1:=LLV(LOW,89);      变量1：位89日的最小值
-VAR2:=HHV(HIGH,233);   变量2：233日的最大值
-操盘线: MA((CLOSE-VAR1)/(VAR2-VAR1)*4,4); 
-操盘线2: MA((CLOSE-VAR1)/(VAR2-VAR1)*4,13);
-金叉买入：CROSS(操盘线,操盘线2);   操盘线上穿操盘线2，且操盘线2<0.3和股价>昨日收盘价*0.97;
-死叉卖出：CROSS(操盘线2,操盘线) ;  操盘线下穿操盘线2，且操盘线2>3.7和股价<昨日收盘价*1.03
-挂单：
-1.回转交易：出现金叉买入，然后出现死叉卖出；出现死叉信号卖出，然后出现金叉买入；
-2.14：00之后不开新的回转交易
-3.如果当天没有完成回转交易，则在14：45分平仓
-4.每次买入卖出为现有持仓50%的仓位
-5.一次买卖交易完成前，忽略信号
-
-其他：
-1、标的股票：沪深300
-2、标的股票要求，最近5个交易日的波动率均大于2%，波动率：（高点-低点）/上一交易日的收盘
-'''
 from jqdata import *
 import numpy as np
 import pandas as pd
 import talib as ta
 from math import isnan
-
+from math import atan
 # 股票池来源
 class Source(Enum):
     AUTO  = 0  # 程序根据波动率及股价自动从沪深300中获取股票
@@ -46,22 +27,22 @@ g.repeat_signal_count = 0
 g.reset_order_count = 0
 g.success_count = 0
 
-# 上穿及下穿阈值
-g.up = 0.1
-g.down = 3.9
-
 #MA平均的天数
 g.ma_4day_count = 4
 g.ma_13day_count = 13
 
 #每次调整的比例
 g.adjust_scale = 0.25 
-# 一次突破时，反向挂单时间（距离突破点）， 单位：分钟
-g.delay_time = 30
 
 # 期望收益率
 g.expected_revenue = 0.003
 
+# 角度阈值
+g.angle_threshold = 30
+class Angle(Enum):
+    UP = 1 # 角度>30
+    MIDDLE = 0 # 角度<=30 且 角度>=-30
+    DOWN = -1 # 角度<-30
 class Status(Enum):
     INIT    = 0  # 在每天交易开始时，置为INIT
     WORKING = 1  # 处于买/卖中
@@ -98,6 +79,7 @@ class BaseStock(object):
         self.delay_price = 0             # 反向挂单价格
         self.operator_value_4 = 0
         self.operator_value_13 = 0
+        self.angle = 1000
 
     def print_stock(self):
         log.info("stock: %s, close: %f, min_vol: %f, max_vol: %f, lowest: %f, hightest: %f, position: %f, sell_roder_id: %d, buy_order_id: %d, operator_value_4: %f, operator_value_13: %f"
@@ -148,6 +130,18 @@ def get_stocks_by_client(context):
     if select_count < g.position_count:
         g.position_count = select_count
     
+def get_stock_angle(context, stock):
+    '''ATAN(（五日收盘价均线值/昨日的五日收盘均线值-1）*100）*57.3'''
+
+    df_close = get_price(stock, count = 6, end_date=str(context.current_dt), frequency='daily', fields=['close'])
+    close_list = [item for item in df_close['close']]
+
+    yesterday_5MA = (reduce(lambda x, y: x + y, close_list) - close_list[5]) / 5
+    today_5MA = (reduce(lambda x, y: x + y, close_list) - close_list[0]) / 5
+    angle = math.atan((today_5MA/yesterday_5MA -1) * 100) * 57.3
+    log.info("股票：%s的角度为：%f", stock , angle)
+    return angle
+
 def initialize(context):
     log.info("---> initialize @ %s" % (str(context.current_dt))) 
     g.repeat_signal_count = 0
@@ -190,6 +184,14 @@ def before_trading_start(context):
         g.basestock_pool[i].break_throught_time = None
         g.basestock_pool[i].delay_amount = 0
         g.basestock_pool[i].delay_price = 0
+        angle = get_stock_angle(context, g.basestock_pool[i].stock)
+        if angle > 30:
+            g.basestock_pool[i].angle = Angle.UP
+        elif angle < -30:
+            g.basestock_pool[i].angle = Angle.DOWN
+        else:
+            g.basestock_pool[i].angle = Angle.MIDDLE
+        
     g.repeat_signal_count = 0
     g.reset_order_count = 0
     g.success_count = 0
@@ -227,6 +229,9 @@ def sell_signal(context, stock, close_price, index):
     if g.basestock_pool[index].status == Status.WORKING:
         log.warn("股票: %s, 收到重复卖出信号，但不做交易", stock)
     elif g.basestock_pool[index].status == Status.INIT:
+        if g.basestock_pool[index].angle == Angle.UP:
+            log.warn("股票：%s, 角度大于30， 忽略卖出信号", stock)
+            return
         sell_ret = sell_stock(context, stock, -amount, limit_price, index)
         g.basestock_pool[index].break_throught_time = context.current_dt
         # 以收盘价 - 价差 * expected_revenue 挂单买入
@@ -246,8 +251,7 @@ def buy_signal(context, stock, close_price, index):
 
     # 每次交易量为持仓量的g.adjust_scale
     amount = g.adjust_scale * g.basestock_pool[index].position
-    
-    
+        
     if amount % 100 != 0:
         amount_new = amount - (amount % 100)
         amount = amount_new
@@ -259,6 +263,11 @@ def buy_signal(context, stock, close_price, index):
     if g.basestock_pool[index].status == Status.WORKING:
         log.warn("股票: %s, 收到重复买入信号，但不做交易", stock)
     elif g.basestock_pool[index].status == Status.INIT:
+
+        if g.basestock_pool[index].angle == Angle.DOWN:
+            log.warn("股票：%s, 角度小于-30， 忽略买入信号", stock)
+            return
+
         buy_stock(context, stock, amount, limit_price, index)
         g.basestock_pool[index].break_throught_time = context.current_dt
         # 以收盘价 + 价差 * expected_revenue 挂单卖出
