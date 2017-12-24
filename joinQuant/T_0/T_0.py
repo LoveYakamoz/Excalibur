@@ -4,61 +4,71 @@ import pandas as pd
 import talib as ta
 from math import isnan
 from math import atan
+
+
 # 股票池来源
 class Source(Enum):
-    AUTO  = 0  # 程序根据波动率及股价自动从沪深300中获取股票
-    CLIENT = 1 # 使用用户提供的股票
+    AUTO = 0  # 程序根据波动率及股价自动从沪深300中获取股票
+    CLIENT = 1  # 使用用户提供的股票
+
 
 g.stocks_source = Source.AUTO  # 默认使用自动的方法获得股票
-g.stock_id_list_from_client = ["000031.XSHE", "000059.XSHE", "000060.XSHE", "000401.XSHE", 
-                               "000423.XSHE", "000528.XSHE", "000562.XSHE", "600036.XSHG", 
-                               "000568.XSHE", "000612.XSHE", "000728.XSHE", "000768.XSHE", 
-                               "000800.XSHE", "000878.XSHE", "000898.XSHE", "000927.XSHE", 
-                               "000937.XSHE", "002024.XSHE", "002142.XSHE", "600009.XSHG", 
-                               "600026.XSHG", "600037.XSHG", "000024.XSHE", "000527.XSHE",  
-                               "600104.XSHG", "600109.XSHG", "600161.XSHG", "600251.XSHG", 
+g.stock_id_list_from_client = ["000031.XSHE", "000059.XSHE", "000060.XSHE", "000401.XSHE",
+                               "000423.XSHE", "000528.XSHE", "000562.XSHE", "600036.XSHG",
+                               "000568.XSHE", "000612.XSHE", "000728.XSHE", "000768.XSHE",
+                               "000800.XSHE", "000878.XSHE", "000898.XSHE", "000927.XSHE",
+                               "000937.XSHE", "002024.XSHE", "002142.XSHE", "600009.XSHG",
+                               "600026.XSHG", "600037.XSHG", "000024.XSHE", "000527.XSHE",
+                               "600104.XSHG", "600109.XSHG", "600161.XSHG", "600251.XSHG",
                                "600266.XSHG", "600096.XSHG"]
 
 # 持仓股票池详细信息
 g.basestock_pool = []
 
-#用于统计结果
+# 用于统计结果
 g.repeat_signal_count = 0
 g.reset_order_count = 0
 g.success_count = 0
 
-#MA平均的天数
+# MA平均的天数
 g.ma_4day_count = 4
 g.ma_13day_count = 13
 
-#每次调整的比例
-g.adjust_scale = 0.25 
+# 每次调整的比例
+g.adjust_scale = 0.25
 
 # 期望收益率
 g.expected_revenue = 0.003
 
 # 角度阈值
 g.angle_threshold = 30
+
+
 class Angle(Enum):
-    UP = 1 # 角度>30
-    MIDDLE = 0 # 角度<=30 且 角度>=-30
-    DOWN = -1 # 角度<-30
+    UP = 1  # 角度>30
+    MIDDLE = 0  # 角度<=30 且 角度>=-30
+    DOWN = -1  # 角度<-30
+
+
 class Status(Enum):
-    INIT    = 0  # 在每天交易开始时，置为INIT
+    INIT = 0  # 在每天交易开始时，置为INIT
     WORKING = 1  # 处于买/卖中
-    NONE    = 2  # 今天不再做任何交易
-    
+    NONE = 2  # 今天不再做任何交易
+
+
 class Break(Enum):
-    UP   = 0  # 上穿
+    UP = 0  # 上穿
     DOWN = 1  # 下穿 
     NONE = 2
+
+
 '''
     记录股票详细信息
 '''
 
-class BaseStock(object):
 
-    def __init__ (self, stock, close, min_vol, max_vol, lowest, highest, status, position, sell_order_id, buy_order_id):
+class BaseStock(object):
+    def __init__(self, stock, close, min_vol, max_vol, lowest, highest, status, position, sell_order_id, buy_order_id):
         self.stock = stock
         self.close = close
         self.min_vol = min_vol
@@ -72,18 +82,20 @@ class BaseStock(object):
         self.sell_price = 0
         self.buy_order_id = buy_order_id
         self.buy_price = 0
-    
+
         self.break_throught_type = Break.NONE  # 突破类型 up or down
         self.break_throught_time = None  # 突破时间点
-        self.delay_amount = 0            # 反向挂单量
-        self.delay_price = 0             # 反向挂单价格
+        self.delay_amount = 0  # 反向挂单量
+        self.delay_price = 0  # 反向挂单价格
         self.operator_value_4 = 0
         self.operator_value_13 = 0
         self.angle = 1000
 
     def print_stock(self):
-        log.info("stock: %s, close: %f, min_vol: %f, max_vol: %f, lowest: %f, hightest: %f, position: %f, sell_roder_id: %d, buy_order_id: %d, operator_value_4: %f, operator_value_13: %f"
-        , self.stock, self.close, self.min_vol, self.max_vol, self.lowest, self.highest, self.position, self.sell_order_id, self.buy_order_id, self.operator_value_4, self.operator_value_13)
+        log.info(
+            "stock: %s, close: %f, min_vol: %f, max_vol: %f, lowest: %f, hightest: %f, position: %f, sell_roder_id: %d, buy_order_id: %d, operator_value_4: %f, operator_value_13: %f"
+            , self.stock, self.close, self.min_vol, self.max_vol, self.lowest, self.highest, self.position,
+            self.sell_order_id, self.buy_order_id, self.operator_value_4, self.operator_value_13)
 
 
 def get_stocks_by_vol(context):
@@ -94,16 +106,17 @@ def get_stocks_by_vol(context):
 
     stock_list = get_index_stocks('399300.XSHE')
     for stock in stock_list:
-        df = get_price(stock, count = 6, end_date = str(context.current_dt), frequency = 'daily', fields = ['high','low', 'close'])
+        df = get_price(stock, count=6, end_date=str(context.current_dt), frequency='daily',
+                       fields=['high', 'low', 'close'])
         for i in range(5):
-            df.ix[i+1, 'Volatility'] = (df.ix[i, 'high'] - df.ix[i, 'low']) / df.ix[i+1, 'close']
-        
-        #选择单价大于10.0元
+            df.ix[i + 1, 'Volatility'] = (df.ix[i, 'high'] - df.ix[i, 'low']) / df.ix[i + 1, 'close']
+
+        # 选择单价大于10.0元
         if df.ix[5, 'close'] > 10.00:
-            vol_df = df.ix[1:6,['Volatility']].sort(["Volatility"], ascending=True)
+            vol_df = df.ix[1:6, ['Volatility']].sort(["Volatility"], ascending=True)
             min_vol = vol_df.iat[0, 0]
             max_vol = vol_df.iat[4, 0]
-            #选择最近5天的波动率最小值大于0.02
+            # 选择最近5天的波动率最小值大于0.02
             if min_vol > 0.02:
                 stock_obj = BaseStock(stock, df.ix[5, 'close'], min_vol, max_vol, 0, 0, Status.INIT, 0, -1, -1)
                 g.basestock_pool.append(stock_obj)
@@ -116,57 +129,60 @@ def get_stocks_by_vol(context):
         g.position_count = select_count
 
 
-
 def get_stocks_by_client(context):
     '''
     直接从客户得到股票列表
     '''
     select_count = 0
     for stock_id in g.stock_id_list_from_client:
-        stock_obj = BaseStock(stock_id, 0, 0, 0, 0, 0, 0, Status.INIT, 0, -1, -1)
+        stock_obj = BaseStock(stock_id, 0, 0, 0, 0, 0, Status.INIT, 0, -1, -1)
         g.basestock_pool.append(stock_obj)
         select_count += 1
-    
+
     if select_count < g.position_count:
         g.position_count = select_count
-    
+
+
 def get_stock_angle(context, stock):
     '''ATAN(（五日收盘价均线值/昨日的五日收盘均线值-1）*100）*57.3'''
 
-    df_close = get_price(stock, count = 6, end_date=str(context.current_dt), frequency='daily', fields=['close'])
+    df_close = get_price(stock, count=6, end_date=str(context.current_dt), frequency='daily', fields=['close'])
     close_list = [item for item in df_close['close']]
 
     yesterday_5MA = (reduce(lambda x, y: x + y, close_list) - close_list[5]) / 5
     today_5MA = (reduce(lambda x, y: x + y, close_list) - close_list[0]) / 5
-    angle = math.atan((today_5MA/yesterday_5MA -1) * 100) * 57.3
-    log.info("股票：%s的角度为：%f", stock , angle)
+    angle = math.atan((today_5MA / yesterday_5MA - 1) * 100) * 57.3
+    log.info("股票：%s的角度为：%f", stock, angle)
     return angle
 
+
 def initialize(context):
-    log.info("---> initialize @ %s" % (str(context.current_dt))) 
+    log.info("---> initialize @ %s" % (str(context.current_dt)))
     g.repeat_signal_count = 0
     g.reset_order_count = 0
     g.success_count = 0
     # 第一天运行时，需要选股入池，并且当天不可进行股票交易
     g.firstrun = True
-    
+
     # 默认股票池容量
     g.position_count = 30
-    
+
     if g.stocks_source == Source.AUTO:
         log.info("程序根据波动率及股价自动从沪深300中获取股票")
         get_stocks_by_vol(context)
-        
+
     elif g.stocks_source == Source.CLIENT:
-        log.info("使用用户提供的股票")        
+        log.info("使用用户提供的股票")
         get_stocks_by_client(context)
     else:
         log.error("未提供获得股票方法！！！")
-        
+
     # 设置基准
     set_benchmark('000300.XSHG')
     set_option('use_real_price', True)
     log.info("initialize over")
+
+
 # 在每天交易开始时，将状态置为可交易状态
 def before_trading_start(context):
     log.info("初始化买卖状态为INIT")
@@ -180,7 +196,7 @@ def before_trading_start(context):
         g.basestock_pool[i].sell_price = 0
         g.basestock_pool[i].buy_order_id = -1
         g.basestock_pool[i].buy_price = 0
-    
+
         g.basestock_pool[i].break_throught_time = None
         g.basestock_pool[i].delay_amount = 0
         g.basestock_pool[i].delay_price = 0
@@ -191,12 +207,13 @@ def before_trading_start(context):
             g.basestock_pool[i].angle = Angle.DOWN
         else:
             g.basestock_pool[i].angle = Angle.MIDDLE
-        
+
     g.repeat_signal_count = 0
     g.reset_order_count = 0
     g.success_count = 0
 
-# 购买股票，并记录订单号，便于查询订单状态	
+
+# 购买股票，并记录订单号，便于查询订单状态
 def buy_stock(context, stock, amount, limit_price, index):
     buy_order = order(stock, amount, LimitOrderStyle(limit_price))
     g.basestock_pool[index].buy_price = limit_price
@@ -204,7 +221,8 @@ def buy_stock(context, stock, amount, limit_price, index):
         g.basestock_pool[index].buy_order_id = buy_order.order_id
         log.info("股票: %s, 以%f价格挂单，买入%d", stock, limit_price, amount)
 
-# 卖出股票，并记录订单号，便于查询订单状态		
+
+# 卖出股票，并记录订单号，便于查询订单状态
 def sell_stock(context, stock, amount, limit_price, index):
     sell_order = order(stock, amount, LimitOrderStyle(limit_price))
     g.basestock_pool[index].sell_price = limit_price
@@ -218,14 +236,14 @@ def sell_signal(context, stock, close_price, index):
 
     # 每次交易量为持仓量的g.adjust_scale
     amount = g.adjust_scale * g.basestock_pool[index].position
-    
+
     if amount % 100 != 0:
         amount_new = amount - (amount % 100)
         amount = amount_new
 
     # 以收盘价 + 0.01 挂单卖出
     limit_price = close_price + 0.01
-    
+
     if g.basestock_pool[index].status == Status.WORKING:
         log.warn("股票: %s, 收到重复卖出信号，但不做交易", stock)
     elif g.basestock_pool[index].status == Status.INIT:
@@ -235,30 +253,30 @@ def sell_signal(context, stock, close_price, index):
         sell_ret = sell_stock(context, stock, -amount, limit_price, index)
         g.basestock_pool[index].break_throught_time = context.current_dt
         # 以收盘价 - 价差 * expected_revenue 挂单买入
-        yesterday = get_price(stock, count = 1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
+        yesterday = get_price(stock, count=1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
         limit_price = close_price - yesterday.iat[0, 0] * g.expected_revenue
-        
+
         g.basestock_pool[index].delay_amount = amount
         g.basestock_pool[index].delay_price = limit_price
         g.basestock_pool[index].break_throught_type = Break.DOWN
-        g.basestock_pool[index].status = Status.WORKING  #更新交易状态
+        g.basestock_pool[index].status = Status.WORKING  # 更新交易状态
     else:
         log.error("股票: %s, 交易状态出错", stock)
-    
+
 
 def buy_signal(context, stock, close_price, index):
     '''金叉买入处理	'''
 
     # 每次交易量为持仓量的g.adjust_scale
     amount = g.adjust_scale * g.basestock_pool[index].position
-        
+
     if amount % 100 != 0:
         amount_new = amount - (amount % 100)
         amount = amount_new
-    
+
     # 以收盘价 - 0.01 挂单买入
     limit_price = close_price - 0.01
-    
+
     # 如果当前不是INIT状态，则表示已经处于一次交易中（未撮合完成）	
     if g.basestock_pool[index].status == Status.WORKING:
         log.warn("股票: %s, 收到重复买入信号，但不做交易", stock)
@@ -271,16 +289,17 @@ def buy_signal(context, stock, close_price, index):
         buy_stock(context, stock, amount, limit_price, index)
         g.basestock_pool[index].break_throught_time = context.current_dt
         # 以收盘价 + 价差 * expected_revenue 挂单卖出
-        yesterday = get_price(stock, count = 1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
+        yesterday = get_price(stock, count=1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
         limit_price = close_price + yesterday.iat[0, 0] * g.expected_revenue
-        
+
         g.basestock_pool[index].delay_amount = -amount
         g.basestock_pool[index].delay_price = limit_price
         g.basestock_pool[index].break_throught_type = Break.UP
-        g.basestock_pool[index].status = Status.WORKING   #更新交易状态
+        g.basestock_pool[index].status = Status.WORKING  # 更新交易状态
     else:
         log.error("股票: %s, 交易状态出错", stock)
-    
+
+
 # 计算当前时间点，是开市以来第几分钟   
 def get_minute_count(current_dt):
     '''
@@ -288,43 +307,48 @@ def get_minute_count(current_dt):
      13:00 --- 15:00
      '''
     current_hour = current_dt.hour
-    current_min  = current_dt.minute
-    
+    current_min = current_dt.minute
+
     if current_hour < 12:
         minute_count = (current_hour - 9) * 60 + current_min - 30
     else:
         minute_count = (current_hour - 13) * 60 + current_min + 120
 
     return minute_count
-  
+
+
 # 获取89分钟内的最低价，不足89分钟，则计算到当前时间点
 def update_89_lowest(context):
     minute_count = get_minute_count(context.current_dt)
     if minute_count > 89:
         minute_count = 89
     for i in range(g.position_count):
-        low_df = get_price(g.basestock_pool[i].stock, count = minute_count, end_date=str(context.current_dt), frequency='1m', fields=['low'])
+        low_df = get_price(g.basestock_pool[i].stock, count=minute_count, end_date=str(context.current_dt),
+                           frequency='1m', fields=['low'])
         g.basestock_pool[i].lowest_89 = min(low_df['low'])
-        #low_df.sort(['low'], ascending = True).iat[0,0]
-        
+        # low_df.sort(['low'], ascending = True).iat[0,0]
+
+
 # 获取233分钟内的最高价，不足233分钟，则计算到当前时间点
 def update_233_highest(context):
     minute_count = get_minute_count(context.current_dt)
     if minute_count > 233:
         minute_count = 233
     for i in range(g.position_count):
-        high_df = get_price(g.basestock_pool[i].stock, count = minute_count, end_date=str(context.current_dt), frequency='1m', fields=['high'])
-        g.basestock_pool[i].highest_233 =  max(high_df['high'])
-        #high_df.sort(['high'], ascending = False).iat[0,0]
-        
+        high_df = get_price(g.basestock_pool[i].stock, count=minute_count, end_date=str(context.current_dt),
+                            frequency='1m', fields=['high'])
+        g.basestock_pool[i].highest_233 = max(high_df['high'])
+        # high_df.sort(['high'], ascending = False).iat[0,0]
+
 
 # 取消所有未完成的订单（未撮合成的订单）        
 def cancel_open_order(context):
     orders = get_open_orders()
     for _order in orders.values():
         cancel_order(_order)
-        #log.warn("cancel order: ", _order)
-    
+        # log.warn("cancel order: ", _order)
+
+
 # 恢复所有股票到原有仓位
 def reset_position(context):
     for i in range(g.position_count):
@@ -336,8 +360,8 @@ def reset_position(context):
             _order = order(stock, src_position - cur_position)
             log.warn("reset posiont: ", _order)
             g.reset_order_count += 1
-        
-        
+
+
 def update_socket_statue(context):
     orders = get_orders()
     if len(orders) == 0:
@@ -351,14 +375,14 @@ def update_socket_statue(context):
         buy_order_id = g.basestock_pool[i].buy_order_id
         status = g.basestock_pool[i].status
         if (status == Status.WORKING) and ((sell_order_id != -1) and (buy_order_id != -1)):
-            sell_order =  orders.get(sell_order_id)
+            sell_order = orders.get(sell_order_id)
             buy_order = orders.get(buy_order_id)
             if (sell_order is not None) and (buy_order is not None):
                 if sell_order.status == OrderStatus.held and buy_order.status == OrderStatus.held:
                     log.info("股票:%s回转交易完成 ==============> SUCCESS", stock)
                     g.basestock_pool[i].sell_order_id = -1
                     g.basestock_pool[i].buy_order_id = -1
-                    g.basestock_pool[i].status = Status.INIT  #一次完整交易（买/卖)结束，可以进行下一次交易
+                    g.basestock_pool[i].status = Status.INIT  # 一次完整交易（买/卖)结束，可以进行下一次交易
                     g.basestock_pool[i].buy_price = 0
                     g.basestock_pool[i].sell_price = 0
                     g.basestock_pool[i].delay_amount = 0
@@ -370,92 +394,92 @@ def update_socket_statue(context):
         if hour == 14 and g.basestock_pool[i].status == Status.INIT:
             g.basestock_pool[i].status = Status.NONE
 
+
 def get_delta_minute(datetime1, datetime2):
     minute1 = get_minute_count(datetime1)
     minute2 = get_minute_count(datetime2)
-    
+
     return abs(minute2 - minute1)
 
 
-            
 def handle_data(context, data):
     # 0. 平均购买价值1000000元的30个股票，并记录持仓数量
     if str(context.run_params.start_date) == str(context.current_dt.strftime("%Y-%m-%d")):
         if g.firstrun is True:
-            for i in range(g.position_count):                
+            for i in range(g.position_count):
                 myorder = order_value(g.basestock_pool[i].stock, 1000000)
                 if myorder is not None:
                     g.basestock_pool[i].position = myorder.amount
                 else:
                     log.error("股票: %s 买入失败", g.basestock_pool[i].stock)
             log.info("====================================================================")
-            for i in range(g.position_count):                
-                g.basestock_pool[i].print_stock()    
+            for i in range(g.position_count):
+                g.basestock_pool[i].print_stock()
             g.firstrun = False
         return
-    
+
     hour = context.current_dt.hour
     minute = context.current_dt.minute
-    
+
     # 每天14点00分钟 将未完成的订单强制恢复到原有持仓量
     if hour == 14 and minute == 0:
         cancel_open_order(context)
         reset_position(context)
-        
+
     # 14点00分钟后， 不再有新的交易 
     if hour == 14 and minute >= 0:
         return
 
     # 因为要计算移动平均线，所以每天前g.ma_13day_count分钟，不做交易
     if get_minute_count(context.current_dt) < g.ma_13day_count:
-        #log.info("13分钟后才有交易")
+        # log.info("13分钟后才有交易")
         return
-    
+
     # 更新89分钟内的最低收盘价，不足89分钟，则按到当前时间的最低收盘价
     update_89_lowest(context)
-    
+
     # 更新233分钟内的最高收盘价，不足233分钟，则按到当前时间的最高收盘价
     update_233_highest(context)
-    
+
     # 根据订单状态来更新，如果交易均结束（买与卖均成交），则置为INIT状态，表示可以再进行交易
     update_socket_statue(context)
-            
-    
+
     # 1. 循环股票列表，看当前价格是否有买入或卖出信号
     for i in range(g.position_count):
         stock = g.basestock_pool[i].stock
-        
+
         if isnan(g.basestock_pool[i].lowest_89) is True:
             log.error("stock: %s's lowest_89 is None", stock)
             continue
         else:
             lowest_89 = g.basestock_pool[i].lowest_89
-            
-        if  isnan(g.basestock_pool[i].highest_233) is True:
+
+        if isnan(g.basestock_pool[i].highest_233) is True:
             log.error("stock: %s's highest_233 is None", stock)
             continue
         else:
             highest_233 = g.basestock_pool[i].highest_233
-            
+
         if g.basestock_pool[i].status == Status.NONE:
             continue
-        
+
         # 如果在开市前几分钟，价格不变化，则求突破线时，会出现除数为0，如果遇到这种情况，表示不会有突破，所以直接过掉
         if lowest_89 == highest_233:
             continue
-        
-        #求取当前是否有突破
-        
-        close_m = get_price(stock, count = g.ma_13day_count, end_date=str(context.current_dt), frequency='1m', fields=['close'])
-       
-        close_4 = array([0.0, 0.0, 0.0, 0.0], dtype = float)
-        close_13 = array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype = float)
-        
+
+        # 求取当前是否有突破
+
+        close_m = get_price(stock, count=g.ma_13day_count, end_date=str(context.current_dt), frequency='1m',
+                            fields=['close'])
+
+        close_4 = array([0.0, 0.0, 0.0, 0.0], dtype=float)
+        close_13 = array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=float)
+
         for j in range(g.ma_13day_count):
             close_13[j] = close_m.iat[j, 0]
         for j in range(g.ma_13day_count):
             close_13[j] = ((close_13[j] - lowest_89) * 1.0 / (highest_233 - lowest_89)) * 4
-        
+
         close_4 = close_13[9:]
 
         if close_13 is not None:
@@ -471,26 +495,37 @@ def handle_data(context, data):
         else:
             log.warn("股票: %s 可能由于停牌等原因无法求解MA", stock)
             continue
-        
+
         # 买入信号产生
-        
-        if ((g.basestock_pool[i].operator_value_4 < g.basestock_pool[i].operator_value_13) and (operator_line_4 > operator_line_13) and (operator_line_13 < 0.3) and (close_m.iat[g.ma_13day_count-1, 0] > close_m.iat[g.ma_13day_count-2, 0] * 0.97)):
-            log.info("BUY SIGNAL for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
-            buy_signal(context, stock, close_m.iat[g.ma_13day_count-1,0], i)
+
+        if ((g.basestock_pool[i].operator_value_4 < g.basestock_pool[i].operator_value_13) and (
+            operator_line_4 > operator_line_13) and (operator_line_13 < 0.3) and (
+            close_m.iat[g.ma_13day_count - 1, 0] > close_m.iat[g.ma_13day_count - 2, 0] * 0.97)):
+            log.info(
+                "BUY SIGNAL for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f",
+                stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13,
+                operator_line_13, close_m.iat[g.ma_4day_count - 1, 0], close_m.iat[g.ma_13day_count - 2, 0], lowest_89,
+                highest_233)
+            buy_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
         # 卖出信号产生
-        elif ((g.basestock_pool[i].operator_value_4 > g.basestock_pool[i].operator_value_13) and (operator_line_4 < operator_line_13) and (operator_line_13 > 3.7) and (close_m.iat[g.ma_13day_count-1, 0] < close_m.iat[g.ma_13day_count-2, 0] * 1.03)):
-            log.info("SELL SIGNAL for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
-            sell_signal(context, stock, close_m.iat[g.ma_13day_count-1,0], i)
+        elif ((g.basestock_pool[i].operator_value_4 > g.basestock_pool[i].operator_value_13) and (
+            operator_line_4 < operator_line_13) and (operator_line_13 > 3.7) and (
+            close_m.iat[g.ma_13day_count - 1, 0] < close_m.iat[g.ma_13day_count - 2, 0] * 1.03)):
+            log.info(
+                "SELL SIGNAL for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f",
+                stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13,
+                operator_line_13, close_m.iat[g.ma_4day_count - 1, 0], close_m.iat[g.ma_13day_count - 2, 0], lowest_89,
+                highest_233)
+            sell_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
         else:
-            #log.info("%s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
+            # log.info("%s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
             pass
         g.basestock_pool[i].operator_value_4 = operator_line_4
         g.basestock_pool[i].operator_value_13 = operator_line_13
-        
-    
-    
+
+
 def after_trading_end(context):
     log.info("===========================================================================")
-    log.info("[统计数据]成功交易次数: %d, 重复信号交易次数: %d, 收盘前强制交易次数: %d",  g.success_count, g.repeat_signal_count, g.reset_order_count)
+    log.info("[统计数据]成功交易次数: %d, 重复信号交易次数: %d, 收盘前强制交易次数: %d", g.success_count, g.repeat_signal_count,
+             g.reset_order_count)
     log.info("===========================================================================")
-        
