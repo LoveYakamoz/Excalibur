@@ -5,7 +5,7 @@ Created on Sunday Dec 24 21:53:00 2017
 """
 
 import tushare as ts
-
+import pandas as pd
 import pymysql
 
 '''
@@ -44,6 +44,19 @@ def get_5min_tick(code):
     return ts.get_k_data(code, ktype='5')
 
 
+def get_1min_tick(code, cons):
+    #return ts.bar(code, conn=cons, freq='1min', start_date='2016-01-01', end_date='')
+    return ts.bar(code, conn=cons, freq='1min', start_date='2016-01-01', end_date='', ma=[5, 13, 89, 233], factors=['vr', 'tor'])
+
+
+def get_factor_tick(code, cons):
+    return ts.bar(code, conn=cons, start_date='2014-01-01', end_date='', ma=[5, 13, 21, 34, 55, 89, 144, 233], factors=['vr', 'tor'])
+
+
+def write_to_excel(file, sheet, df):
+    df.to_excel(file, sheet)
+
+
 def write_data(conn, data):
     cur = conn.cursor()
     for index, row in data.iterrows():
@@ -58,20 +71,22 @@ def write_data(conn, data):
 
 def run():
     conn = pymysql.connect("localhost", "root", "root", "stock")
-    stock_list_df = ts.get_stock_basics()
+    cons = ts.get_apis()
 
-    for code, info in stock_list_df.iterrows():
-        print("Trying:" + code)
+    code = '600000'
+    print("Trying:" + code)
 
-        for i in range(5):
-            try:
-                df = get_5min_tick(code)
-                write_data(conn, df)
-                print("Written:" + code)
-                print(df)
-                break
-            except:
-                print("Retrying..." + code)
+    for i in range(5):
+        try:
+            df = get_1min_tick(code, cons)
+            #df =get_5min_tick(code)
+            write_to_excel('1min.xlsx', code, df)
+            print(df)
+            break
+        except IOError as e:
+            print (e)
+            print("Retrying..." + code)
+
     conn.close()
 
 
