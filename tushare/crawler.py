@@ -4,9 +4,9 @@ Created on Sunday Dec 24 21:53:00 2017
 @author: Yangpei
 """
 
-import tushare as ts
-import pandas as pd
 import pymysql
+
+import tushare as ts
 
 '''
 CREATE TABLE stock.stock_list (
@@ -45,12 +45,19 @@ def get_5min_tick(code):
 
 
 def get_1min_tick(code, cons):
-    #return ts.bar(code, conn=cons, freq='1min', start_date='2016-01-01', end_date='')
-    return ts.bar(code, conn=cons, freq='1min', start_date='2016-01-01', end_date='', ma=[5, 13, 89, 233], factors=['vr', 'tor'])
+    """
+    此API  ts.bar只能获得100天内的数据
+    :param code:
+    :param cons:
+    :return:
+    """
+    return ts.bar(code, conn=cons, freq='1min', start_date='2017-01-01', end_date='2017-03-01', ma=[5, 13, 89, 233],
+                  factors=['vr', 'tor'])
 
 
 def get_factor_tick(code, cons):
-    return ts.bar(code, conn=cons, start_date='2014-01-01', end_date='', ma=[5, 13, 21, 34, 55, 89, 144, 233], factors=['vr', 'tor'])
+    return ts.bar(code, conn=cons, start_date='2014-01-01', end_date='', ma=[5, 13, 21, 34, 55, 89, 144, 233],
+                  factors=['vr', 'tor'])
 
 
 def write_to_excel(file, sheet, df):
@@ -79,12 +86,12 @@ def run():
     for i in range(5):
         try:
             df = get_1min_tick(code, cons)
-            #df =get_5min_tick(code)
+            # df =get_5min_tick(code)
             write_to_excel('1min.xlsx', code, df)
             print(df)
             break
         except IOError as e:
-            print (e)
+            print(e)
             print("Retrying..." + code)
 
     conn.close()
