@@ -12,15 +12,11 @@ class Source(Enum):
     CLIENT = 1  # 使用用户提供的股票
 
 
-g.stocks_source = Source.AUTO  # 默认使用自动的方法获得股票
-g.stock_id_list_from_client = ["000031.XSHE", "000059.XSHE", "000060.XSHE", "000401.XSHE",
-                               "000423.XSHE", "000528.XSHE", "000562.XSHE", "600036.XSHG",
-                               "000568.XSHE", "000612.XSHE", "000728.XSHE", "000768.XSHE",
-                               "000800.XSHE", "000878.XSHE", "000898.XSHE", "000927.XSHE",
-                               "000937.XSHE", "002024.XSHE", "002142.XSHE", "600009.XSHG",
-                               "600026.XSHG", "600037.XSHG", "000024.XSHE", "000527.XSHE",
-                               "600104.XSHG", "600109.XSHG", "600161.XSHG", "600251.XSHG",
-                               "600266.XSHG", "600096.XSHG"]
+g.stocks_source = Source.CLIENT  # 默认使用自动的方法获得股票
+
+g.stock_id_list_from_client = ["002506.XSHE", "600703.XSHG", "300059.XSHE", "600206.XSHG",
+                               "002281.XSHE", "603345.XSHG", "002555.XSHE", "002440.XSHE",
+                               "600897.XSHG", "000063.XSHE"]
 
 # 持仓股票池详细信息
 g.basestock_pool = []
@@ -58,7 +54,7 @@ class Status(Enum):
 
 class Break(Enum):
     UP = 0  # 上穿
-    DOWN = 1  # 下穿 
+    DOWN = 1  # 下穿
     NONE = 2
 
 
@@ -277,7 +273,7 @@ def buy_signal(context, stock, close_price, index):
     # 以收盘价 - 0.01 挂单买入
     limit_price = close_price - 0.01
 
-    # 如果当前不是INIT状态，则表示已经处于一次交易中（未撮合完成）	
+    # 如果当前不是INIT状态，则表示已经处于一次交易中（未撮合完成）
     if g.basestock_pool[index].status == Status.WORKING:
         log.warn("股票: %s, 收到重复买入信号，但不做交易", stock)
     elif g.basestock_pool[index].status == Status.INIT:
@@ -296,11 +292,12 @@ def buy_signal(context, stock, close_price, index):
         g.basestock_pool[index].delay_price = limit_price
         g.basestock_pool[index].break_throught_type = Break.UP
         g.basestock_pool[index].status = Status.WORKING  # 更新交易状态
+
     else:
         log.error("股票: %s, 交易状态出错", stock)
 
 
-# 计算当前时间点，是开市以来第几分钟   
+# 计算当前时间点，是开市以来第几分钟
 def get_minute_count(current_dt):
     '''
      9:30 -- 11:30
@@ -341,7 +338,7 @@ def update_233_highest(context):
         # high_df.sort(['high'], ascending = False).iat[0,0]
 
 
-# 取消所有未完成的订单（未撮合成的订单）        
+# 取消所有未完成的订单（未撮合成的订单）
 def cancel_open_order(context):
     orders = get_open_orders()
     for _order in orders.values():
@@ -394,6 +391,24 @@ def update_socket_statue(context):
         if hour == 14 and g.basestock_pool[i].status == Status.INIT:
             g.basestock_pool[i].status = Status.NONE
 
+    for i in range(g.position_count):
+        stock = g.basestock_pool[i].stock
+        sell_order_id = g.basestock_pool[i].sell_order_id
+        buy_order_id = g.basestock_pool[i].buy_order_id
+        status = g.basestock_pool[i].status
+        # 买完再卖
+        if (status == Status.WORKING) and (sell_order_id == -1):
+            buy_order = orders.get(buy_order_id)
+            if (buy_order is not None):
+                if buy_order.status == OrderStatus.held:
+                    sell_stock(context, stock, g.basestock_pool[i].delay_amount, g.basestock_pool[i].delay_price, i)
+        # 卖完再买
+        if (status == Status.WORKING) and (buy_order_id == -1):
+            sell_order = orders.get(sell_order_id)
+            if (sell_order is not None):
+                if sell_order.status == OrderStatus.held:
+                    buy_stock(context, stock, g.basestock_pool[i].delay_amount, g.basestock_pool[i].delay_price, i)
+
 
 def get_delta_minute(datetime1, datetime2):
     minute1 = get_minute_count(datetime1)
@@ -414,11 +429,10 @@ def price_and_volume_up(context, stock):
 
 
 def handle_data(context, data):
-    # 0. 平均购买价值1000000元的30个股票，并记录持仓数量
     if str(context.run_params.start_date) == str(context.current_dt.strftime("%Y-%m-%d")):
         if g.firstrun is True:
             for i in range(g.position_count):
-                myorder = order_value(g.basestock_pool[i].stock, 1000000)
+                myorder = order_value(g.basestock_pool[i].stock, 30000)
                 if myorder is not None:
                     g.basestock_pool[i].position = myorder.amount
                 else:
