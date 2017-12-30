@@ -98,4 +98,5 @@ def run():
 
 
 if "__main__" == __name__:
+    print(ts.__version__)
     run()

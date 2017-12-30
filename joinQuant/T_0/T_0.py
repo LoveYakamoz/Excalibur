@@ -402,6 +402,17 @@ def get_delta_minute(datetime1, datetime2):
     return abs(minute2 - minute1)
 
 
+def price_and_volume_up(context, stock):
+    df = get_price(stock, end_date=context.current_dt, count=3, frequency='1m', fields=['close', 'volume'])
+
+    if (df['close'][0] < df['close'][1] < df['close'][2]) and (df['volume'][0] < df['volume'][1] < df['volume'][2]):
+        log.info("close: %f, %f, %f; volume: %d, %d, %d", df['close'][0], df['close'][1], df['close'][2],
+                 df['volume'][0], df['volume'][1], df['volume'][2])
+        return True
+    else:
+        return False
+
+
 def handle_data(context, data):
     # 0. 平均购买价值1000000元的30个股票，并记录持仓数量
     if str(context.run_params.start_date) == str(context.current_dt.strftime("%Y-%m-%d")):
@@ -426,7 +437,7 @@ def handle_data(context, data):
         cancel_open_order(context)
         reset_position(context)
 
-    # 14点00分钟后， 不再有新的交易 
+    # 14点00分钟后， 不再有新的交易
     if hour == 14 and minute >= 0:
         return
 
@@ -499,8 +510,8 @@ def handle_data(context, data):
         # 买入信号产生
 
         if ((g.basestock_pool[i].operator_value_4 < g.basestock_pool[i].operator_value_13) and (
-            operator_line_4 > operator_line_13) and (operator_line_13 < 0.3) and (
-            close_m.iat[g.ma_13day_count - 1, 0] > close_m.iat[g.ma_13day_count - 2, 0] * 0.97)):
+                    operator_line_4 > operator_line_13) and (operator_line_13 < 0.3) and (
+                    close_m.iat[g.ma_13day_count - 1, 0] > close_m.iat[g.ma_13day_count - 2, 0] * 0.97)):
             log.info(
                 "BUY SIGNAL for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f",
                 stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13,
@@ -509,14 +520,22 @@ def handle_data(context, data):
             buy_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
         # 卖出信号产生
         elif ((g.basestock_pool[i].operator_value_4 > g.basestock_pool[i].operator_value_13) and (
-            operator_line_4 < operator_line_13) and (operator_line_13 > 3.7) and (
-            close_m.iat[g.ma_13day_count - 1, 0] < close_m.iat[g.ma_13day_count - 2, 0] * 1.03)):
+                    operator_line_4 < operator_line_13) and (operator_line_13 > 3.7) and (
+                    close_m.iat[g.ma_13day_count - 1, 0] < close_m.iat[g.ma_13day_count - 2, 0] * 1.03)):
             log.info(
                 "SELL SIGNAL for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f",
                 stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13,
                 operator_line_13, close_m.iat[g.ma_4day_count - 1, 0], close_m.iat[g.ma_13day_count - 2, 0], lowest_89,
                 highest_233)
             sell_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
+        # 价格与成交量均上涨，也是买入信号
+        elif (price_and_volume_up(context, stock)):
+            log.info(
+                "BUY SIGNAL by price_volume for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f",
+                stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13,
+                operator_line_13, close_m.iat[g.ma_4day_count - 1, 0], close_m.iat[g.ma_13day_count - 2, 0], lowest_89,
+                highest_233)
+            buy_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
         else:
             # log.info("%s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
             pass
