@@ -4,7 +4,11 @@ import pandas as pd
 import talib as ta
 from math import isnan
 from math import atan
-
+import tushare as ts
+try:
+    import shipane_sdk
+except:
+    pass
 
 # 股票池来源
 class Source(Enum):
@@ -14,9 +18,9 @@ class Source(Enum):
 
 g.stocks_source = Source.CLIENT  # 默认使用自动的方法获得股票
 
-g.stock_id_list_from_client = ["002506.XSHE", "600703.XSHG", "300059.XSHE", "600206.XSHG",
-                               "002281.XSHE", "603345.XSHG", "002555.XSHE", "002440.XSHE",
-                               "600897.XSHG", "000063.XSHE"]
+g.stock_id_list_from_client = ["300059.XSHE", "002440.XSHE"]
+g.stock_position = {"300059.XSHE": 100,
+                    "002440.XSHE": 100}
 
 # 持仓股票池详细信息
 g.basestock_pool = []
@@ -94,44 +98,15 @@ class BaseStock(object):
             self.sell_order_id, self.buy_order_id, self.operator_value_4, self.operator_value_13)
 
 
-def get_stocks_by_vol(context):
-    '''
-    获得沪深300的股票列表, 5天波动率大于2%，单价大于10.00元, 每标的买入100万元
-    '''
-    select_count = 0
-
-    stock_list = get_index_stocks('399300.XSHE')
-    for stock in stock_list:
-        df = get_price(stock, count=6, end_date=str(context.current_dt), frequency='daily',
-                       fields=['high', 'low', 'close'])
-        for i in range(5):
-            df.ix[i + 1, 'Volatility'] = (df.ix[i, 'high'] - df.ix[i, 'low']) / df.ix[i + 1, 'close']
-
-        # 选择单价大于10.0元
-        if df.ix[5, 'close'] > 10.00:
-            vol_df = df.ix[1:6, ['Volatility']].sort(["Volatility"], ascending=True)
-            min_vol = vol_df.iat[0, 0]
-            max_vol = vol_df.iat[4, 0]
-            # 选择最近5天的波动率最小值大于0.02
-            if min_vol > 0.02:
-                stock_obj = BaseStock(stock, df.ix[5, 'close'], min_vol, max_vol, 0, 0, Status.INIT, 0, -1, -1)
-                g.basestock_pool.append(stock_obj)
-                select_count += 1
-            else:
-                pass
-        else:
-            pass
-    if select_count < g.position_count:
-        g.position_count = select_count
-
-
 def get_stocks_by_client(context):
     '''
     直接从客户得到股票列表
     '''
     select_count = 0
     for stock_id in g.stock_id_list_from_client:
-        stock_obj = BaseStock(stock_id, 0, 0, 0, 0, 0, Status.INIT, 0, -1, -1)
+        stock_obj = BaseStock(stock_id, 0, 0, 0, 0, 0, Status.INIT, g.stock_position[stock_id], -1, -1)
+        stock_obj.print_stock()
+
         g.basestock_pool.append(stock_obj)
         select_count += 1
 
@@ -153,7 +128,7 @@ def get_stock_angle(context, stock):
 
 
 def initialize(context):
-    log.info("---> initialize @ %s" % (str(context.current_dt)))
+    log.info("---> 策略初始化 @ %s" % (str(context.current_dt)))
     g.repeat_signal_count = 0
     g.reset_order_count = 0
     g.success_count = 0
@@ -176,8 +151,9 @@ def initialize(context):
     # 设置基准
     set_benchmark('000300.XSHG')
     set_option('use_real_price', True)
-    log.info("initialize over")
+    log.info("初始化完成")
 
+    g.__manager = shipane_sdk.JoinQuantStrategyManagerFactory(context).create('manager-1')
 
 # 在每天交易开始时，将状态置为可交易状态
 def before_trading_start(context):
@@ -216,16 +192,25 @@ def buy_stock(context, stock, amount, limit_price, index):
     if buy_order is not None:
         g.basestock_pool[index].buy_order_id = buy_order.order_id
         log.info("股票: %s, 以%f价格挂单，买入%d", stock, limit_price, amount)
+        try:
+            g.__manager.execute(buy_order)
+            log.info('实盘易买股挂单成功:' + str(buy_order))
+        except:
+            log.info('实盘易买股挂单失败:' + str(buy_order))
 
 
-# 卖出股票，并记录订单号，便于查询订单状态
+    # 卖出股票，并记录订单号，便于查询订单状态
 def sell_stock(context, stock, amount, limit_price, index):
     sell_order = order(stock, amount, LimitOrderStyle(limit_price))
     g.basestock_pool[index].sell_price = limit_price
     if sell_order is not None:
         g.basestock_pool[index].sell_order_id = sell_order.order_id
         log.info("股票: %s, 以%f价格挂单，卖出%d", stock, limit_price, amount)
-
+        try:
+            g.__manager.execute(sell_order)
+            log.info('实盘易卖股挂单成功:' + str(sell_order))
+        except:
+            log.info('实盘易卖股挂单失败:' + str(sell_order))
 
 def sell_signal(context, stock, close_price, index):
     '''死叉卖出处理'''
@@ -323,7 +308,6 @@ def update_89_lowest(context):
         low_df = get_price(g.basestock_pool[i].stock, count=minute_count, end_date=str(context.current_dt),
                            frequency='1m', fields=['low'])
         g.basestock_pool[i].lowest_89 = min(low_df['low'])
-        # low_df.sort(['low'], ascending = True).iat[0,0]
 
 
 # 获取233分钟内的最高价，不足233分钟，则计算到当前时间点
@@ -342,8 +326,9 @@ def update_233_highest(context):
 def cancel_open_order(context):
     orders = get_open_orders()
     for _order in orders.values():
-        cancel_order(_order)
-        # log.warn("cancel order: ", _order)
+        #cancel_order(_order)
+        g.__manager.cancel(_order)
+
 
 
 # 恢复所有股票到原有仓位
@@ -356,6 +341,11 @@ def reset_position(context):
             log.info("src_position : cur_position", src_position, cur_position)
             _order = order(stock, src_position - cur_position)
             log.warn("reset posiont: ", _order)
+            try:
+                g.__manager.execute(_order)
+                log.info('实盘易恢复仓位挂单成功:' + str(_order))
+            except:
+                log.info('实盘易恢复仓位挂单失败:' + str(_order))
             g.reset_order_count += 1
 
 
@@ -421,7 +411,8 @@ def price_and_volume_up(context, stock):
     df = get_price(stock, end_date=context.current_dt, count=3, frequency='1m', fields=['close', 'volume'])
 
     if (df['close'][0] < df['close'][1] < df['close'][2]) and (df['volume'][0] < df['volume'][1] < df['volume'][2]):
-        log.info("close: %f, %f, %f; volume: %d, %d, %d", df['close'][0], df['close'][1], df['close'][2],
+        log.info("量价买入：%s, close: %f, %f, %f; volume: %d, %d, %d", stock, df['close'][0], df['close'][1],
+                 df['close'][2],
                  df['volume'][0], df['volume'][1], df['volume'][2])
         return True
     else:
@@ -429,25 +420,11 @@ def price_and_volume_up(context, stock):
 
 
 def handle_data(context, data):
-    if str(context.run_params.start_date) == str(context.current_dt.strftime("%Y-%m-%d")):
-        if g.firstrun is True:
-            for i in range(g.position_count):
-                myorder = order_value(g.basestock_pool[i].stock, 30000)
-                if myorder is not None:
-                    g.basestock_pool[i].position = myorder.amount
-                else:
-                    log.error("股票: %s 买入失败", g.basestock_pool[i].stock)
-            log.info("====================================================================")
-            for i in range(g.position_count):
-                g.basestock_pool[i].print_stock()
-            g.firstrun = False
-        return
-
     hour = context.current_dt.hour
     minute = context.current_dt.minute
 
-    # 每天14点00分钟 将未完成的订单强制恢复到原有持仓量
-    if hour == 14 and minute == 0:
+    # 每天14点55分钟 将未完成的订单强制恢复到原有持仓量
+    if hour == 14 and minute == 55:
         cancel_open_order(context)
         reset_position(context)
 
@@ -473,6 +450,10 @@ def handle_data(context, data):
     for i in range(g.position_count):
         stock = g.basestock_pool[i].stock
 
+        df = ts.get_realtime_quotes(stock.split(".")[0])
+        log.info(df[['time', 'code', 'name', 'price', 'bid', 'ask', 'volume', 'amount']])
+        log.info(df[['code', 'b1_v', 'b1_p', 'b2_v', 'b2_p', 'b3_v', 'b3_p', 'b4_v', 'b4_p', 'b5_v', 'b5_p']])
+        log.info(df[['code', 'a1_v', 'a1_p', 'a2_v', 'a2_p', 'a3_v', 'a3_p', 'a4_v', 'a4_p', 'a5_v', 'a5_p']])
         if isnan(g.basestock_pool[i].lowest_89) is True:
             log.error("stock: %s's lowest_89 is None", stock)
             continue
@@ -527,7 +508,7 @@ def handle_data(context, data):
                     operator_line_4 > operator_line_13) and (operator_line_13 < 0.3) and (
                     close_m.iat[g.ma_13day_count - 1, 0] > close_m.iat[g.ma_13day_count - 2, 0] * 0.97)):
             log.info(
-                "BUY SIGNAL for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f",
+                "金叉买入：%s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f",
                 stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13,
                 operator_line_13, close_m.iat[g.ma_4day_count - 1, 0], close_m.iat[g.ma_13day_count - 2, 0], lowest_89,
                 highest_233)
@@ -537,18 +518,13 @@ def handle_data(context, data):
                     operator_line_4 < operator_line_13) and (operator_line_13 > 3.7) and (
                     close_m.iat[g.ma_13day_count - 1, 0] < close_m.iat[g.ma_13day_count - 2, 0] * 1.03)):
             log.info(
-                "SELL SIGNAL for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f",
+                "死叉卖出：%s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f",
                 stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13,
                 operator_line_13, close_m.iat[g.ma_4day_count - 1, 0], close_m.iat[g.ma_13day_count - 2, 0], lowest_89,
                 highest_233)
             sell_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
         # 价格与成交量均上涨，也是买入信号
         elif (price_and_volume_up(context, stock)):
-            log.info(
-                "BUY SIGNAL by price_volume for %s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f",
-                stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13,
-                operator_line_13, close_m.iat[g.ma_4day_count - 1, 0], close_m.iat[g.ma_13day_count - 2, 0], lowest_89,
-                highest_233)
             buy_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
         else:
             # log.info("%s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
