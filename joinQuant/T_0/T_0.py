@@ -2,13 +2,15 @@ from jqdata import *
 import numpy as np
 import pandas as pd
 import talib as ta
-from math import isnan
+from math import isnan, floor
 from math import atan
 import tushare as ts
+
 try:
     import shipane_sdk
 except:
     pass
+
 
 # 股票池来源
 class Source(Enum):
@@ -19,8 +21,8 @@ class Source(Enum):
 g.stocks_source = Source.CLIENT  # 默认使用自动的方法获得股票
 
 g.stock_id_list_from_client = ["300059.XSHE", "002440.XSHE"]
-g.stock_position = {"300059.XSHE": 100,
-                    "002440.XSHE": 100}
+g.stock_position = {"300059.XSHE": 1000,
+                    "002440.XSHE": 1000}
 
 # 持仓股票池详细信息
 g.basestock_pool = []
@@ -155,6 +157,7 @@ def initialize(context):
 
     g.__manager = shipane_sdk.JoinQuantStrategyManagerFactory(context).create('manager-1')
 
+
 # 在每天交易开始时，将状态置为可交易状态
 def before_trading_start(context):
     log.info("初始化买卖状态为INIT")
@@ -199,7 +202,9 @@ def buy_stock(context, stock, amount, limit_price, index):
             log.info('实盘易买股挂单失败:' + str(buy_order))
 
 
-    # 卖出股票，并记录订单号，便于查询订单状态
+            # 卖出股票，并记录订单号，便于查询订单状态
+
+
 def sell_stock(context, stock, amount, limit_price, index):
     sell_order = order(stock, amount, LimitOrderStyle(limit_price))
     g.basestock_pool[index].sell_price = limit_price
@@ -212,15 +217,19 @@ def sell_stock(context, stock, amount, limit_price, index):
         except:
             log.info('实盘易卖股挂单失败:' + str(sell_order))
 
+
 def sell_signal(context, stock, close_price, index):
     '''死叉卖出处理'''
 
     # 每次交易量为持仓量的g.adjust_scale
     amount = g.adjust_scale * g.basestock_pool[index].position
+    log.info("sell scale: %f, src_posiont: %d, amount: %d", g.adjust_scale, g.basestock_pool[index].position, amount)
 
-    if amount % 100 != 0:
-        amount_new = amount - (amount % 100)
-        amount = amount_new
+    if amount <= 100:
+        amount = 100
+    else:
+        if amount % 100 != 0:
+            amount = amount - (amount % 100)
 
     # 以收盘价 + 0.01 挂单卖出
     limit_price = close_price + 0.01
@@ -249,11 +258,14 @@ def buy_signal(context, stock, close_price, index):
     '''金叉买入处理	'''
 
     # 每次交易量为持仓量的g.adjust_scale
-    amount = g.adjust_scale * g.basestock_pool[index].position
+    amount = floor(g.adjust_scale * g.basestock_pool[index].position)
+    log.info("buy scale: %f, src_posiont: %d, amount: %d", g.adjust_scale, g.basestock_pool[index].position, amount)
 
-    if amount % 100 != 0:
-        amount_new = amount - (amount % 100)
-        amount = amount_new
+    if amount <= 100:
+        amount = 100
+    else:
+        if amount % 100 != 0:
+            amount = amount - (amount % 100)
 
     # 以收盘价 - 0.01 挂单买入
     limit_price = close_price - 0.01
@@ -262,7 +274,6 @@ def buy_signal(context, stock, close_price, index):
     if g.basestock_pool[index].status == Status.WORKING:
         log.warn("股票: %s, 收到重复买入信号，但不做交易", stock)
     elif g.basestock_pool[index].status == Status.INIT:
-
         if g.basestock_pool[index].angle == Angle.DOWN:
             log.warn("股票：%s, 角度小于-30， 忽略买入信号", stock)
             return
@@ -326,9 +337,8 @@ def update_233_highest(context):
 def cancel_open_order(context):
     orders = get_open_orders()
     for _order in orders.values():
-        #cancel_order(_order)
+        # cancel_order(_order)
         g.__manager.cancel(_order)
-
 
 
 # 恢复所有股票到原有仓位
@@ -391,12 +401,14 @@ def update_socket_statue(context):
             buy_order = orders.get(buy_order_id)
             if (buy_order is not None):
                 if buy_order.status == OrderStatus.held:
+                    log.info("买完再卖: stock %s, delay_amount: %d", stock, g.basestock_pool[i].delay_amount)
                     sell_stock(context, stock, g.basestock_pool[i].delay_amount, g.basestock_pool[i].delay_price, i)
         # 卖完再买
         if (status == Status.WORKING) and (buy_order_id == -1):
             sell_order = orders.get(sell_order_id)
             if (sell_order is not None):
                 if sell_order.status == OrderStatus.held:
+                    log.info("卖完再买: stock %s, delay_amount: %d", stock, g.basestock_pool[i].delay_amount)
                     buy_stock(context, stock, g.basestock_pool[i].delay_amount, g.basestock_pool[i].delay_price, i)
 
 
@@ -449,11 +461,10 @@ def handle_data(context, data):
     # 1. 循环股票列表，看当前价格是否有买入或卖出信号
     for i in range(g.position_count):
         stock = g.basestock_pool[i].stock
-
-        df = ts.get_realtime_quotes(stock.split(".")[0])
-        log.info(df[['time', 'code', 'name', 'price', 'bid', 'ask', 'volume', 'amount']])
-        log.info(df[['code', 'b1_v', 'b1_p', 'b2_v', 'b2_p', 'b3_v', 'b3_p', 'b4_v', 'b4_p', 'b5_v', 'b5_p']])
-        log.info(df[['code', 'a1_v', 'a1_p', 'a2_v', 'a2_p', 'a3_v', 'a3_p', 'a4_v', 'a4_p', 'a5_v', 'a5_p']])
+        # df = ts.get_realtime_quotes(stock.split(".")[0])
+        # log.info(df[['time', 'code', 'name', 'price', 'bid', 'ask', 'volume', 'amount']])
+        # log.info(df[['code', 'b1_v', 'b1_p', 'b2_v', 'b2_p', 'b3_v', 'b3_p', 'b4_v', 'b4_p', 'b5_v', 'b5_p']])
+        # log.info(df[['code', 'a1_v', 'a1_p', 'a2_v', 'a2_p', 'a3_v', 'a3_p', 'a4_v', 'a4_p', 'a5_v', 'a5_p']])
         if isnan(g.basestock_pool[i].lowest_89) is True:
             log.error("stock: %s's lowest_89 is None", stock)
             continue
@@ -534,6 +545,8 @@ def handle_data(context, data):
 
 
 def after_trading_end(context):
+    # df = ts.get_today_ticks('300059')
+    # log.info(df.head(1000))
     log.info("===========================================================================")
     log.info("[统计数据]成功交易次数: %d, 重复信号交易次数: %d, 收盘前强制交易次数: %d", g.success_count, g.repeat_signal_count,
              g.reset_order_count)
