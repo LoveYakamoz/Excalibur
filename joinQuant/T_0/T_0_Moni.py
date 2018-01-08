@@ -132,6 +132,45 @@ def get_stock_angle(context, stock):
     return angle
 
 
+
+def evaluate_activeVolBuy(np_close, vol):
+    """
+    主动性买盘成交量
+    :param np_close:
+    :param vol:
+    :return:
+    """
+    diff_a1 = np.diff(np_close)
+    comp_vol = vol[1:]
+    activeVolBuy = []
+    activeVolSell = []
+    swingVol = []
+    accumulateNetVol = 0
+    netVol_buySell = []
+    MFI_indicator = []  # 威廉姆斯的分形数学/混沌操作法的指标
+
+    for i in range(len(diff_a1)):
+        mfi = diff_a1[i] / comp_vol[i]
+        MFI_indicator.append(mfi)
+        if diff_a1[i] > 0:
+            activeVolBuy.append(comp_vol[i])
+            activeVolSell.append(0)
+        elif diff_a1[i] < 0:
+            activeVolSell.append(comp_vol[i])
+            activeVolBuy.append(0)
+        else:
+            swingVol.append(comp_vol[i])
+            activeVolBuy.append(0)
+            activeVolSell.append(0)
+
+    for k in range(len(activeVolBuy)):
+        netVol = activeVolBuy[k] - activeVolSell[k]
+        accumulateNetVol += netVol
+        netVol_buySell.append(accumulateNetVol)
+
+    netVol_buySell_sum = np.sum(np.array(activeVolBuy)) - np.sum(np.array(activeVolSell))
+    print('netVol_buySell_sum= %d', netVol_buySell_sum)
+
 def initialize(context):
     log.info("---> 策略初始化 @ %s" % (str(context.current_dt)))
     g.repeat_signal_count = 0
