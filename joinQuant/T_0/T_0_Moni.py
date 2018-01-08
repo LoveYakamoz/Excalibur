@@ -4,7 +4,7 @@ import pandas as pd
 import talib as ta
 from math import isnan, floor
 from math import atan
-
+import tushare as ts
 
 # 股票池来源
 class Source(Enum):
@@ -15,9 +15,18 @@ class Source(Enum):
 g.stocks_source = Source.CLIENT  # 默认使用自动的方法获得股票
 
 g.stock_id_list_from_client = ["002506.XSHE", "600703.XSHG", "300059.XSHE", "600206.XSHG",
-                               "002281.XSHE", "603340.XSHG", "002092.XSHE", "002440.XSHE",
+                               "002281.XSHE", "600340.XSHG", "002092.XSHE", "002440.XSHE",
                                "600897.XSHG", "000063.XSHE"]
-
+g.stock_position = {"002506.XSHE": 0,
+                    "600703.XSHG": 0,
+                    "300059.XSHE": 0,
+                    "600206.XSHG": 0,
+                    "002281.XSHE": 0,
+                    "600340.XSHG": 0,
+                    "002092.XSHE": 0,
+                    "002440.XSHE": 0,
+                    "600897.XSHG": 0,
+                    "000063.XSHE": 0}
 # 持仓股票池详细信息
 g.basestock_pool = []
 
