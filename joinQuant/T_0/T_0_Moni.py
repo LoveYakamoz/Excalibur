@@ -494,10 +494,6 @@ def handle_data(context, data):
     # 1. 循环股票列表，看当前价格是否有买入或卖出信号
     for i in range(g.position_count):
         stock = g.basestock_pool[i].stock
-        df = ts.get_realtime_quotes(stock.split(".")[0])
-        log.info(df[['time', 'code', 'name', 'price', 'bid', 'ask', 'volume', 'amount']])
-        log.info(df[['code', 'b1_v', 'b1_p', 'b2_v', 'b2_p', 'b3_v', 'b3_p', 'b4_v', 'b4_p', 'b5_v', 'b5_p']])
-        log.info(df[['code', 'a1_v', 'a1_p', 'a2_v', 'a2_p', 'a3_v', 'a3_p', 'a4_v', 'a4_p', 'a5_v', 'a5_p']])
         if isnan(g.basestock_pool[i].lowest_89) is True:
             log.error("stock: %s's lowest_89 is None", stock)
             continue

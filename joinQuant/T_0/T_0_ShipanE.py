@@ -18,9 +18,9 @@ class Source(Enum):
 
 g.stocks_source = Source.CLIENT  # 默认使用自动的方法获得股票
 
-g.stock_id_list_from_client = ["300059.XSHE", "002440.XSHE"]
+g.stock_id_list_from_client = ["300059.XSHE", "600206.XSHE"]
 g.stock_position = {"300059.XSHE": 100,
-                    "002440.XSHE": 100}
+                    "600206.XSHG": 100}
 
 # 持仓股票池详细信息
 g.basestock_pool = []
@@ -234,15 +234,16 @@ def sell_signal(context, stock, close_price, index):
             log.warn("股票：%s, 角度大于30， 忽略卖出信号", stock)
             return
         sell_ret = sell_stock(context, stock, -amount, limit_price, index)
-        g.basestock_pool[index].break_throught_time = context.current_dt
-        # 以收盘价 - 价差 * expected_revenue 挂单买入
-        yesterday = get_price(stock, count=1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
-        limit_price = close_price - yesterday.iat[0, 0] * g.expected_revenue
+        if g.basestock_pool[index].sell_order_id != -1:
+            g.basestock_pool[index].break_throught_time = context.current_dt
+            # 以收盘价 - 价差 * expected_revenue 挂单买入
+            yesterday = get_price(stock, count=1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
+            limit_price = close_price - yesterday.iat[0, 0] * g.expected_revenue
 
-        g.basestock_pool[index].delay_amount = amount
-        g.basestock_pool[index].delay_price = limit_price
-        g.basestock_pool[index].break_throught_type = Break.DOWN
-        g.basestock_pool[index].status = Status.WORKING  # 更新交易状态
+            g.basestock_pool[index].delay_amount = amount
+            g.basestock_pool[index].delay_price = limit_price
+            g.basestock_pool[index].break_throught_type = Break.DOWN
+            g.basestock_pool[index].status = Status.WORKING  # 更新交易状态
     else:
         log.error("股票: %s, 交易状态出错", stock)
 
@@ -270,15 +271,16 @@ def buy_signal(context, stock, close_price, index):
             return
 
         buy_stock(context, stock, amount, limit_price, index)
-        g.basestock_pool[index].break_throught_time = context.current_dt
-        # 以收盘价 + 价差 * expected_revenue 挂单卖出
-        yesterday = get_price(stock, count=1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
-        limit_price = close_price + yesterday.iat[0, 0] * g.expected_revenue
+        if g.basestock_pool[index].buy_order_id != -1:
+            g.basestock_pool[index].break_throught_time = context.current_dt
+            # 以收盘价 + 价差 * expected_revenue 挂单卖出
+            yesterday = get_price(stock, count=1, end_date=str(context.current_dt), frequency='daily', fields=['close'])
+            limit_price = close_price + yesterday.iat[0, 0] * g.expected_revenue
 
-        g.basestock_pool[index].delay_amount = -amount
-        g.basestock_pool[index].delay_price = limit_price
-        g.basestock_pool[index].break_throught_type = Break.UP
-        g.basestock_pool[index].status = Status.WORKING  # 更新交易状态
+            g.basestock_pool[index].delay_amount = -amount
+            g.basestock_pool[index].delay_price = limit_price
+            g.basestock_pool[index].break_throught_type = Break.UP
+            g.basestock_pool[index].status = Status.WORKING  # 更新交易状态
 
     else:
         log.error("股票: %s, 交易状态出错", stock)
@@ -453,10 +455,6 @@ def handle_data(context, data):
     # 1. 循环股票列表，看当前价格是否有买入或卖出信号
     for i in range(g.position_count):
         stock = g.basestock_pool[i].stock
-        df = ts.get_realtime_quotes(stock.split(".")[0])
-        log.info(df[['time', 'code', 'name', 'price', 'bid', 'ask', 'volume', 'amount']])
-        log.info(df[['code', 'b1_v', 'b1_p', 'b2_v', 'b2_p', 'b3_v', 'b3_p', 'b4_v', 'b4_p', 'b5_v', 'b5_p']])
-        log.info(df[['code', 'a1_v', 'a1_p', 'a2_v', 'a2_p', 'a3_v', 'a3_p', 'a4_v', 'a4_p', 'a5_v', 'a5_p']])
         if isnan(g.basestock_pool[i].lowest_89) is True:
             log.error("stock: %s's lowest_89 is None", stock)
             continue
