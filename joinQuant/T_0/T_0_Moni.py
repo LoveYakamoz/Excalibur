@@ -6,6 +6,7 @@ from math import isnan, floor
 from math import atan
 import tushare as ts
 
+
 # 股票池来源
 class Source(Enum):
     AUTO = 0  # 程序根据波动率及股价自动从沪深300中获取股票
@@ -47,6 +48,10 @@ g.expected_revenue = 0.003
 
 # 角度阈值
 g.angle_threshold = 30
+
+g.sampleSize = 20  # 20 or 30
+g.scale = 1.0  # 倍数1.0-5倍
+g.signal_buy_dict = {}
 
 
 class Angle(Enum):
@@ -132,11 +137,10 @@ def get_stock_angle(context, stock):
     return angle
 
 
-
 def evaluate_activeVolBuy(np_close, vol):
     """
     主动性买盘成交量
-    :param np_close:
+    :param np_close:  3~4 sampleSize
     :param vol:
     :return:
     """
@@ -147,11 +151,8 @@ def evaluate_activeVolBuy(np_close, vol):
     swingVol = []
     accumulateNetVol = 0
     netVol_buySell = []
-    MFI_indicator = []  # 威廉姆斯的分形数学/混沌操作法的指标
 
     for i in range(len(diff_a1)):
-        mfi = diff_a1[i] / comp_vol[i]
-        MFI_indicator.append(mfi)
         if diff_a1[i] > 0:
             activeVolBuy.append(comp_vol[i])
             activeVolSell.append(0)
@@ -166,10 +167,21 @@ def evaluate_activeVolBuy(np_close, vol):
     for k in range(len(activeVolBuy)):
         netVol = activeVolBuy[k] - activeVolSell[k]
         accumulateNetVol += netVol
-        netVol_buySell.append(accumulateNetVol)
+        netVol_buySell.append(float(accumulateNetVol))
 
     netVol_buySell_sum = np.sum(np.array(activeVolBuy)) - np.sum(np.array(activeVolSell))
-    print('netVol_buySell_sum= %d', netVol_buySell_sum)
+    print('netVol_buySell_sum=%d' % netVol_buySell_sum)
+
+    threshold_netVol = np.average(netVol_buySell[-g.sampleSize:])
+
+    if netVol_buySell[-1] > (threshold_netVol * g.scale):
+        g.signal_buy_dict['signal_netVol_buySell'] = 1
+
+    elif netVol_buySell[-1] < (-1) * (threshold_netVol * g.scale):
+        g.signal_buy_dict['signal_netVol_buySell'] = -1
+
+    return activeVolBuy, activeVolSell, netVol_buySell
+
 
 def initialize(context):
     log.info("---> 策略初始化 @ %s" % (str(context.current_dt)))
@@ -542,9 +554,30 @@ def handle_data(context, data):
             log.warn("股票: %s 可能由于停牌等原因无法求解MA", stock)
             continue
 
-        # 买入信号产生
+        count_number = g.sampleSize * 4
+        df = get_price(stock, count=count_number, end_date=str(context.current_dt), frequency='1m',
+                       fields=['close', 'volume'])
+        np_close = []
+        vol = []
+        print(df)
 
-        if ((g.basestock_pool[i].operator_value_4 < g.basestock_pool[i].operator_value_13) and (
+        for k in range(count_number):
+            np_close.append(df.iat[k, 0])
+            vol.append(df.iat[k, 1])
+
+        evaluate_activeVolBuy(np.array(np_close), np.array(vol))
+
+        # 买入信号产生
+        if g.signal_buy_dict['signal_netVol_buySell'] == 1:
+            log.info("主动买入：%s", stock)
+            buy_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
+            g.signal_buy_dict['signal_netVol_buySell'] = 0
+        elif g.signal_buy_dict['signal_netVol_buySell'] == -1:
+            log.info("主动卖出：%s", stock)
+            sell_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
+            g.signal_buy_dict['signal_netVol_buySell'] = 0
+
+        elif ((g.basestock_pool[i].operator_value_4 < g.basestock_pool[i].operator_value_13) and (
                     operator_line_4 > operator_line_13) and (operator_line_13 < 0.3) and (
                     close_m.iat[g.ma_13day_count - 1, 0] > close_m.iat[g.ma_13day_count - 2, 0] * 0.97)):
             log.info(
@@ -564,7 +597,7 @@ def handle_data(context, data):
                 highest_233)
             sell_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
         # 价格与成交量均上涨，也是买入信号
-        elif (price_and_volume_up(context, stock)):
+        elif price_and_volume_up(context, stock):
             buy_signal(context, stock, close_m.iat[g.ma_13day_count - 1, 0], i)
         else:
             # log.info("%s, ma_4 from %f to %f, ma_13 from %f to %f, close_price: %f, yesterday_close_price: %f, lowest_89: %f, highest_233: %f", stock, g.basestock_pool[i].operator_value_4, operator_line_4, g.basestock_pool[i].operator_value_13, operator_line_13, close_m.iat[g.ma_4day_count-1,0], close_m.iat[g.ma_13day_count-2,0], lowest_89, highest_233)
