@@ -28,7 +28,7 @@ class T_0(Enum):
     Open = 1
     Close = 2
 
-
+"""
 g.stock_id_list_from_client = ["002506.XSHE", "600703.XSHG", "300059.XSHE", "600206.XSHG",
                                "002281.XSHE", "600340.XSHG", "002092.XSHE", "002440.XSHE",
                                "600897.XSHG", "000063.XSHE"]
@@ -47,7 +47,7 @@ g.stock_id_list_from_client = ["600206.XSHG"]
 g.stock_position = {
                     "600206.XSHG": 0,
                    }
-"""
+
 # 持仓股票池详细信息
 g.basestock_pool = []
 
@@ -93,7 +93,7 @@ class BaseStock(object):
         return "stock: {}, close: {}, position: {}, sell_order_id: {}, buy_order_id: {}, t_0_type: {}".format(
             self.stock, self.close, self.position, self.sell_order_id, self.buy_order_id, self.t_0_type)
 
-    def clear(self):
+    def clearup(self):
         self.status = Status.INIT
         self.sell_order_id = -1
         self.sell_price = 0.0
@@ -102,6 +102,7 @@ class BaseStock(object):
         self.delay_amount = 0
         self.delay_price = 0.0
         self.t_0_type = Type.NONE
+        log.info("clearup")
 
 
 def get_stocks_by_client():
@@ -192,8 +193,8 @@ def initialize(context):
 # 在每天交易开始时，将状态置为可交易状态
 def before_trading_start(context):
     log.info("初始化买卖状态为INIT")
-    for i in range(g.position_count):
-        g.basestock_pool[i].clear()
+    for s in g.basestock_pool:
+        s.clearup()
 
     g.repeat_signal_count = 0
     g.reset_order_count = 0
@@ -336,10 +337,13 @@ def reset_position(context):
         cur_position = context.portfolio.positions[stock].total_amount
         if src_position != cur_position:
             order(stock, src_position - cur_position)
+            cur_close = get_price(stock, count=1, end_date=str(context.current_dt), frequency='1m',
+                                  fields=['close']).iat[0, 0]
+            delta_pos = abs(src_position - cur_position)
             if s.t_0_type == Type.Active_Buy:
-                log.info("T_0 失败：【先买后卖】股票: %s, 恢复仓位: %d", stock, abs(src_position - cur_position))
+                log.info("T_0 失败：【先买后卖】股票: %s, 恢复仓位: %d, 盈利: %f元", stock, delta_pos, (-1) * abs(cur_close - s.buy_price) * delta_pos)
             elif s.t_0_type == Type.Active_Sell:
-                log.info("T_0 失败：【先卖后买】股票: %s,  恢复仓位: %d", stock, abs(src_position - cur_position))
+                log.info("T_0 失败：【先卖后买】股票: %s, 恢复仓位: %d, 盈利: %f元", stock, delta_pos, (-1) * abs(cur_close - s.sell_price) * delta_pos)
             else:
                 pass
             g.reset_order_count += 1
@@ -356,63 +360,78 @@ def update_socket_statue(context):
         return
     hour = context.current_dt.hour
 
-    for s in g.basestock_pool:
-        stock = s.stock
-        sell_order_id = s.sell_order_id
-        buy_order_id = s.buy_order_id
-        status = s.status
+    for i in range(g.position_count):
+        stock = g.basestock_pool[i].stock
+        sell_order_id = g.basestock_pool[i].sell_order_id
+        buy_order_id = g.basestock_pool[i].buy_order_id
+        status = g.basestock_pool[i].status
         if (status == Status.WORKING) and ((sell_order_id != -1) and (buy_order_id != -1)):
             sell_order = orders.get(sell_order_id)
             buy_order = orders.get(buy_order_id)
             if (sell_order is not None) and (buy_order is not None):
                 if sell_order.status == OrderStatus.held and buy_order.status == OrderStatus.held:
-                    if s.t_0_type == Type.Active_Buy:
+                    if g.basestock_pool[i].t_0_type == Type.Active_Buy:
                         log.info("T_0 成功：【先买后卖】股票: %s, 以 %f 价格买入 %d 股，然后以%f价格卖出 %d 股, 盈利%f元",
-                                 stock, s.buy_price, abs(s.delay_amount), s.delay_price, abs(s.delay_amount),
-                                 (s.delay_price - s.buy_price) * abs(s.delay_amount))
+                                 stock, g.basestock_pool[i].buy_price, abs(g.basestock_pool[i].delay_amount), g.basestock_pool[i].delay_price, abs(g.basestock_pool[i].delay_amount),
+                                 (g.basestock_pool[i].delay_price - g.basestock_pool[i].buy_price) * abs(g.basestock_pool[i].delay_amount))
                     elif g.basestock_pool[i].t_0_type == Type.Active_Sell:
                         log.info("T_0 成功：【先卖后买】股票: %s, 以%f价格卖出%d股，然后以%f价格买入%d股, 盈利%f元",
-                                 stock, s.sell_price, abs(s.delay_amount), s.delay_price, abs(s.delay_amount),
-                                 (s.delay_price - s.buy_price) * abs(s.delay_amount))
+                                 stock, g.basestock_pool[i].sell_price, abs(g.basestock_pool[i].delay_amount), g.basestock_pool[i].delay_price, abs(g.basestock_pool[i].delay_amount),
+                                 (g.basestock_pool[i].delay_price - g.basestock_pool[i].buy_price) * abs(g.basestock_pool[i].delay_amount))
                     else:
                         pass
-                    s.clear()
+                    g.basestock_pool[i].status = Status.INIT
+                    g.basestock_pool[i].sell_order_id = -1
+                    g.basestock_pool[i].sell_price = 0.0
+                    g.basestock_pool[i].buy_order_id = -1
+                    g.basestock_pool[i].buy_price = 0.0
+                    g.basestock_pool[i].delay_amount = 0
+                    g.basestock_pool[i].delay_price = 0.0
+                    g.basestock_pool[i].t_0_type = Type.NONE
 
                     g.success_count += 1
 
         # 每天14点后， 不再进行新的买卖
         if hour == 14 and s.status == Status.INIT:
-            s.status = Status.NONE
-    i = 0
-    for s in g.basestock_pool:
-        stock = s.stock
-        sell_order_id = s.sell_order_id
-        buy_order_id = s.buy_order_id
-        status = s.status
+            g.basestock_pool[i].status = Status.NONE
+
+    for i in range(g.position_count):
+        stock = g.basestock_pool[i].stock
+        sell_order_id = g.basestock_pool[i].sell_order_id
+        buy_order_id = g.basestock_pool[i].buy_order_id
+        status = g.basestock_pool[i].status
         # 买完再卖
         if (status == Status.WORKING) and (sell_order_id == -1):
             buy_order = orders.get(buy_order_id)
             if (buy_order is not None):
                 if buy_order.status == OrderStatus.held:
-                    flag = sell_stock(stock, s.delay_amount, s.delay_price, i)
-                    log.info("买完再卖: stock %s, delay_amount: %d, flag = %d", stock, s.delay_amount, flag)
+                    flag = sell_stock(stock, g.basestock_pool[i].delay_amount, g.basestock_pool[i].delay_price, i)
+                    log.info("买完再卖: stock %s, delay_amount: %d, flag = %d", stock, g.basestock_pool[i].delay_amount, flag)
 
         if (status == Status.WORKING) and (sell_order_id != -1) and (sell_order.status != OrderStatus.held):
             """
             卖出止损
             """
             cur_close = get_price(stock, count=1, end_date=str(context.current_dt), frequency='1m',
-                      fields=['close'])
-            if (s.buy_price - cur_close.iat[0, 0]) / cur_close.iat[0, 0] >= 0.003:
-                _order = order(stock, s.delay_amount, MarketOrderStyle())
+                      fields=['close']).iat[0, 0]
+            if (g.basestock_pool[i].buy_price - cur_close) / cur_close >= 0.003:
+                _order = order(stock, g.basestock_pool[i].delay_amount, MarketOrderStyle())
                 if (_order is not None):
-                    s.sell_order_id = _order.order_id
-                    s.sell_price = cur_close.iat[0, 0]
-                    log.info("股票: %s, 进行止损成功", g.basestock_pool[i].stock)
+                    g.basestock_pool[i].sell_order_id = _order.order_id
+                    g.basestock_pool[i].sell_price = cur_close
+                    log.info("T_0 成功: 【止损成功】股票: %s, 以 %f 价格买入 %d 股，然后以%f价格卖出 %d 股, 盈利%f元",
+                             g.basestock_pool[i].stock, g.basestock_pool[i].buy_price, abs(g.basestock_pool[i].delay_amount), cur_close, abs(g.basestock_pool[i].delay_amount), (-1)*abs(g.basestock_pool[i].buy_price-cur_close)*abs(g.basestock_pool[i].delay_amount))
+                    g.basestock_pool[i].status = Status.INIT
+                    g.basestock_pool[i].sell_order_id = -1
+                    g.basestock_pool[i].sell_price = 0.0
+                    g.basestock_pool[i].buy_order_id = -1
+                    g.basestock_pool[i].buy_price = 0.0
+                    g.basestock_pool[i].delay_amount = 0
+                    g.basestock_pool[i].delay_price = 0.0
+                    g.basestock_pool[i].t_0_type = Type.NONE
                 else:
-                    log.error("股票: %s, 进行止损失败", g.basestock_pool[i].stock)
+                    log.error("T_0 失败: 【止损成功】股票: %s, 进行止损失败", g.basestock_pool[i].stock)
 
-        i += 1
 
 def handle_data(context, data):
     if str(context.run_params.start_date) == str(context.current_dt.strftime("%Y-%m-%d")):
