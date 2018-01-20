@@ -4,10 +4,12 @@ from jqdata import *
 import numpy as np
 import pandas as pd
 import talib as ta
-from math import isnan, floor
-from math import atan
-import tushare as ts
+from math import floor
 
+try:
+    import shipane_sdk
+except:
+    pass
 
 class Status(Enum):
     INIT = 0  # 在每天交易开始时，置为INIT
@@ -181,6 +183,9 @@ def evaluate_activeVolBuy(np_close, vol):
 
     return activeVolBuy, activeVolSell, netVol_buySell
 
+def process_initialize(context):
+    g.__manager = shipane_sdk.JoinQuantStrategyManagerFactory(context).create('manager-1')
+
 
 def initialize(context):
     log.info("---> 策略初始化 @ %s" % (str(context.current_dt)))
@@ -221,7 +226,11 @@ def buy_stock(stock, amount, limit_price, index):
     :param index:
     :return:
     """
-    buy_order = order(stock, amount, LimitOrderStyle(limit_price))
+    try:
+        buy_order = order(stock, amount, LimitOrderStyle(limit_price))
+    finally:
+        g.__manager.work()
+
     if buy_order is not None:
         g.basestock_pool[index].buy_order_id = buy_order.order_id
         g.basestock_pool[index].buy_price = limit_price
@@ -241,7 +250,10 @@ def sell_stock(stock, amount, limit_price, index):
     :param index:
     :return:
     """
-    sell_order = order(stock, amount, LimitOrderStyle(limit_price))
+    try:
+        sell_order = order(stock, amount, LimitOrderStyle(limit_price))
+    finally:
+        g.__manager.work()
 
     if sell_order is not None:
         g.basestock_pool[index].sell_order_id = sell_order.order_id
@@ -334,7 +346,10 @@ def cancel_open_order(context):
     """
     orders = get_open_orders()
     for _order in orders.values():
-        cancel_order(_order)
+        try:
+            cancel_order(_order)
+        finally:
+            g.__manager.work()
 
 
 def reset_position(context):
@@ -348,9 +363,12 @@ def reset_position(context):
         src_position = s.position
         cur_position = context.portfolio.positions[stock].total_amount
         if src_position != cur_position:
-            order(stock, src_position - cur_position)
-            cur_close = get_price(stock, count=1, end_date=str(context.current_dt), frequency='1m',
-                                  fields=['close']).iat[0, 0]
+            try:
+                order(stock, src_position - cur_position)
+            finally:
+                g.__manager.work()
+            current_data = get_current_data()
+            cur_close = current_data[stock].last_price
             delta_pos = abs(src_position - cur_position)
             if s.t_0_type == Type.Active_Buy:
                 log.info("T_0 ：【先买后卖失败】股票: %s, 恢复仓位: %d, 盈利: %f元", stock, delta_pos,
@@ -449,8 +467,12 @@ def update_socket_statue(context):
             价差卖出止损
             """
             if (g.basestock_pool[i].buy_price - cur_close) / cur_close >= DELTA_PRICE:
-                cancel_order(sell_order_id)
-                _order = order(stock, g.basestock_pool[i].delay_amount, MarketOrderStyle())
+                try:
+                    cancel_order(sell_order_id)
+                    _order = order(stock, g.basestock_pool[i].delay_amount, MarketOrderStyle())
+                finally:
+                    g.__manager.work()
+
                 if (_order is not None):
                     g.basestock_pool[i].sell_order_id = _order.order_id
                     g.basestock_pool[i].sell_price = cur_close
@@ -469,8 +491,12 @@ def update_socket_statue(context):
             时差止损
             """
             if get_delta_minute(context.current_dt, g.basestock_pool[i].start_time) > DELTA_MINITE:
-                cancel_order(sell_order_id)
-                _order = order(stock, g.basestock_pool[i].delay_amount, MarketOrderStyle())
+                try:
+                    cancel_order(sell_order_id)
+                    _order = order(stock, g.basestock_pool[i].delay_amount, MarketOrderStyle())
+                finally:
+                    g.__manager.work()
+
                 if (_order is not None):
                     g.basestock_pool[i].sell_order_id = _order.order_id
                     g.basestock_pool[i].sell_price = cur_close
@@ -488,7 +514,11 @@ def handle_data(context, data):
     if str(context.run_params.start_date) == str(context.current_dt.strftime("%Y-%m-%d")):
         if g.firstrun is True:
             for s in g.basestock_pool:
-                myorder = order_value(s.stock, 100000)
+                try:
+                    myorder = order_value(s.stock, 100000)
+                finally:
+                    g.__manager.work()
+
                 if myorder is not None:
                     s.position = myorder.amount
                 else:
