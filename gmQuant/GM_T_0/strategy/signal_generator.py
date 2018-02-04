@@ -1,12 +1,17 @@
 import numpy as np
+from gm.api import history_n
+
+g_sampleSize = 20  # 20 or 30
+g_scale = 1.5  # 倍数1.0-5倍
+g_signal_buy_dict = {}
+
+
 def evaluate_activeVolBuy(np_close, vol):
     """
     主动性买盘成交量
     :return:
-    :param np_close:  3~4 sampleSize
-    :param vol:
-    :return:
     """
+
     diff_a1 = np.diff(np_close)
     comp_vol = vol[1:]
     activeVolBuy = []
@@ -34,15 +39,15 @@ def evaluate_activeVolBuy(np_close, vol):
 
     netVol_buySell_sum = np.sum(np.array(activeVolBuy)) - np.sum(np.array(activeVolSell))
 
-    threshold_netVol = np.average(netVol_buySell[-g.sampleSize:])
-    # print('netVol_buySell_sum=%d, threshold_netvol=%d' % (netVol_buySell_sum, threshold_netVol))
-    if netVol_buySell[-1] > 0 and netVol_buySell_sum > 0 and netVol_buySell[-1] > (threshold_netVol * g.scale):
-        g.signal_buy_dict['signal_netVol_buySell'] = 1
+    threshold_netVol = np.average(netVol_buySell[-g_sampleSize:])
+
+    if netVol_buySell[-1] > 0 and netVol_buySell_sum > 0 and netVol_buySell[-1] > (threshold_netVol * g_scale):
+        g_signal_buy_dict['signal_netVol_buySell'] = 1
 
     elif netVol_buySell[-1] < 0 and threshold_netVol < 0 and abs(netVol_buySell[-1]) > (
-                abs(threshold_netVol) * g.scale):
-        g.signal_buy_dict['signal_netVol_buySell'] = -1
+                abs(threshold_netVol) * g_scale):
+        g_signal_buy_dict['signal_netVol_buySell'] = -1
     else:
-        g.signal_buy_dict['signal_netVol_buySell'] = 0
+        g_signal_buy_dict['signal_netVol_buySell'] = 0
 
     return activeVolBuy, activeVolSell, netVol_buySell

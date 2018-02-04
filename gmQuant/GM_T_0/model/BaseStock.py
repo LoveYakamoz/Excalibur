@@ -1,5 +1,8 @@
 from enum import Enum
 
+# 持仓股票池详细信息
+g_basestock_pool = []
+MAX_STOCK_COUNT = 30
 
 class Status(Enum):
     INIT = 0  # 在每天交易开始时，置为INIT
@@ -21,7 +24,7 @@ class T_0(Enum):
     Close = 2
 
 
-class BaseStock(object):
+class BaseStock:
     """
     股票详细信息
     """
@@ -59,22 +62,5 @@ class BaseStock(object):
         self.t_0_type = Type.NONE
         self.start_time = None
         self.end_time = None
-        log.info("cleanup %s", self.stock)
+        print("cleanup %s" % self.stock)
 
-
-def get_stocks_by_client():
-    """
-    直接从客户得到股票列表
-    :param context:
-    :return:
-    """
-    select_count = 0
-    for stock_id in g.stock_id_list_from_client:
-        stock_obj = BaseStock(stock_id, 0, Status.INIT, g.stock_position[stock_id], -1, -1, Type.NONE)
-        print(stock_obj)
-
-        g.basestock_pool.append(stock_obj)
-        select_count += 1
-
-    if select_count < g.position_count:
-        g.position_count = select_count
