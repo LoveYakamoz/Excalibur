@@ -43,7 +43,7 @@ def init(context):
     schedule(schedule_func=after_trading, date_rule='1d', time_rule="15:30:00")
     context.symbol = "SHSE.600000"
     context.freq = "60s"
-    context.count = 40
+    context.count = 50
 
     subscribe(symbols=context.symbol, frequency=context.freq, count=context.count)
     context.first_run = True
