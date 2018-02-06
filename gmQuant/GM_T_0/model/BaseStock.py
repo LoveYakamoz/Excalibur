@@ -1,7 +1,6 @@
 from enum import Enum
 
 # 持仓股票池详细信息
-g_basestock_pool = []
 MAX_STOCK_COUNT = 30
 
 class Status(Enum):
