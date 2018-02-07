@@ -28,7 +28,7 @@ def buy_stock(context, stock, amount, limit_price, index):
 
     if buy_order is not None:
         context.basestock_pool[index].buy_price = limit_price
-        # print("买入股票: %s, 以%f价格挂单，买入%d, 成功" % (stock, limit_price, amount))
+        print("买入股票: %s, 以%f价格挂单，买入%d, 成功" % (stock, limit_price, amount))
         return True
     else:
         context.basestock_pool[index].buy_price = 0
@@ -80,24 +80,22 @@ def sell_signal(context, stock, close_price, index):
           (context.adjust_scale, context.basestock_pool[index].position, amount, limit_price))
 
     if context.basestock_pool[index].status == Status.INIT:
-        flag = sell_stock(context, stock, -amount, limit_price, index)
-        if not flag:
-            return
 
         # 以收盘价 - 价差 * expected_revenue 挂单买入
         yesterday = history(symbol=stock, frequency='1d', start_time=context.lastday,
                             end_time=context.today, fields='close', df=True)
-        limit_price = close_price - yesterday.iat[0, 0] * context.expected_revenue
+        delay_price = close_price - yesterday.iat[0, 0] * context.expected_revenue
         context.basestock_pool[index].t_0_type = Type.Active_Sell
         context.basestock_pool[index].delay_amount = amount
-        context.basestock_pool[index].delay_price = limit_price
+        context.basestock_pool[index].delay_price = delay_price
         context.basestock_pool[index].status = Status.WORKING  # 更新交易状态
+
+        sell_stock(context, stock, -amount, limit_price, index)
     else:
         print("股票: %s, 交易状态出错" % stock)
 
 
 def buy_signal(context, stock, close_price, index):
-    print(context.basestock_pool[index].status)
     if context.basestock_pool[index].status == Status.WORKING:
         print("%s 股票: %s, index: %d 收到重复买入信号，但不做交易" % (context.now, stock, index))
         return
@@ -117,20 +115,18 @@ def buy_signal(context, stock, close_price, index):
           (context.adjust_scale, context.basestock_pool[index].position, amount, limit_price))
 
     if context.basestock_pool[index].status == Status.INIT:
-        flag = buy_stock(context, stock, amount, limit_price, index)
-        if not flag:
-            return
 
         # 以收盘价 + 价差 * expected_revenue 挂单卖出
         yesterday = history(symbol=stock, frequency='1d', start_time=context.lastday,
                             end_time=context.today, fields='close', df=True)
-        limit_price = close_price + yesterday.iat[0, 0] * context.expected_revenue
+        delay_price = close_price + yesterday.iat[0, 0] * context.expected_revenue
         context.basestock_pool[index].t_0_type = Type.Active_Buy
         context.basestock_pool[index].delay_amount = -amount
-        context.basestock_pool[index].delay_price = limit_price
+        context.basestock_pool[index].delay_price = delay_price
         context.basestock_pool[index].status = Status.WORKING  # 更新交易状态
         context.basestock_pool[index].start_time = context.now
 
+        buy_stock(context, stock, amount, limit_price, index)
     else:
         print("股票: %s, 交易状态出错" % stock)
 

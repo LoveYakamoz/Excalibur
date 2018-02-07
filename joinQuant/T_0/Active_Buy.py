@@ -115,7 +115,7 @@ class BaseStock(object):
         self.t_0_type = Type.NONE
         self.start_time = None
         self.end_time = None
-        log.info("clearup %s", self.stock)
+        print("clear up %s" % self.stock)
 
 
 def get_stocks_by_client():

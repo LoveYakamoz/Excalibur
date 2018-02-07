@@ -75,7 +75,6 @@ def before_trading(context):
 
 
 def on_bar(context, bars):
-    print("bar.status1: {}".format(context.basestock_pool[0].status))
     context.today = bars[0].bob.strftime('%Y-%m-%d')
     if context.T_0 == T_0.Close:
         """
@@ -126,9 +125,9 @@ def on_bar(context, bars):
         for k in range(count_number):
             np_close.append(df.iat[k, 0])
             vol.append(df.iat[k, 1])
-        print("bar.status2: {}".format(context.basestock_pool[0].status))
+
         evaluate_activeVolBuy(np_close, vol)
-        print("bar.status3: {}".format(context.basestock_pool[0].status))
+
         if g_signal_buy_dict['signal_netVol_buySell'] == 1:
             buy_signal(context, s.stock, np_close[count_number - 1], 0)
             g_signal_buy_dict['signal_netVol_buySell'] = 0
@@ -153,15 +152,14 @@ def on_order_status(context, order):
 """
 def on_execution_report(context, execrpt):
     if execrpt.exec_type == ExecType_Trade and execrpt.side == OrderSide_Buy:
-        print("T_0: [买完再卖] %s 委托买入股票: %s, 交易量: %d, 成功" %
-              (context.now, execrpt.symbol, execrpt.volume))
+        print("T_0: [买完再卖] %s 委托买入股票: %s, 交易量: %d, 委托成交价格:%f, 成功" %
+              (context.now, execrpt.symbol, execrpt.volume, execrpt.price))
         sell_stock(context, execrpt.symbol, execrpt.volume, context.basestock_pool[0].delay_price, 0)
     elif execrpt.exec_type == ExecType_Trade and execrpt.side == OrderSide_Sell:
         context.success_count += 1
         context.basestock_pool[0].status = Status.INIT
-        print("on_execution_report: {}".format(context.basestock_pool[0].status))
-        print("T_0: [先买后卖成功] %s 委托卖出股票: %s, 交易量: %d, 成功" %
-              (context.now, execrpt.symbol, execrpt.volume))
+        print("T_0: [先买后卖成功] %s 委托卖出股票: %s, 交易量: %d, 委托成交价格:%f, 成功" %
+              (context.now, execrpt.symbol, execrpt.volume, execrpt.price))
 
 
 def after_trading(context):
@@ -180,7 +178,7 @@ if __name__ == '__main__':
         mode=MODE_BACKTEST,
         token='f1b42b8ab54bb61010b685eac99765b28209c3e0',
         backtest_start_time='2017-06-19 09:00:00',
-        backtest_end_time='2018-01-21 15:00:00')
+        backtest_end_time='2017-06-23 15:00:00')
 
 
 

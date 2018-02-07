@@ -18,7 +18,7 @@ class Source(Enum):
 
 g.stocks_source = Source.CLIENT  # 默认使用自动的方法获得股票
 
-g.stock_id_list_from_client = ["300059.XSHE", "600206.XSHE"]
+g.stock_id_list_from_client = ["300059.XSHE", "600206.XSHG"]
 g.stock_position = {"300059.XSHE": 100,
                     "600206.XSHG": 100}
 
@@ -27,8 +27,8 @@ g.basestock_pool = []
 
 # 用于统计结果
 g.repeat_signal_count = 0
-g.reset_order_count = 0
-g.success_count = 0
+g.reset_order_count   = 0
+g.success_count       = 0
 
 # MA平均的天数
 g.ma_4day_count = 4
@@ -126,6 +126,8 @@ def get_stock_angle(context, stock):
     log.info("股票：%s的角度为：%f", stock, angle)
     return angle
 
+def process_initialize(context):
+    g.__manager = shipane_sdk.JoinQuantStrategyManagerFactory(context).create('manager-1')
 
 def initialize(context):
     log.info("---> 策略初始化 @ %s" % (str(context.current_dt)))
@@ -152,8 +154,6 @@ def initialize(context):
     set_benchmark('000300.XSHG')
     set_option('use_real_price', True)
     log.info("初始化完成")
-
-    g.__manager = shipane_sdk.JoinQuantStrategyManagerFactory(context).create('manager-1')
 
 # 在每天交易开始时，将状态置为可交易状态
 def before_trading_start(context):
@@ -187,30 +187,32 @@ def before_trading_start(context):
 
 # 购买股票，并记录订单号，便于查询订单状态
 def buy_stock(context, stock, amount, limit_price, index):
-    buy_order = order(stock, amount, LimitOrderStyle(limit_price))
+    try:
+        buy_order = order(stock, amount, LimitOrderStyle(limit_price))
+    except Exception as e:
+        log.info('实盘易买股挂单失败:' + str(e))
+    finally:
+        g.__manager.work()
+
     g.basestock_pool[index].buy_price = limit_price
     if buy_order is not None:
         g.basestock_pool[index].buy_order_id = buy_order.order_id
-        log.info("股票: %s, 以%f价格挂单，买入%d", stock, limit_price, amount)
-        try:
-            g.__manager.execute(buy_order)
-            log.info('实盘易买股挂单成功:' + str(buy_order))
-        except:
-            log.info('实盘易买股挂单失败:' + str(buy_order))
+        log.info("股票: %s, 以%f价格挂单，买入%d, 实盘易买股挂单成功", stock, limit_price, amount)
 
 
 # 卖出股票，并记录订单号，便于查询订单状态
 def sell_stock(context, stock, amount, limit_price, index):
-    sell_order = order(stock, amount, LimitOrderStyle(limit_price))
+    try:
+        sell_order = order(stock, amount, LimitOrderStyle(limit_price))
+    except Exception as e:
+        log.info('实盘易买股挂单失败:' + str(e))
+    finally:
+        g.__manager.work()
+
     g.basestock_pool[index].sell_price = limit_price
     if sell_order is not None:
         g.basestock_pool[index].sell_order_id = sell_order.order_id
-        log.info("股票: %s, 以%f价格挂单，卖出%d", stock, limit_price, amount)
-        try:
-            g.__manager.execute(sell_order)
-            log.info('实盘易卖股挂单成功:' + str(sell_order))
-        except:
-            log.info('实盘易卖股挂单失败:' + str(sell_order))
+        log.info("股票: %s, 以%f价格挂单，卖出%d, 实盘易卖股挂单成功", stock, limit_price, amount)
 
 def sell_signal(context, stock, close_price, index):
     # 每次交易量为持仓量的g.adjust_scale
@@ -331,7 +333,7 @@ def cancel_open_order(context):
     orders = get_open_orders()
     for _order in orders.values():
         #cancel_order(_order)
-        g.__manager.cancel(_order)
+        pass
 
 
 
@@ -343,13 +345,12 @@ def reset_position(context):
         cur_position = context.portfolio.positions[stock].total_amount
         if src_position != cur_position:
             log.info("src_position : cur_position", src_position, cur_position)
-            _order = order(stock, src_position - cur_position)
-            log.warn("reset posiont: ", _order)
             try:
-                g.__manager.execute(_order)
-                log.info('实盘易恢复仓位挂单成功:' + str(_order))
-            except:
-                log.info('实盘易恢复仓位挂单失败:' + str(_order))
+                _order = order(stock, src_position - cur_position)
+            finally:
+                g.__manager.work()
+            log.warn("reset posiont: ", _order)
+
             g.reset_order_count += 1
 
 
