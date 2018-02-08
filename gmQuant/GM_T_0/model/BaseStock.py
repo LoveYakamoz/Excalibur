@@ -1,6 +1,8 @@
 from enum import Enum
 
 # 持仓股票池详细信息
+from gmQuant.GM_T_0.utils.log import logger
+
 MAX_STOCK_COUNT = 30
 
 class Status(Enum):
@@ -29,7 +31,7 @@ class BaseStock:
     """
 
     def __init__(self, stock, close, status, position, sell_order_id, buy_order_id, t_0_type):
-        self.stock = stock
+        self.symbol = stock
         self.close = close
 
         self.status = status
@@ -48,7 +50,7 @@ class BaseStock:
 
     def __repr__(self):
         return "stock: {}, close: {}, position: {}, sell_order_id: {}, buy_order_id: {}, t_0_type: {}".format(
-            self.stock, self.close, self.position, self.sell_order_id, self.buy_order_id, self.t_0_type)
+            self.symbol, self.close, self.position, self.sell_order_id, self.buy_order_id, self.t_0_type)
 
     def cleanup(self):
         self.status = Status.INIT
@@ -61,5 +63,5 @@ class BaseStock:
         self.t_0_type = Type.NONE
         self.start_time = None
         self.end_time = None
-        print("cleanup %s" % self.stock)
+        logger.info("cleanup %s", self.symbol)
 

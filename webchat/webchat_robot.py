@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import codecs
+import http.client
+import http.cookiejar
 import json
 import logging
 import logging.handlers
 import multiprocessing
 import os
-import platform
 import random
 import re
 import subprocess
@@ -18,9 +19,6 @@ import xml.dom.minidom
 from collections import defaultdict
 
 import requests
-
-import http.client
-import http.cookiejar
 
 try:
     from HTMLParser import HTMLParser
