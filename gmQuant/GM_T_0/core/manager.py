@@ -45,7 +45,7 @@ def init(context):
     context.adjust_scale = 0.25
 
     # 期望收益率
-    context.expected_revenue = 0.030
+    context.expected_revenue = 0.010
 
     context.lastday = ""
     context.today = ""
