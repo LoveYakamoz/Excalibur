@@ -23,7 +23,7 @@ def buy_stock(stock, amount, limit_price):
     :return:
     """
     buy_order = order_volume(symbol=stock.symbol, volume=amount,
-                             side=OrderSide_Buy,
+                             side=PositionSide_Long,
                              order_type=OrderType_Limit,
                              position_effect=PositionEffect_Open,
                              price=limit_price)
@@ -48,9 +48,9 @@ def sell_stock(stock, amount, limit_price):
     :return:
     """
     sell_order = order_volume(symbol=stock.symbol, volume=amount,
-                              side=OrderSide_Sell,
+                              side=PositionSide_Short,
                               order_type=OrderType_Limit,
-                              position_effect=PositionEffect_Open,
+                              position_effect=PositionEffect_Close,
                               price=limit_price)
 
     if sell_order is not None:
@@ -144,26 +144,26 @@ def reset_position(context):
     :return:
     """
     for stock in context.basestock_pool:
-        src_position = stock.position
-        cur_position = context.account().positions(symbol=stock.symbol)[0].volume
-        print(cur_position)
-        print(context.account().position(symbol=stock.symbol, side=PositionSide_Long))
-        if src_position > cur_position:
-            # 说明 卖了买不回来，强制买入
-            context.reset_order_count += 1
+        cur_position = (context.account().position(symbol=stock.symbol, side=PositionSide_Long))['volume']
+        if cur_position == stock.position:
+            # 仓位相等，不做操作
             pass
 
-        elif src_position < cur_position:
+        elif cur_position > stock.position:
             # 说明 买了卖不出去，强制卖出
             context.reset_order_count += 1
-            order_volume(symbol=stock.symbol, volume=(cur_position - src_position),
-                         side=OrderSide_Sell, order_type=OrderType_Market,
+            order_volume(symbol=stock.symbol, volume=(cur_position - stock.position),
+                         side=PositionSide_Short, order_type=OrderType_Market,
                          position_effect=PositionEffect_Open)
 
             cur_close = current(symbols=stock.symbol, fields='price')[0].price
-            delta_pos = abs(src_position - cur_position)
+            delta_pos = abs(cur_position - stock.position)
 
             logger.info("T_0: [先买后卖失败]股票: %s, 恢复仓位: %d, 盈利: %f元",
                         stock, delta_pos, (-1) * abs(cur_close - stock.buy_price) * delta_pos)
+        elif cur_position < stock.position:
+            # 说明 卖了买不回来，强制买入
+            context.reset_order_count += 1
+            pass
         else:
             pass

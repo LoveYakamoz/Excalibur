@@ -10,22 +10,22 @@ def init(context):
     logger.info("---> 策略初始化 @ %s", str(context.now))
     schedule(schedule_func=before_trading, date_rule='1d', time_rule="09:20:00")
     schedule(schedule_func=after_trading, date_rule='1d', time_rule="15:30:00")
-    """
+
     context.client_symbol_dict = {
         "SZSE.002506": 1000}
     """
     context.client_symbol_dict = {
-        "SZSE.002506": 3000,
-        "SHSE.600703": 3000,
-        "SZSE.300059": 3000,
-        "SHSE.600206": 3000,
-        "SZSE.002281": 3000,
-        "SHSE.600340": 3000,
-        "SZSE.002092": 3000,
-        "SZSE.002440": 3000,
-        "SHSE.600897": 3000,
-        "SZSE.000063": 3000}
-
+        "SZSE.002506": 30000,
+        "SHSE.600703": 30000,
+        "SZSE.300059": 30000,
+        "SHSE.600206": 30000,
+        "SZSE.002281": 30000,
+        "SHSE.600340": 30000,
+        "SZSE.002092": 30000,
+        "SZSE.002440": 30000,
+        "SHSE.600897": 30000,
+        "SZSE.000063": 30000}
+    """
     context.freq = "60s"
     context.count = 50
     context.basestock_pool = []
@@ -45,7 +45,7 @@ def init(context):
     context.adjust_scale = 0.25
 
     # 期望收益率
-    context.expected_revenue = 0.010
+    context.expected_revenue = 0.030
 
     context.lastday = ""
     context.today = ""
@@ -111,7 +111,7 @@ def on_bar(context, bars):
 
     # 14点50分钟后，强制恢复仓位
     if hour == 14 and minute == 50:
-        # reset_position(context)
+        reset_position(context)
         return
 
     # 14点40分钟后， 不再有新的交易
@@ -174,7 +174,6 @@ def on_execution_report(context, execrpt):
 
 def after_trading(context):
     context.T_0 = T_0.Open
-
     logger.info("===========================================================================")
     logger.info("[%s 统计数据]成功交易次数:\t%d, 重复信号交易次数:\t%d, 收盘前强制交易次数:\t%d",
                 context.now, context.success_count, context.repeat_signal_count, context.reset_order_count)
@@ -182,7 +181,7 @@ def after_trading(context):
         logger.info(pos)
     logger.info("===========================================================================")
     context.lastday = context.now.strftime('%Y-%m-%d')
-    print(context.now)
+    print("%s 已经完成" % context.now)
 
 
 if __name__ == '__main__':
@@ -191,9 +190,9 @@ if __name__ == '__main__':
         filename='manager.py',
         mode=MODE_BACKTEST,
         backtest_adjust=ADJUST_PREV,
-        backtest_initial_cash=30000000,
+        backtest_initial_cash=10000000,
         backtest_commission_ratio=0.0001,
         token='f1b42b8ab54bb61010b685eac99765b28209c3e0',
-        backtest_start_time='2017-06-19 09:00:00',
-        backtest_end_time='2017-06-23 16:00:00')
+        backtest_start_time='2018-01-15 09:00:00',
+        backtest_end_time='2018-01-17 16:00:00')
     print("end")
