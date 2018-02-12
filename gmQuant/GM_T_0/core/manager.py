@@ -5,32 +5,37 @@ from gmQuant.GM_T_0.strategy.buy_sell import buy_signal, sell_stock, reset_posit
 from gmQuant.GM_T_0.strategy.signal_generator import evaluate_activeVolBuy, g_signal_buy_dict
 from gmQuant.GM_T_0.utils.log import logger
 
+# 时间差止损，如果设置大于240， 意味着不使用时间差止损
+from gmQuant.GM_T_0.utils.time import get_delta_minute
+
+DELTA_MINITE = 30
+
 
 def init(context):
     logger.info("---> 策略初始化 @ %s", str(context.now))
     schedule(schedule_func=before_trading, date_rule='1d', time_rule="09:20:00")
     schedule(schedule_func=after_trading, date_rule='1d', time_rule="15:30:00")
-
+    """
     context.client_symbol_dict = {
         "SZSE.002506": 1000}
     """
     context.client_symbol_dict = {
-        "SZSE.002506": 30000,
-        "SHSE.600703": 30000,
-        "SZSE.300059": 30000,
-        "SHSE.600206": 30000,
-        "SZSE.002281": 30000,
-        "SHSE.600340": 30000,
-        "SZSE.002092": 30000,
-        "SZSE.002440": 30000,
-        "SHSE.600897": 30000,
-        "SZSE.000063": 30000}
-    """
+        "SZSE.002506": 1000,
+        "SHSE.600703": 1000,
+        "SZSE.300059": 1000,
+        "SHSE.600206": 1000,
+        "SZSE.002281": 1000,
+        "SHSE.600340": 1000,
+        "SZSE.002092": 1000,
+        "SZSE.002440": 1000,
+        "SHSE.600897": 1000,
+        "SZSE.000063": 1000}
+
     context.freq = "60s"
     context.count = 50
     context.basestock_pool = []
     context.first_run = True
-    context.T_0 = T_0.Open  # 如果只看持仓收益，将其置为T_0.close
+    context.T_0 = T_0.Close  # 如果只看持仓收益，将其置为T_0.close
 
     context.repeat_signal_count = 0
     context.reset_order_count = 0
@@ -82,6 +87,13 @@ def before_trading(context):
 
     logger.info("每日初始化")
 
+def sell_by_deltatime(context):
+    for stock in context.basestock_pool:
+        if stock.status == Status.WORKING:
+            if get_delta_minute(context.now, stock.start_time) > DELTA_MINITE:
+                order_volume(symbol=stock.symbol, volume=200, side=OrderSide_Sell, order_type=OrderType_Market,
+                         position_effect=PositionEffect_Close)
+                stock.status = Status.INIT
 
 def on_bar(context, bars):
     context.today = bars[0].bob.strftime('%Y-%m-%d')
@@ -114,10 +126,12 @@ def on_bar(context, bars):
         reset_position(context)
         return
 
-    # 14点40分钟后， 不再有新的交易
+    # 14点40分钟后，不再有新的交易
     if hour == 14 and minute >= 40:
         return
-
+    # 0. 查看委托，并按时差交易
+    if context.lastday != "":
+        sell_by_deltatime(context)
     # 1. 循环股票列表，看当前价格是否有买入或卖出信号
     for stock in context.basestock_pool:
         # 每天14点后， 不再进行新的买卖
@@ -133,7 +147,7 @@ def on_bar(context, bars):
             count_number = context.count
 
         df = context.data(symbol=stock.symbol, frequency='60s',
-                          count=count_number, fields='close, volume')
+                          count=count_number, fields='close, volume, bob, eob')
 
         np_close = []
         vol = []
@@ -149,6 +163,7 @@ def on_bar(context, bars):
             g_signal_buy_dict['signal_netVol_buySell'] = 0
 
 
+"""
 def on_execution_report(context, execrpt):
     if context.first_run is True:
         return
@@ -170,10 +185,11 @@ def on_execution_report(context, execrpt):
                             context.now, execrpt.symbol, execrpt.volume, execrpt.price)
                 logger.info("===========================================================================")
                 break
+"""
 
 
 def after_trading(context):
-    context.T_0 = T_0.Open
+    context.T_0 = T_0.Close
     logger.info("===========================================================================")
     logger.info("[%s 统计数据]成功交易次数:\t%d, 重复信号交易次数:\t%d, 收盘前强制交易次数:\t%d",
                 context.now, context.success_count, context.repeat_signal_count, context.reset_order_count)
@@ -186,7 +202,7 @@ def after_trading(context):
 
 if __name__ == '__main__':
     print("start")
-    run(strategy_id='1c61a610-fdfd-11e7-974a-00ffaabbccdd',
+    run(strategy_id='fdd4868b-0e44-11e8-af9e-3c46d86d550e',
         filename='manager.py',
         mode=MODE_BACKTEST,
         backtest_adjust=ADJUST_PREV,
@@ -194,5 +210,5 @@ if __name__ == '__main__':
         backtest_commission_ratio=0.0001,
         token='f1b42b8ab54bb61010b685eac99765b28209c3e0',
         backtest_start_time='2018-01-15 09:00:00',
-        backtest_end_time='2018-01-17 16:00:00')
+        backtest_end_time='2018-02-12 16:00:00')
     print("end")

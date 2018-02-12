@@ -11,19 +11,12 @@ from gm.api import order_cancel_all
 
 from gmQuant.GM_T_0.model.BaseStock import Type, Status
 
-
 def buy_stock(stock, amount, limit_price):
     """
-    购买股票，并记录订单号，便于查询订单状态
-    :param context:
-    :param stock:
-    :param amount:
-    :param limit_price:
-    :param index:
-    :return:
+    购买股票
     """
     buy_order = order_volume(symbol=stock.symbol, volume=amount,
-                             side=PositionSide_Long,
+                             side=OrderSide_Buy,
                              order_type=OrderType_Limit,
                              position_effect=PositionEffect_Open,
                              price=limit_price)
@@ -39,16 +32,11 @@ def buy_stock(stock, amount, limit_price):
 
 def sell_stock(stock, amount, limit_price):
     """
-    卖出股票，并记录订单号，便于查询订单状态
-    :param context:
-    :param stock:
-    :param amount:
-    :param limit_price:
-    :param index:
+    卖出股票
     :return:
     """
     sell_order = order_volume(symbol=stock.symbol, volume=amount,
-                              side=PositionSide_Short,
+                              side=OrderSide_Sell,
                               order_type=OrderType_Limit,
                               position_effect=PositionEffect_Close,
                               price=limit_price)
