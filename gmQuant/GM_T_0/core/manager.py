@@ -17,7 +17,7 @@ def init(context):
     schedule(schedule_func=after_trading, date_rule='1d', time_rule="15:30:00")
     """
     context.client_symbol_dict = {
-        "SZSE.002506": 1000}
+        "SHSE.600340": 1000}
     """
     context.client_symbol_dict = {
         "SZSE.002506": 1000,
@@ -40,6 +40,7 @@ def init(context):
     context.repeat_signal_count = 0
     context.reset_order_count = 0
     context.success_count = 0
+    context.reset = False
     # 时间差止损，如果设置大于240， 意味着不使用时间差止损
     context.DELTA_MINITE = 10000
 
@@ -55,6 +56,7 @@ def init(context):
     context.lastday = ""
     context.today = ""
     get_stocks_by_client(context)
+
     logger.info("策略初始化完成")
 
 
@@ -66,7 +68,7 @@ def get_stocks_by_client(context):
     for sym, pos in context.client_symbol_dict.items():
         stock_obj = BaseStock(sym, 0, Status.INIT, pos, -1, -1, Type.NONE)
         logger.info(stock_obj)
-        subscribe(symbols=sym, frequency='1m', count=context.count)
+        subscribe(symbols=sym, frequency='tick', count=context.count)
         context.basestock_pool.append(stock_obj)
         select_count += 1
 
@@ -87,20 +89,27 @@ def before_trading(context):
 
     logger.info("每日初始化")
 
+
 def sell_by_deltatime(context):
     for stock in context.basestock_pool:
         if stock.status == Status.WORKING:
             if get_delta_minute(context.now, stock.start_time) > DELTA_MINITE:
+                logger.info("Time: %s, Symbol: %s sell it", context.now, stock.symbol)
                 order_volume(symbol=stock.symbol, volume=200, side=OrderSide_Sell, order_type=OrderType_Market,
-                         position_effect=PositionEffect_Close)
+                             position_effect=PositionEffect_Close)
                 stock.status = Status.INIT
 
-def on_bar(context, bars):
-    context.today = bars[0].bob.strftime('%Y-%m-%d')
+
+def sell_by_price_standard_deviation(context):
+    pass
+
+
+def on_tick(context, tick):
     if context.first_run is True:
         logger.info("开始建仓===========================================================================")
         for stock in context.basestock_pool:
-            order_volume(symbol=stock.symbol, volume=stock.position, side=OrderSide_Buy, order_type=OrderType_Market,
+            order_volume(symbol=stock.symbol, volume=stock.position, side=OrderSide_Buy,
+                         order_type=OrderType_Market,
                          position_effect=PositionEffect_Open)
             logger.info("股票:\t%s 买入成功", stock.symbol)
         logger.info("结束建仓===========================================================================")
@@ -129,67 +138,41 @@ def on_bar(context, bars):
     # 14点40分钟后，不再有新的交易
     if hour == 14 and minute >= 40:
         return
+
     # 0. 查看委托，并按时差交易
     if context.lastday != "":
         sell_by_deltatime(context)
+        sell_by_price_standard_deviation(context)
     # 1. 循环股票列表，看当前价格是否有买入或卖出信号
-    for stock in context.basestock_pool:
+    for i in range(len(context.basestock_pool)):
         # 每天14点后， 不再进行新的买卖
-        if hour == 14 and stock.status == Status.INIT:
-            stock.status = Status.NONE
-
-        if stock.status == Status.NONE:
+        if tick.symbol != context.basestock_pool[i].symbol:
             continue
 
-        count_number = context.count
-        if count_number > context.count:
-            logger.info("context.count: %d, current count: %d", context.count, count_number)
-            count_number = context.count
+        if hour == 14 and context.basestock_pool[i].status == Status.INIT:
+            context.basestock_pool[i].status = Status.NONE
 
-        df = context.data(symbol=stock.symbol, frequency='60s',
-                          count=count_number, fields='close, volume, bob, eob')
+        if context.basestock_pool[i].status == Status.NONE:
+            continue
 
-        np_close = []
-        vol = []
+        context.basestock_pool[i].history_n_tick_p.append(tick['quotes'][0]['bid_p'])
+        context.basestock_pool[i].history_n_tick_v.append(tick['quotes'][0]['bid_v'])
 
-        for k in range(count_number):
-            np_close.append(df.iat[k, 0])
-            vol.append(df.iat[k, 1])
+        if len(context.basestock_pool[i].history_n_tick_p) <= 51:
+            continue
 
-        evaluate_activeVolBuy(np_close, vol)
+        evaluate_activeVolBuy(context.basestock_pool[i].history_n_tick_p[-50:],
+                              context.basestock_pool[i].history_n_tick_v[-50:])
 
         if g_signal_buy_dict['signal_netVol_buySell'] == 1:
-            buy_signal(context, stock, np_close[count_number - 1])
+            buy_signal(context, context.basestock_pool[i], context.basestock_pool[i].history_n_tick_p[-1])
             g_signal_buy_dict['signal_netVol_buySell'] = 0
-
-
-"""
-def on_execution_report(context, execrpt):
-    if context.first_run is True:
-        return
-
-    if execrpt.exec_type == ExecType_Trade and execrpt.side == OrderSide_Buy:
-        logger.info("T_0: [买完再卖] %s 委托买入股票: %s, 交易量: %d, 委托成交价格:%f, 成功",
-                    context.now, execrpt.symbol, execrpt.volume, execrpt.price)
-        for stock in context.basestock_pool:
-            if stock.symbol == execrpt.symbol:
-                sell_stock(stock, execrpt.volume, stock.delay_price)
-                break
-
-    elif execrpt.exec_type == ExecType_Trade and execrpt.side == OrderSide_Sell:
-        context.success_count += 1
-        for stock in context.basestock_pool:
-            if stock.symbol == execrpt.symbol:
-                stock.status = Status.INIT
-                logger.info("T_0: [先买后卖成功] %s 委托卖出股票: %s, 交易量: %d, 委托成交价格:%f, 成功",
-                            context.now, execrpt.symbol, execrpt.volume, execrpt.price)
-                logger.info("===========================================================================")
-                break
-"""
 
 
 def after_trading(context):
     context.T_0 = T_0.Close
+    context.reset = False
+
     logger.info("===========================================================================")
     logger.info("[%s 统计数据]成功交易次数:\t%d, 重复信号交易次数:\t%d, 收盘前强制交易次数:\t%d",
                 context.now, context.success_count, context.repeat_signal_count, context.reset_order_count)
@@ -206,9 +189,9 @@ if __name__ == '__main__':
         filename='manager.py',
         mode=MODE_BACKTEST,
         backtest_adjust=ADJUST_PREV,
-        backtest_initial_cash=10000000,
+        backtest_initial_cash=1000000,
         backtest_commission_ratio=0.0001,
         token='f1b42b8ab54bb61010b685eac99765b28209c3e0',
-        backtest_start_time='2018-01-15 09:00:00',
-        backtest_end_time='2018-02-12 16:00:00')
+        backtest_start_time='2018-02-1 09:00:00',
+        backtest_end_time='2018-03-10 16:00:00')
     print("end")

@@ -102,13 +102,9 @@ def buy_signal(context, stock, close_price):
     logger.info("%s 买入信号: src_position: %d, amount: %d, price: %f", stock.symbol, stock.position, amount, limit_price)
 
     if stock.status == Status.INIT:
-        # 以收盘价 + 价差 * expected_revenue 挂单卖出
-        yesterday = history(symbol=stock.symbol, frequency='1d', start_time=context.lastday,
-                            end_time=context.today, fields='close', df=True)
-        delay_price = close_price + yesterday.iat[0, 0] * context.expected_revenue
         stock.t_0_type = Type.Active_Buy
         stock.delay_amount = amount
-        stock.delay_price = delay_price
+        stock.delay_price = 0
         stock.status = Status.WORKING  # 更新交易状态
         stock.start_time = context.now
 
@@ -131,27 +127,32 @@ def reset_position(context):
     :param context:
     :return:
     """
-    for stock in context.basestock_pool:
-        cur_position = (context.account().position(symbol=stock.symbol, side=PositionSide_Long))['volume']
-        if cur_position == stock.position:
-            # 仓位相等，不做操作
-            pass
+    if context.reset:
+        return
+    else:
+        for stock in context.basestock_pool:
+            cur_position = (context.account().position(symbol=stock.symbol, side=PositionSide_Long))['volume']
+            if cur_position == stock.position:
+                # 仓位相等，不做操作
+                pass
 
-        elif cur_position > stock.position:
-            # 说明 买了卖不出去，强制卖出
-            context.reset_order_count += 1
-            order_volume(symbol=stock.symbol, volume=(cur_position - stock.position),
-                         side=PositionSide_Short, order_type=OrderType_Market,
-                         position_effect=PositionEffect_Open)
+            elif cur_position > stock.position:
+                # 说明 买了卖不出去，强制卖出
+                context.reset_order_count += 1
+                order_volume(symbol=stock.symbol, volume=(cur_position - stock.position),
+                             side=PositionSide_Short, order_type=OrderType_Market,
+                             position_effect=PositionEffect_Open)
 
-            cur_close = current(symbols=stock.symbol, fields='price')[0].price
-            delta_pos = abs(cur_position - stock.position)
+                cur_close = current(symbols=stock.symbol, fields='price')[0].price
+                delta_pos = abs(cur_position - stock.position)
 
-            logger.info("T_0: [先买后卖失败]股票: %s, 恢复仓位: %d, 盈利: %f元",
-                        stock, delta_pos, (-1) * abs(cur_close - stock.buy_price) * delta_pos)
-        elif cur_position < stock.position:
-            # 说明 卖了买不回来，强制买入
-            context.reset_order_count += 1
-            pass
-        else:
-            pass
+                logger.info("T_0: [先买后卖失败]股票: %s, 恢复仓位: %d, 盈利: %f元",
+                            stock, delta_pos, (-1) * abs(cur_close - stock.buy_price) * delta_pos)
+            elif cur_position < stock.position:
+                # 说明 卖了买不回来，强制买入
+                context.reset_order_count += 1
+                pass
+            else:
+                pass
+
+        context.reset = True

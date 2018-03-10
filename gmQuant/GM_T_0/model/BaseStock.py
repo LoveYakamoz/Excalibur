@@ -5,6 +5,7 @@ from gmQuant.GM_T_0.utils.log import logger
 
 MAX_STOCK_COUNT = 30
 
+
 class Status(Enum):
     INIT = 0  # 在每天交易开始时，置为INIT
     WORKING = 1  # 处于买/卖中
@@ -47,6 +48,8 @@ class BaseStock:
 
         self.start_time = None
         self.end_time = None
+        self.history_n_tick_p = []
+        self.history_n_tick_v = []
 
     def __repr__(self):
         return "stock: {}, close: {}, position: {}, sell_order_id: {}, buy_order_id: {}, t_0_type: {}".format(
@@ -64,4 +67,3 @@ class BaseStock:
         self.start_time = None
         self.end_time = None
         logger.info("cleanup %s", self.symbol)
-
