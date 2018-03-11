@@ -1,3 +1,5 @@
+from math import floor
+
 from gm.api import *
 
 from gmQuant.GM_T_0.model.BaseStock import Status, T_0, BaseStock, Type, MAX_STOCK_COUNT
@@ -8,8 +10,6 @@ from gmQuant.GM_T_0.utils.log import logger
 # 时间差止损，如果设置大于240， 意味着不使用时间差止损
 from gmQuant.GM_T_0.utils.time import get_delta_minute
 
-DELTA_MINITE = 30
-
 
 def init(context):
     logger.info("---> 策略初始化 @ %s", str(context.now))
@@ -17,32 +17,32 @@ def init(context):
     schedule(schedule_func=after_trading, date_rule='1d', time_rule="15:30:00")
     """
     context.client_symbol_dict = {
-        "SHSE.600340": 1000}
+        "SHSE.600897": 4000}
     """
     context.client_symbol_dict = {
-        "SZSE.002506": 1000,
-        "SHSE.600703": 1000,
-        "SZSE.300059": 1000,
-        "SHSE.600206": 1000,
-        "SZSE.002281": 1000,
-        "SHSE.600340": 1000,
-        "SZSE.002092": 1000,
-        "SZSE.002440": 1000,
-        "SHSE.600897": 1000,
-        "SZSE.000063": 1000}
+        "SZSE.002506": 4000,
+        "SHSE.600703": 4000,
+        "SZSE.300059": 4000,
+        "SHSE.600206": 4000,
+        "SZSE.002281": 4000,
+        "SHSE.600340": 4000,
+        "SZSE.002092": 4000,
+        "SZSE.002440": 4000,
+        "SHSE.600897": 4000,
+        "SZSE.000063": 4000}
 
     context.freq = "60s"
     context.count = 50
     context.basestock_pool = []
     context.first_run = True
-    context.T_0 = T_0.Close  # 如果只看持仓收益，将其置为T_0.close
+    context.T_0 = T_0.Open  # 如果只看持仓收益，将其置为T_0.close
 
     context.repeat_signal_count = 0
     context.reset_order_count = 0
     context.success_count = 0
     context.reset = False
     # 时间差止损，如果设置大于240， 意味着不使用时间差止损
-    context.DELTA_MINITE = 10000
+    context.DELTA_MINITE = 30
 
     # 价格差止损，如果设置大于0.1， 意味着不使用价格差止损
     context.DELTA_PRICE = 0.020
@@ -93,12 +93,12 @@ def before_trading(context):
 def sell_by_deltatime(context):
     for stock in context.basestock_pool:
         if stock.status == Status.WORKING:
-            if get_delta_minute(context.now, stock.start_time) > DELTA_MINITE:
+            if get_delta_minute(context.now, stock.start_time) > context.DELTA_MINITE:
                 logger.info("Time: %s, Symbol: %s sell it", context.now, stock.symbol)
-                order_volume(symbol=stock.symbol, volume=200, side=OrderSide_Sell, order_type=OrderType_Market,
+                order_volume(symbol=stock.symbol, volume=floor(context.adjust_scale * stock.position), side=OrderSide_Sell, order_type=OrderType_Market,
                              position_effect=PositionEffect_Close)
                 stock.status = Status.INIT
-
+                context.success_count += 1
 
 def sell_by_price_standard_deviation(context):
     pass
@@ -118,9 +118,6 @@ def on_tick(context, tick):
         return
 
     if context.T_0 == T_0.Close:
-        """
-        关闭T_0，只测试持仓收益
-        """
         logger.info("close T_0")
         return
 
@@ -170,7 +167,7 @@ def on_tick(context, tick):
 
 
 def after_trading(context):
-    context.T_0 = T_0.Close
+    context.T_0 = T_0.Open
     context.reset = False
 
     logger.info("===========================================================================")
@@ -192,6 +189,6 @@ if __name__ == '__main__':
         backtest_initial_cash=1000000,
         backtest_commission_ratio=0.0001,
         token='f1b42b8ab54bb61010b685eac99765b28209c3e0',
-        backtest_start_time='2018-02-1 09:00:00',
+        backtest_start_time='2018-01-4 09:00:00',
         backtest_end_time='2018-03-10 16:00:00')
     print("end")

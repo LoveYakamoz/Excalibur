@@ -85,7 +85,7 @@ def sell_signal(context, stock, close_price):
 
 def buy_signal(context, stock, close_price):
     if stock.status == Status.WORKING:
-        logger.info("%s 股票: %s 收到重复买入信号，但不做交易", context.now, stock.symbol)
+        # logger.info("%s 股票: %s 收到重复买入信号，但不做交易", context.now, stock.symbol)
         return
 
     # 每次交易量为持仓量的g.adjust_scale
@@ -145,7 +145,7 @@ def reset_position(context):
 
                 cur_close = current(symbols=stock.symbol, fields='price')[0].price
                 delta_pos = abs(cur_position - stock.position)
-
+                context.reset_order_count += 1
                 logger.info("T_0: [先买后卖失败]股票: %s, 恢复仓位: %d, 盈利: %f元",
                             stock, delta_pos, (-1) * abs(cur_close - stock.buy_price) * delta_pos)
             elif cur_position < stock.position:
