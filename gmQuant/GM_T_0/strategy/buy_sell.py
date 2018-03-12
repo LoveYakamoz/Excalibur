@@ -98,7 +98,9 @@ def buy_signal(context, stock, close_price):
             amount -= amount % 100
 
     # 以收盘价 - 0.01 挂单买入
-    limit_price = close_price - 0.01
+    # TODO: 使用参数决定入场的价格
+    # limit_price = close_price - 0.01
+    limit_price = close_price
     logger.info("%s 买入信号: src_position: %d, amount: %d, price: %f", stock.symbol, stock.position, amount, limit_price)
 
     if stock.status == Status.INIT:
